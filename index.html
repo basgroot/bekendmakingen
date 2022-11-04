@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="ROBOTS" content="INDEX, FOLLOW" />
+    <meta name="VIEWPORT" content="width=device-width, initial-scale=1" />
+    <!--link rel="stylesheet" href="https://saxobank.github.io/openapi-samples-js/assets/css/style.css"-->
+    <!--link rel="shortcut icon" type="image/x-icon" href="https://saxobank.github.io/openapi-samples-js/favicon.ico"-->
+    <title>Vergunningen Amsterdam</title>
+</head>
+<body>
+Bekendmakingen:<br />
+<textarea id="idBekendmakingen" cols="200" rows="20" wrap="off">
+Loading..
+</textarea><br />
+<input type="button" value="Filter 'Verleend'" id="idBtnFilterVerleend" />
+<input type="button" value="Show on map" id="idBtnShowMap" />
+<input type="button" value="Collect bezwaartermijnen" id="idBtnCollectBezwaartermijnen" />
+
+<style type="text/css" media="screen">
+
+#overzicht-bekendmakingen {
+    height: 400px;
+    width: 1000px;
+}
+
+/* #D9D764 */
+
+h2.info_window_heading {
+    color: #9BC8D4;
+}
+
+.info_window_body {
+    color: #4F8053;
+}
+
+</style>
+<div id="overzicht-bekendmakingen"></div>
+
+<script type="text/javascript" src="index.js" defer></script>
+<script type="text/javascript" src="map.js" defer></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=weekly&key=AIzaSyDtYSjTFPLSIUvcPqihvvLYNc120a61k80&language=nl&region=nl&callback=initEdMap" defer></script>
+</body>
+</html>
