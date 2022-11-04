@@ -1,12 +1,12 @@
 /*jslint browser: true, for: true, long: true, unordered: true */
-/*global window console demonstrationHelper */
+/*global window console */
 
 (function () {
     let inputData;
 
     function bekendmakingToText(bekendmaking) {
         const bekendmakingsDate = new Date(bekendmaking.properties.datum_tijdstip);
-        return bekendmakingsDate.toISOString() + ";" + bekendmaking.properties.url + ";\"" + bekendmaking.properties.titel + "\";\"" + bekendmaking.properties.beschrijving + "\"";
+        return bekendmakingsDate.toISOString() + ";" + bekendmaking.properties.url + ";\"" + bekendmaking.properties.titel + "\";\"" + bekendmaking.properties.beschrijving + "\";" + bekendmaking.geometry.coordinates[0] + ";" + bekendmaking.geometry.coordinates[1];
     }
 
     function isKnownBekendmakingType(titel) {
@@ -40,14 +40,11 @@
         // URL: https://zoek.officielebekendmakingen.nl/gmb-2022-425209.html
         // Endpoint: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-425209/1/xml/gmb-2022-425209.xml
         const gmbNumber = getGmbNumberFromUrl();
-        alert("'" + getYearFromUrl() + "'");
         const url = "https://repository.overheid.nl/frbr/officielepublicaties/gmb/" + getYearFromUrl() + "/" + gmbNumber + "/1/xml/" + gmbNumber + ".xml";
         fetch(
             url,
             {
-                "method": "GET",
-                "headers": {
-                }
+                "method": "GET"
             }
         ).then(function (response) {
             if (response.ok) {
@@ -55,7 +52,7 @@
 
                 });
             } else {
-                demo.processError(response);
+                console.error(response);
             }
         }).catch(function (error) {
             console.error(error);
@@ -67,9 +64,7 @@
         fetch(
             url,
             {
-                "method": "GET",
-                "headers": {
-                }
+                "method": "GET"
             }
         ).then(function (response) {
             if (response.ok) {
@@ -87,7 +82,7 @@
                     document.getElementById("idBekendmakingen").value = text.join("\n");
                 });
             } else {
-                demo.processError(response);
+                console.error(response);
             }
         }).catch(function (error) {
             console.error(error);
