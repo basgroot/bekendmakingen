@@ -1,255 +1,42 @@
+/*jslint browser: true, for: true, long: true, unordered: true */
+/*global window console google */
+
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
-function initEdMap() {
+function initBekendmakingenMap() {
     var mapDetails = {
         "initialZoomLevel": 12,
         "center": {
             "lat": 52.35573500060706,
             "lng": 4.902256946565444
-        },
-        "properties": [
-        {
-            "id": "H1B", // Hemony plek 1, bakfiets
-            "icon": "bakfiets.png",
-            "zIndex": 4,
-            "minZoomLevel": 19,
-            "maxZoomLevel": 99,
-            "isPropertyPageActive": false,
-            "headline": "Bakfiets Pieter Hemony",
-            "description": "Locatie: Hemonystraat 12.<br />Status: wacht op plaatsing. Dit kan als auto er staat en markering is aangebracht.",
-            "propertyPageUrl": "https://cargoroo.nl/",
-            "position": {
-                "lat": 52.35780589422096,
-                "lng": 4.902029146487228
-            }
-        }, {
-            "id": "W3B", // Willibrordus plek 3, bakfiets
-            "icon": "bakfiets.png",
-            "zIndex": 4,
-            "minZoomLevel": 19,
-            "maxZoomLevel": 99,
-            "isPropertyPageActive": false,
-            "headline": "Bakfiets Pieter Aertsz",
-            "description": "Locatie: Pieter Aertszstraat 112.<br />Status: wacht op plaatsing. Dit kan als auto er staat en markering is aangebracht.",
-            "propertyPageUrl": "https://cargoroo.nl/",
-            "position": {
-                "lat": 52.352986258382,
-                "lng": 4.904718381631734
-            }
-        }, {
-            "id": "HUB", // Hemony plek 1, auto+bakfiets
-            "icon": "auto_bakfiets.png",
-            "zIndex": 6,
-            "minZoomLevel": 15,
-            "maxZoomLevel": 18,
-            "isPropertyPageActive": false,
-            "headline": "Deelplek (auto en bakfiets)",
-            "description": "Hemonystraat 13.",
-            "position": {
-                "lat": 52.35777521694568,
-                "lng": 4.902135323017705
-            }
-        }, {
-            "id": "H1A", // Hemony plek 1, auto
-            "icon": "auto.png",
-            "zIndex": 5,
-            "minZoomLevel": 19,
-            "maxZoomLevel": 99,
-            "isPropertyPageActive": window.location.pathname === "/francois-hemony/",
-            "headline": "Auto François Hemony",
-            "description": "Locatie: Hemonystraat 13.<br />Status: Fiat 500 kan worden gereserveerd.",
-            "propertyPageUrl": "https://elektrischdeelrijden.nl/francois-hemony/",  // Show the link only when page is not the PropertyPage
-            "position": {
-                "lat": 52.35777521694568,
-                "lng": 4.902135323017705
-            }
-        }, {
-            "id": "H2A",
-            "icon": "auto.png",
-            "zIndex": 5,
-            "minZoomLevel": 15,
-            "maxZoomLevel": 99,
-            "isPropertyPageActive": window.location.pathname === "/jan-steen/",
-            "headline": "Auto Jan Steen",
-            "description": "Locatie: Tweede Jan Steenstraat 93.<br />Status: Fiat 500 kan worden gereserveerd.",
-            "propertyPageUrl": "https://elektrischdeelrijden.nl/jan-steen/",  // Show the link only when page is not the PropertyPage
-            "position": {
-                "lat": 52.35676675100333,
-                "lng": 4.902451289139401
-            }
-        }, {
-            "id": "H3A",
-            "icon": "auto.png",
-            "zIndex": 5,
-            "minZoomLevel": 15,
-            "maxZoomLevel": 99,
-            "isPropertyPageActive": window.location.pathname === "/jan-van-der-heijden/",
-            "headline": "Auto Jan van der Heijden",
-            "description": "Locatie: Tweede Jan van der Heijdenstraat 70.<br />Status: Skoda Citigo kan worden gereserveerd.",
-            "propertyPageUrl": "https://elektrischdeelrijden.nl/jan-van-der-heijden/",  // Show the link only when page is not the PropertyPage
-            "position": {
-                "lat": 52.35623474965593,
-                "lng": 4.903241416827072
-            }
-        }, {
-            "id": "W1A",
-            "icon": "auto.png",
-            "zIndex": 5,
-            "minZoomLevel": 15,
-            "maxZoomLevel": 99,
-            "isPropertyPageActive": window.location.pathname === "/michiel-servaesz-nouts/",
-            "headline": "Auto Servaes Nouts",
-            "description": "Locatie: Servaes Noutsstraat 14 (Willibrordusplein).<br />Status: Kia E-Niro kan worden gereserveerd.",
-            "propertyPageUrl": "https://elektrischdeelrijden.nl/michiel-servaesz-nouts/",  // Show the link only when page is not the PropertyPage
-            "position": {
-                "lat": 52.35490931544342,
-                "lng": 4.9035470766602645
-            }
-        }, {
-            "id": "W2A",
-            "icon": "auto.png",
-            "zIndex": 5,
-            "minZoomLevel": 15,
-            "maxZoomLevel": 99,
-            "isPropertyPageActive": window.location.pathname === "/adriaen-van-ostade/",
-            "headline": "Auto Adriaen van Ostade",
-            "description": "Locatie: Van Ostadestraat 385.<br />Status: Kia E-Niro kan worden gereserveerd.",
-            "propertyPageUrl": "https://elektrischdeelrijden.nl/adriaen-van-ostade/",  // Show the link only when page is not the PropertyPage
-            "position": {
-                "lat": 52.354503526889935,
-                "lng": 4.9040808199246575
-            }
-        }, {
-            "id": "W3A",
-            "icon": "auto.png",
-            "zIndex": 5,
-            "minZoomLevel": 19,
-            "maxZoomLevel": 99,
-            "isPropertyPageActive": window.location.pathname === "/pieter-aertsz/",
-            "headline": "Auto Pieter Aertsz",
-            "description": "Locatie: Pieter Aertszstraat 110.<br />Status: vergunning deelauto verleend, wacht op plaatsing.",
-            "propertyPageUrl": "https://elektrischdeelrijden.nl/pieter-aertsz/",  // Show the link only when page is not the PropertyPage
-            "position": {
-                "lat": 52.35296966938074,
-                "lng": 4.9045958328264385
-            }
-        }, {
-            "id": "HUB",
-            "icon": "auto_bakfiets.png",
-            "zIndex": 6,
-            "minZoomLevel": 15,
-            "maxZoomLevel": 18,
-            "isPropertyPageActive": false,
-            "headline": "Deelplek (auto en bakfiets)",
-            "description": "Pieter Aertszstraat 110.",
-            "position": {
-                "lat": 52.35296966938074,
-                "lng": 4.9045958328264385
-            }
-        }, {
-            "id": "BUURT",
-            "icon": "auto_bakfiets.png",
-            "zIndex": 10,
-            "minZoomLevel": 13,
-            "maxZoomLevel": 14,
-            "isPropertyPageActive": false,
-            "headline": "Hemonybuurt",
-            "description": "Hemonybuurt.",
-            "position": {
-                "lat": 52.35719789736865,
-                "lng": 4.902452741740485
-            },
-            "bounds": {
-                "sw": {
-                    "lat": 52.35504046860087,
-                    "lng": 4.900293921023917
-                },
-                "ne": {
-                    "lat": 52.35862647963468,
-                    "lng": 4.904130250668165
-                }
-            }
-        }, {
-            "id": "BUURT",
-            "icon": "auto_bakfiets.png",
-            "zIndex": 10,
-            "minZoomLevel": 13,
-            "maxZoomLevel": 14,
-            "isPropertyPageActive": false,
-            "headline": "Willibrordusbuurt",
-            "description": "Willibrordusbuurt.",
-            "position": {
-                "lat": 52.354058591133196,
-                "lng": 4.9043275332667
-            },
-            "bounds": {
-                "sw": {
-                    "lat": 52.352400014090854,
-                    "lng": 4.902122049575124
-                },
-                "ne": {
-                    "lat": 52.35585223170553,
-                    "lng": 4.9058476214904045
-                }
-            }
-        }, {
-            "id": "BUURT",
-            "icon": "logo.png",
-            "zIndex": 10,
-            "minZoomLevel": 0,
-            "maxZoomLevel": 12,
-            "isPropertyPageActive": false,
-            "headline": "Elektrisch Deelrijden de Pijp",
-            "description": "Hemony- en Willibrordusbuurt.",
-            "position": {
-                "lat": 52.35556991254003,
-                "lng": 4.903242927744562
-            },
-            "bounds": {
-                "sw": {
-                    "lat": 52.352400014090854,
-                    "lng": 4.902122049575124
-                },
-                "ne": {
-                    "lat": 52.35862647963468,
-                    "lng": 4.904130250668165
-                }
-            }
-        }, {
-            "id": "DIKS",
-            "icon": "diks.png",
-            "zIndex": 1,
-            "minZoomLevel": 15,
-            "maxZoomLevel": 99,
-            "isPropertyPageActive": false,
-            "headline": "Receptie DIKS",
-            "description": "We werken met DIKS samen voor de auto's. U kunt bij hen terecht met vragen over de app en de auto's. En voor 15% ledenkorting op het reguliere huuraanbod.<br /><br />Van Ostadestraat 366, telefoon: <a href='tel:0031206623366'>020 662 33 66</a><br /><br />Openingstijden:<br />Ma, Di, Wo 8:00-17:30, Do, Vr, Za 8:00-19:30, Zo 9:00-12:30.",
-            "propertyPageUrl": "https://diks.net/vestigingen/amsterdam-zuid/31206623366/",
-            "position": {
-                "lat": 52.35328543271351,
-                "lng": 4.899291847827083
-            }
-        }, {
-            "id": "DIKS-G",
-            "icon": "diks_garage.png",
-            "zIndex": 10,
-            "minZoomLevel": 15,
-            "maxZoomLevel": 99,
-            "isPropertyPageActive": false,
-            "headline": "Garage DIKS",
-            "description": "Dit is de garage van DIKS, niet de bezoekerslocatie, die ligt een stukje meer naar het westen in de Van Ostadestraat.",
-            "propertyPageUrl": "https://diks.net/vestigingen/amsterdam-zuid/31206623366/",
-            "position": {
-                "lat": 52.35397067926202,
-                "lng": 4.9025949536949325
-            }
-        }]
+        }
     };
     var map;
     var infoWindow;
-    var markersArray = [];
+    //var markersArray = [];
 
-    function isMarkerVisible(zoomLevel, minZoomLevel, maxZoomLevel) {
-        return zoomLevel >= minZoomLevel && zoomLevel <= maxZoomLevel;
+    function convertRijksdriehoekToLatLng(x, y) {
+        // The city "Amsterfoort" is used as reference "Rijksdriehoek" coordinate.
+        const referenceRdX = 155000;
+        const referenceRdY = 463000;
+        const dX = (x - referenceRdX) * (Math.pow(10, -5));
+        const dY = (y - referenceRdY) * (Math.pow(10, -5));
+        const sumN = (3235.65389 * dY) + (-32.58297 * Math.pow(dX, 2)) + (-0.2475 * Math.pow(dY, 2)) + (-0.84978 * Math.pow(dX, 2) * dY) + (-0.0655 * Math.pow(dY, 3)) + (-0.01709 * Math.pow(dX, 2) * Math.pow(dY, 2)) + (-0.00738 * dX) + (0.0053 * Math.pow(dX, 4)) + (-0.00039 * Math.pow(dX, 2) * Math.pow(dY, 3)) + (0.00033 * Math.pow(dX, 4) * dY) + (-0.00012 * dX * dY);
+        const sumE = (5260.52916 * dX) + (105.94684 * dX * dY) + (2.45656 * dX * Math.pow(dY, 2)) + (-0.81885 * Math.pow(dX, 3)) + (0.05594 * dX * Math.pow(dY, 3)) + (-0.05607 * Math.pow(dX, 3) * dY) + (0.01199 * dY) + (-0.00256 * Math.pow(dX, 3) * Math.pow(dY, 2)) + (0.00128 * dX * Math.pow(dY, 4)) + (0.00022 * Math.pow(dY, 2)) + (-0.00022 * Math.pow(dX, 2)) + (0.00026 * Math.pow(dX, 5));
+        // The city "Amsterfoort" is used as reference "WGS84" coordinate.
+        const referenceWgs84X = 52.15517;
+        const referenceWgs84Y = 5.387206;
+        const latitude = referenceWgs84X + (sumN / 3600);
+        const longitude = referenceWgs84Y + (sumE / 3600);
+        // Input
+        // x = 122202
+        // y = 487250
+        //
+        // Result
+        // "52.372143838117, 4.90559760435224"
+        return {
+            "lat": latitude,
+            "lng": longitude
+        };
     }
 
     function showInfoWindow(marker, header, body) {
@@ -261,68 +48,42 @@ function initEdMap() {
         });
     }
 
-    function addMarker(property) {
+    function addMarker(bekendmaking) {
+        // 2022-09-05T09:04:57.175Z;
+        // https://zoek.officielebekendmakingen.nl/gmb-2022-396401.html;
+        // "Besluit apv vergunning Verleend Monnikendammerweg 27";
+        // "TVM- 7 PV reserveren - Monnikendammerweg 27-37 - 03-07/10/2022, Monnikendammerweg 27";
+        // 125171;
+        // 488983
         // https://developers.google.com/maps/documentation/javascript/reference#MarkerOptions
         var marker = new google.maps.Marker({
             "map": map,
-            "position": property.position,
+            "position": convertRijksdriehoekToLatLng(bekendmaking[4], bekendmaking[5]),
             "clickable": true,
-            "optimized": false,
-            "visible": isMarkerVisible(mapDetails.initialZoomLevel, property.minZoomLevel, property.maxZoomLevel),
-            "icon": "https://elektrischdeelrijden.nl/wp-content/include-me/map/" + property.icon,
-            "zIndex": property.zIndex,
-            "title": property.headline
+            //"optimized": false,
+            "visible": true,
+            //"icon": "https://elektrischdeelrijden.nl/wp-content/include-me/map/auto.png",
+            //"zIndex": property.zIndex,
+            "title": bekendmaking[2]
         });
         marker.addListener(
             "click",
             function () {
-                var newBounds;
-                var description;
-                switch (property.id) {
-                case "BUURT":  // Hemony- en Willibrordusbuurt
-                    newBounds = new google.maps.LatLngBounds(property.bounds.sw, property.bounds.ne);
-                    map.fitBounds(newBounds);
-                    break;
-                case "HUB":  // Auto + bakfiets
-                    map.setZoom(19);
-                    map.setCenter(marker.getPosition());
-                    break;
-                default:
-                    description = property.description;
-                    if (!property.isPropertyPageActive) {
-                        description += "<br /><br />Meer info: <a href='" + property.propertyPageUrl + "?utm_source=site-" + property.id + "'>" + property.propertyPageUrl + "</a>.";
-                    }
-                    showInfoWindow(marker, property.headline, description);
-                }
+                var description = bekendmaking[3] + "<br /><br />Meer info: <a href='" + bekendmaking[1] + "'>" + bekendmaking[1] + "</a>.";
+                showInfoWindow(marker, bekendmaking[2], description);
             }
         );
-        markersArray.push({
-            "marker": marker,
-            "maxZoomLevel": property.maxZoomLevel,
-            "minZoomLevel": property.minZoomLevel
-        });
-        // This is the dedicated page for this property: show infoWindow
-        if (property.isPropertyPageActive) {
-            map.setCenter(marker.getPosition());
-            window.setTimeout(function () {
-                map.setZoom(19);
-                window.setTimeout(function () {
-                    showInfoWindow(marker, property.headline, property.description);
-                }, 1000);
-            }, 1000);
-        }
+        //markersArray.push({
+        //    "marker": marker,
+        //    "maxZoomLevel": property.maxZoomLevel,
+        //    "minZoomLevel": property.minZoomLevel
+        //});
     }
 
     function addMarkers() {
-        mapDetails.properties.forEach(function (property) {
-            addMarker(property);
+        document.getElementById("idBekendmakingen").value.split("\n").forEach(function (bekendmaking) {
+            addMarker(bekendmaking.split(";"));
         });
-    }
-
-    function addTraffic() {
-        // https://developers.google.com/maps/documentation/javascript/trafficlayer
-        var trafficLayer = new google.maps.TrafficLayer();
-        trafficLayer.setMap(map);
     }
 
     function internalInitMap() {
@@ -331,7 +92,7 @@ function initEdMap() {
         map = new google.maps.Map(
             document.getElementById("overzicht-bekendmakingen"),
             {
-                clickableIcons: false,
+                "clickableIcons": false,
                 // Paid feature - "mapId": "c2a918307d540be7",  // https://console.cloud.google.com/google/maps-apis/studio/styles?project=eddepijp
                 "center": new google.maps.LatLng(mapDetails.center.lat, mapDetails.center.lng),
                 "mapTypeId": google.maps.MapTypeId.ROADMAP,  // https://developers.google.com/maps/documentation/javascript/reference/map#MapTypeId
@@ -339,17 +100,16 @@ function initEdMap() {
                 "zoom": mapDetails.initialZoomLevel
             }
         );
-        //addTraffic();
         //addMarkers();
-        map.addListener("zoom_changed", function () {
-            var zoom = map.getZoom();
-            // Iterate over markers and call setVisible
-            markersArray.forEach(function (marker) {
-                marker.marker.setVisible(isMarkerVisible(zoom, marker.minZoomLevel, marker.maxZoomLevel));
-            });
-            infoWindow.close();
-            console.log("ZoomLevel: " + zoom);
-        });
+        //map.addListener("zoom_changed", function () {
+        //    var zoom = map.getZoom();
+        //    // Iterate over markers and call setVisible
+        //    markersArray.forEach(function (marker) {
+        //        marker.marker.setVisible(isMarkerVisible(zoom, marker.minZoomLevel, marker.maxZoomLevel));
+        //    });
+        //    infoWindow.close();
+        //    console.log("ZoomLevel: " + zoom);
+        //});
         map.addListener("center_changed", function () {
             console.log("New center: " + map.getCenter());
         });
