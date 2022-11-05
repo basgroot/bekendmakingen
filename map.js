@@ -4,10 +4,10 @@
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
 function initBekendmakingenMap() {
     var mapDetails = {
-        "initialZoomLevel": 12,
+        "initialZoomLevel": 17,
         "center": {
-            "lat": 52.35573500060706,
-            "lng": 4.902256946565444
+            "lat": 52.35430482656097,
+            "lng": 4.896706237692308
         }
     };
     var map;
@@ -78,12 +78,16 @@ function initBekendmakingenMap() {
         //    "maxZoomLevel": property.maxZoomLevel,
         //    "minZoomLevel": property.minZoomLevel
         //});
+        return marker;
     }
 
     function addMarkers() {
+        //const markers = [];
         document.getElementById("idBekendmakingen").value.split("\n").forEach(function (bekendmaking) {
             addMarker(bekendmaking.split(";"));
         });
+        // Add a marker clusterer to manage the markers.
+        //new markerClusterer.MarkerClusterer({ markers, map });
     }
 
     function internalInitMap() {
@@ -101,15 +105,15 @@ function initBekendmakingenMap() {
             }
         );
         //addMarkers();
-        //map.addListener("zoom_changed", function () {
-        //    var zoom = map.getZoom();
+        map.addListener("zoom_changed", function () {
+            var zoom = map.getZoom();
         //    // Iterate over markers and call setVisible
         //    markersArray.forEach(function (marker) {
         //        marker.marker.setVisible(isMarkerVisible(zoom, marker.minZoomLevel, marker.maxZoomLevel));
         //    });
         //    infoWindow.close();
-        //    console.log("ZoomLevel: " + zoom);
-        //});
+            console.log("ZoomLevel: " + zoom);
+        });
         map.addListener("center_changed", function () {
             console.log("New center: " + map.getCenter());
         });
