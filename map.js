@@ -66,15 +66,15 @@ function initBekendmakingenMap() {
         const alineas = getAlineas(responseXml);
         const today = new Date(new Date().toDateString());
         const maxLooptijd = (6 * 7) + 1;  // 6 weken de tijd om bezwaar te maken
-        const dateFormatOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
-        let datumBekendgemaakt;  // Datum verzonden aan belanghebbende(n)
-        let looptijd;
-        let resterendAantalDagenBezwaartermijn;
-        let i;
-        let j;
-        let alinea;
-        let value;
-        let isBezwaartermijnFound = false;
+        const dateFormatOptions = {"weekday": "long", "year": "numeric", "month": "long", "day": "numeric"};
+        var datumBekendgemaakt;  // Datum verzonden aan belanghebbende(n)
+        var looptijd;
+        var resterendAantalDagenBezwaartermijn;
+        var i;
+        var j;
+        var alinea;
+        var value;
+        var isBezwaartermijnFound = false;
         datumGepubliceerd = new Date(datumGepubliceerd.toDateString());
         for (i = 0; i < alineas.length; i += 1) {
             alinea = alineas[i];
@@ -151,7 +151,7 @@ function initBekendmakingenMap() {
         // 488983
         // https://developers.google.com/maps/documentation/javascript/reference#MarkerOptions
         var marker = new google.maps.Marker({
-            //"map": map,
+            "map": map,
             "position": convertRijksdriehoekToLatLng(bekendmaking[4], bekendmaking[5]),
             "clickable": true,
             "optimized": true,
@@ -179,12 +179,13 @@ function initBekendmakingenMap() {
     }
 
     function addMarkers() {
-        const markers = [];
+        //const markers = [];
         document.getElementById("idBekendmakingen").value.split("\n").forEach(function (bekendmaking) {
-            markers.push(addMarker(bekendmaking.split(";")));
+            //markers.push(addMarker(bekendmaking.split(";")));
+            addMarker(bekendmaking.split(";"));
         });
         // Add a marker clusterer to manage the markers.
-        new markerClusterer.MarkerClusterer({ markers, map });
+        //new markerClusterer.MarkerClusterer({ markers, map });
     }
 
     function internalInitMap() {
@@ -201,7 +202,6 @@ function initBekendmakingenMap() {
                 "zoom": mapDetails.initialZoomLevel
             }
         );
-        //addMarkers();
         map.addListener("zoom_changed", function () {
             var zoom = map.getZoom();
         //    // Iterate over markers and call setVisible
@@ -230,7 +230,7 @@ function initBekendmakingenMap() {
             "aanvraag",
             "vergunning verleend"
         ];
-        let isKnown = false;
+        var isKnown = false;
         filters.forEach(function (filter) {
             if (titel.substring(0, filter.length).toLowerCase() === filter) {
                 isKnown = true;
