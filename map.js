@@ -12,6 +12,7 @@ function initBekendmakingenMap() {
     };
     var map;
     var infoWindow;
+    var inputData;
     //var markersArray = [];
 
     function convertRijksdriehoekToLatLng(x, y) {
@@ -48,6 +49,99 @@ function initBekendmakingenMap() {
         });
     }
 
+    function getAlineas(responseXml) {
+        const parser = new window.DOMParser();
+        const xmlDoc = parser.parseFromString(responseXml, "text/xml");
+        // gemeenteblad / zakelijke-mededeling / zakelijke-mededeling-tekst / tekst / <al>Verzonden naar aanvrager op: 20-09-2022</al>
+        const zakelijkeMededeling = xmlDoc.getElementsByTagName("zakelijke-mededeling-tekst");
+        return (
+            zakelijkeMededeling.length === 0
+            ? []
+            : zakelijkeMededeling[0].getElementsByTagName("al")
+        );
+    }
+
+    function parseBekendmaking(responseXml, datumGepubliceerd, gmbNumber) {
+        const identifier = "Verzonden naar aanvrager op: ";
+        const alineas = getAlineas(responseXml);
+        const today = new Date(new Date().toDateString());
+        const maxLooptijd = (6 * 7) + 1;  // 6 weken de tijd om bezwaar te maken
+        const dateFormatOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+        let datumBekendgemaakt;  // Datum verzonden aan belanghebbende(n)
+        let looptijd;
+        let resterendAantalDagenBezwaartermijn;
+        let i;
+        let j;
+        let alinea;
+        let value;
+        let isBezwaartermijnFound = false;
+        datumGepubliceerd = new Date(datumGepubliceerd.toDateString());
+        for (i = 0; i < alineas.length; i += 1) {
+            alinea = alineas[i];
+            if (alinea.childNodes.length > 0) {
+                for (j = 0; j < alinea.childNodes.length; j += 1) {
+                    if (alinea.childNodes[j].nodeName === "#text") {
+                        value = alinea.childNodes[j].nodeValue;
+                        if (value.substr(0, identifier.length) === identifier) {
+                            // Verzonden naar aanvrager op: 02-09-2022
+                            isBezwaartermijnFound = true;
+                            // Remove time from dates:
+                            datumBekendgemaakt = new Date(value.substr(35, 4) + "-" + value.substr(32, 2) + "-" + value.substr(29, 2));
+                            datumBekendgemaakt = new Date(datumBekendgemaakt.toDateString());
+                            looptijd = Math.round((today.getTime() - datumGepubliceerd.getTime()) / (1000 * 60 * 60 * 24));
+                            console.log("today.getTime(): " + today.getTime());
+                            console.log("datumGepubliceerd.getTime(): " + datumGepubliceerd.getTime());
+                            console.log("looptijd: " + looptijd);
+                            console.log("maxLooptijd: " + maxLooptijd);
+                            resterendAantalDagenBezwaartermijn = maxLooptijd - looptijd;
+                            document.getElementById(gmbNumber).innerHTML = "Gepubliceerd: " + datumGepubliceerd.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />Bekendgemaakt aan belanghebbende: " + datumBekendgemaakt.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />" + (
+                                resterendAantalDagenBezwaartermijn > 0
+                                ? "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
+                                : "<b>Geen bezwaar meer mogelijk.</b>"
+                            ) + "<br /><br />";
+                        }
+                    }
+                }
+            }
+        }
+        if (!isBezwaartermijnFound) {
+            document.getElementById(gmbNumber).innerHTML = "Gepubliceerd: " + datumGepubliceerd.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br /><br />";
+        }
+    }
+
+    function collectBezwaartermijn(gmbNumber, datumGepubliceerd) {
+
+        function getYearFromGmbNumber() {
+            return gmbNumber.substr(4, 4);
+        }
+
+        // URL: https://zoek.officielebekendmakingen.nl/gmb-2022-425209.html
+        // Endpoint: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-425209/1/xml/gmb-2022-425209.xml
+        //const url = "http://localhost/proxy-server/index.php?number=" + gmbNumber + "&year=" + getYearFromGmbNumber(gmbNumber);
+        const url = "https://basement.nl/proxy-server/index.php?number=" + gmbNumber + "&year=" + getYearFromGmbNumber(gmbNumber);
+        fetch(
+            url,
+            {
+                "method": "GET"
+            }
+        ).then(function (response) {
+            if (response.ok) {
+                response.text().then(function (xml) {
+                    parseBekendmaking(xml, datumGepubliceerd, gmbNumber);
+                });
+            } else {
+                console.error(response);
+            }
+        }).catch(function (error) {
+            console.error(error);
+        });
+    }
+
+    function getGmbNumberFromUrl(websiteUrl) {
+        // gmb-2022-425209
+        return websiteUrl.substr(40, websiteUrl.length - 45);
+    }
+
     function addMarker(bekendmaking) {
         // 2022-09-05T09:04:57.175Z;
         // https://zoek.officielebekendmakingen.nl/gmb-2022-396401.html;
@@ -57,10 +151,10 @@ function initBekendmakingenMap() {
         // 488983
         // https://developers.google.com/maps/documentation/javascript/reference#MarkerOptions
         var marker = new google.maps.Marker({
-            "map": map,
+            //"map": map,
             "position": convertRijksdriehoekToLatLng(bekendmaking[4], bekendmaking[5]),
             "clickable": true,
-            //"optimized": false,
+            "optimized": true,
             "visible": true,
             //"icon": "https://elektrischdeelrijden.nl/wp-content/include-me/map/auto.png",
             //"zIndex": property.zIndex,
@@ -69,8 +163,11 @@ function initBekendmakingenMap() {
         marker.addListener(
             "click",
             function () {
-                var description = bekendmaking[3] + "<br /><br />Meer info: <a href='" + bekendmaking[1] + "'>" + bekendmaking[1] + "</a>.";
-                showInfoWindow(marker, bekendmaking[2], description);
+                var gmbNumber = getGmbNumberFromUrl(bekendmaking[1]);
+                var datumGepubliceerd = new Date(bekendmaking[0]);
+                var description = bekendmaking[3] + "<br /><br />Meer info: <a href=\"" + bekendmaking[1] + "\" target=\"blank\">" + bekendmaking[1] + "</a>.";
+                showInfoWindow(marker, bekendmaking[2], "<div id=\"" + gmbNumber + "\"><br /><br /><br /></div>" + description);
+                collectBezwaartermijn(gmbNumber, datumGepubliceerd);
             }
         );
         //markersArray.push({
@@ -82,12 +179,12 @@ function initBekendmakingenMap() {
     }
 
     function addMarkers() {
-        //const markers = [];
+        const markers = [];
         document.getElementById("idBekendmakingen").value.split("\n").forEach(function (bekendmaking) {
-            addMarker(bekendmaking.split(";"));
+            markers.push(addMarker(bekendmaking.split(";")));
         });
         // Add a marker clusterer to manage the markers.
-        //new markerClusterer.MarkerClusterer({ markers, map });
+        new markerClusterer.MarkerClusterer({ markers, map });
     }
 
     function internalInitMap() {
@@ -119,7 +216,60 @@ function initBekendmakingenMap() {
         });
     }
 
-    internalInitMap();
+    function bekendmakingToText(bekendmaking) {
+        const bekendmakingsDate = new Date(bekendmaking.properties.datum_tijdstip);
+        return bekendmakingsDate.toISOString() + ";" + bekendmaking.properties.url + ";\"" + bekendmaking.properties.titel + "\";\"" + bekendmaking.properties.beschrijving + "\";" + bekendmaking.geometry.coordinates[0] + ";" + bekendmaking.geometry.coordinates[1];
+    }
 
-    document.getElementById("idBtnShowMap").addEventListener("click", addMarkers);
+    function isKnownBekendmakingType(titel) {
+        const filters = [
+            "besluit",
+            "ontwerpbesluit",
+            "gemeente amsterdam",
+            "verlenging",
+            "aanvraag",
+            "vergunning verleend"
+        ];
+        let isKnown = false;
+        filters.forEach(function (filter) {
+            if (titel.substring(0, filter.length).toLowerCase() === filter) {
+                isKnown = true;
+            }
+        });
+        return isKnown;
+    }
+
+    function loadData() {
+        const url = "https://api.data.amsterdam.nl/v1/wfs/bekendmakingen/?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=bekendmakingen&OUTPUTFORMAT=geojson";
+        fetch(
+            url,
+            {
+                "method": "GET"
+            }
+        ).then(function (response) {
+            if (response.ok) {
+                response.json().then(function (responseJson) {
+                    const text = [];
+                    inputData = responseJson;
+                    console.log("Found " + inputData.features.length + " bekendmakingen in Amsterdam.");
+                    inputData.features.forEach(function (bekendmaking) {
+                        text.push(bekendmakingToText(bekendmaking));
+                        if (!isKnownBekendmakingType(bekendmaking.properties.titel)) {
+                            console.error("Bekendmaking zonder tag: " + bekendmaking.properties.titel);
+                        }
+                    });
+                    text.sort();
+                    document.getElementById("idBekendmakingen").value = text.join("\n");
+                    addMarkers();
+                });
+            } else {
+                console.error(response);
+            }
+        }).catch(function (error) {
+            console.error(error);
+        });
+    }
+
+    internalInitMap();
+    loadData();
 }
