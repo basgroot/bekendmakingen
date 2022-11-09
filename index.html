@@ -4,40 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="ROBOTS" content="INDEX, FOLLOW" />
     <meta name="VIEWPORT" content="width=device-width, initial-scale=1" />
-    <!--link rel="stylesheet" href="css/style.css"-->
-    <!--link rel="shortcut icon" type="image/x-icon" href="favicon.ico"-->
+    <link rel="stylesheet" href="map.css">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <title>Vergunningen Amsterdam op kaart</title>
 </head>
 <body>
-Bekendmakingen:<br />
-<textarea id="idBekendmakingen" cols="200" rows="20" wrap="off">
-Loading..
-</textarea><br />
 
-<style type="text/css" media="screen">
+<div id="idHeader">
 
-#overzicht-bekendmakingen {
-    height: 400px;
-    width: 100%;
-}
+</div>
 
-/* #D9D764 */
-
-h2.info_window_heading {
-    color: #9BC8D4;
-}
-
-.info_window_body {
-    color: #4F8053;
-}
-
-</style>
 <div id="overzicht-bekendmakingen"></div>
 
 <script type="text/javascript" src="map.js" defer></script>
-<!--script type="text/javascript"src="https://unpkg.com/supercluster@7.1.2/dist/supercluster.min.js"></script-->
-<!--script type="text/javascript" src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script-->
-<!--script type="text/javascript" src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script-->
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=weekly&key=AIzaSyB2VxJuGd7PQLeh6UDBR8Q8qC4ql_sYmI0&language=nl&region=nl&callback=initBekendmakingenMap" defer></script>
 </body>
 </html>

@@ -142,7 +142,7 @@ function initBekendmakingenMap() {
         return websiteUrl.substr(40, websiteUrl.length - 45);
     }
 
-    function addMarker(bekendmaking) {
+    function addMarker(feature) {
         // 2022-09-05T09:04:57.175Z;
         // https://zoek.officielebekendmakingen.nl/gmb-2022-396401.html;
         // "Besluit apv vergunning Verleend Monnikendammerweg 27";
@@ -152,21 +152,21 @@ function initBekendmakingenMap() {
         // https://developers.google.com/maps/documentation/javascript/reference#MarkerOptions
         var marker = new google.maps.Marker({
             "map": map,
-            "position": convertRijksdriehoekToLatLng(bekendmaking[4], bekendmaking[5]),
+            "position": convertRijksdriehoekToLatLng(feature.geometry.coordinates[0], feature.geometry.coordinates[1]),
             "clickable": true,
             "optimized": true,
             "visible": true,
             //"icon": "https://elektrischdeelrijden.nl/wp-content/include-me/map/auto.png",
             //"zIndex": property.zIndex,
-            "title": bekendmaking[2]
+            "title": feature.properties.titel
         });
         marker.addListener(
             "click",
             function () {
-                var gmbNumber = getGmbNumberFromUrl(bekendmaking[1]);
-                var datumGepubliceerd = new Date(bekendmaking[0]);
-                var description = bekendmaking[3] + "<br /><br />Meer info: <a href=\"" + bekendmaking[1] + "\" target=\"blank\">" + bekendmaking[1] + "</a>.";
-                showInfoWindow(marker, bekendmaking[2], "<div id=\"" + gmbNumber + "\"><br /><br /><br /></div>" + description);
+                var gmbNumber = getGmbNumberFromUrl(feature.properties.url);
+                var datumGepubliceerd = new Date(feature.properties.datum_tijdstip);
+                var description = feature.properties.beschrijving + "<br /><br />Meer info: <a href=\"" + feature.properties.url + "\" target=\"blank\">" + feature.properties.url + "</a>.";
+                showInfoWindow(marker, feature.properties.titel, "<div id=\"" + gmbNumber + "\"><br /><br /><br /></div>" + description);
                 collectBezwaartermijn(gmbNumber, datumGepubliceerd);
             }
         );
@@ -179,13 +179,7 @@ function initBekendmakingenMap() {
     }
 
     function addMarkers() {
-        //const markers = [];
-        document.getElementById("idBekendmakingen").value.split("\n").forEach(function (bekendmaking) {
-            //markers.push(addMarker(bekendmaking.split(";")));
-            addMarker(bekendmaking.split(";"));
-        });
-        // Add a marker clusterer to manage the markers.
-        //new markerClusterer.MarkerClusterer({ markers, map });
+        inputData.features.forEach(addMarker);
     }
 
     function internalInitMap() {
@@ -216,11 +210,6 @@ function initBekendmakingenMap() {
         });
     }
 
-    function bekendmakingToText(bekendmaking) {
-        const bekendmakingsDate = new Date(bekendmaking.properties.datum_tijdstip);
-        return bekendmakingsDate.toISOString() + ";" + bekendmaking.properties.url + ";\"" + bekendmaking.properties.titel + "\";\"" + bekendmaking.properties.beschrijving + "\";" + bekendmaking.geometry.coordinates[0] + ";" + bekendmaking.geometry.coordinates[1];
-    }
-
     function isKnownBekendmakingType(titel) {
         const filters = [
             "besluit",
@@ -240,6 +229,12 @@ function initBekendmakingenMap() {
     }
 
     function loadData() {
+
+        function sortBekendmakingen(a, b) {
+            // Sort on time, so newer licences are projected above the older ones.
+            return a.properties.datum_tijdstip.localeCompare(b.properties.datum_tijdstip);
+        }
+
         const url = "https://api.data.amsterdam.nl/v1/wfs/bekendmakingen/?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=bekendmakingen&OUTPUTFORMAT=geojson";
         fetch(
             url,
@@ -249,17 +244,9 @@ function initBekendmakingenMap() {
         ).then(function (response) {
             if (response.ok) {
                 response.json().then(function (responseJson) {
-                    const text = [];
                     inputData = responseJson;
                     console.log("Found " + inputData.features.length + " bekendmakingen in Amsterdam.");
-                    inputData.features.forEach(function (bekendmaking) {
-                        text.push(bekendmakingToText(bekendmaking));
-                        if (!isKnownBekendmakingType(bekendmaking.properties.titel)) {
-                            console.error("Bekendmaking zonder tag: " + bekendmaking.properties.titel);
-                        }
-                    });
-                    text.sort();
-                    document.getElementById("idBekendmakingen").value = text.join("\n");
+                    inputData.features.sort(sortBekendmakingen);
                     addMarkers();
                 });
             } else {
