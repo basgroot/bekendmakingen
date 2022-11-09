@@ -2,6 +2,8 @@
 
 Bekijk vergunningen aangevraagd en verleend in uw omgeving.
 
+<https://basgroot.github.io/bekendmakingen-amsterdam/>
+
 ## Legenda
 
 - ![Aanvraag](img/aanvraag.png) Aangevraagde vergunning, of aankondiging uitstel besluit.
