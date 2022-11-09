@@ -1,6 +1,15 @@
 /*jslint browser: true, for: true, long: true, unordered: true */
 /*global window console google */
 
+/*
+tedoen:
+- "Verzonden naar aanvrager op :" (https://zoek.officielebekendmakingen.nl/gmb-2022-441976.html)
+  ..en https://zoek.officielebekendmakingen.nl/gmb-2022-463945.html
+
+Verzonden naar aanvrager op: --
+- https://zoek.officielebekendmakingen.nl/gmb-2022-440164.html
+*/
+
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
 function initBekendmakingenMap() {
     var mapDetails = {
@@ -13,7 +22,7 @@ function initBekendmakingenMap() {
     var map;
     var infoWindow;
     var inputData;
-    //var markersArray = [];
+    var markersArray = [];
 
     function convertRijksdriehoekToLatLng(x, y) {
         // The city "Amsterfoort" is used as reference "Rijksdriehoek" coordinate.
@@ -61,10 +70,15 @@ function initBekendmakingenMap() {
         );
     }
 
+    function getDaysPassed(date) {
+        const today = new Date(new Date().toDateString());  // Rounded date
+        const dateFrom = new Date(date.toDateString());
+        return Math.round((today.getTime() - dateFrom.getTime()) / (1000 * 60 * 60 * 24));
+    }
+
     function parseBekendmaking(responseXml, datumGepubliceerd, gmbNumber) {
         const identifier = "Verzonden naar aanvrager op: ";
         const alineas = getAlineas(responseXml);
-        const today = new Date(new Date().toDateString());
         const maxLooptijd = (6 * 7) + 1;  // 6 weken de tijd om bezwaar te maken
         const dateFormatOptions = {"weekday": "long", "year": "numeric", "month": "long", "day": "numeric"};
         var datumBekendgemaakt;  // Datum verzonden aan belanghebbende(n)
@@ -88,11 +102,7 @@ function initBekendmakingenMap() {
                             // Remove time from dates:
                             datumBekendgemaakt = new Date(value.substr(35, 4) + "-" + value.substr(32, 2) + "-" + value.substr(29, 2));
                             datumBekendgemaakt = new Date(datumBekendgemaakt.toDateString());
-                            looptijd = Math.round((today.getTime() - datumGepubliceerd.getTime()) / (1000 * 60 * 60 * 24));
-                            console.log("today.getTime(): " + today.getTime());
-                            console.log("datumGepubliceerd.getTime(): " + datumGepubliceerd.getTime());
-                            console.log("looptijd: " + looptijd);
-                            console.log("maxLooptijd: " + maxLooptijd);
+                            looptijd = getDaysPassed(datumBekendgemaakt);
                             resterendAantalDagenBezwaartermijn = maxLooptijd - looptijd;
                             document.getElementById(gmbNumber).innerHTML = "Gepubliceerd: " + datumGepubliceerd.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />Bekendgemaakt aan belanghebbende: " + datumBekendgemaakt.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />" + (
                                 resterendAantalDagenBezwaartermijn > 0
@@ -142,7 +152,72 @@ function initBekendmakingenMap() {
         return websiteUrl.substr(40, websiteUrl.length - 45);
     }
 
-    function addMarker(feature) {
+    function getIcon(title) {
+        const aanvraagFilters = [
+            "verlenging",
+            "aanvraag"
+        ];
+        var apvFilter = "besluit apv";
+        var isAanvraag = false;
+        title = title.toLowerCase();
+        aanvraagFilters.forEach(function (filter) {
+            if (title.substring(0, filter.length) === filter) {
+                isAanvraag = true;
+            }
+        });
+        if (isAanvraag) {
+            return "img/aanvraag.png";
+        }
+        if (title.substring(0, apvFilter.length) === apvFilter) {
+            return "img/apv.png";
+        }
+        if (title.indexOf("exploitatievergunning") >= 0 || title.indexOf("alcoholwetvergunning") >= 0) {
+            return "img/bar.png";
+        }
+        if (title.indexOf("bed & breakfast") >= 0 || title.indexOf("vakantieverhuur") >= 0) {
+            return "img/hotel.png";
+        }
+        return "img/constructie.png";
+    }
+
+    function findUniquePosition(proposedCoordinate) {
+
+        function isCoordinateAvailable(coordinate) {
+            var isAvailable = true;  // Be positive
+            var i;
+            var marker;
+            for (i = 0; i < markersArray.length; i += 1) {
+                // Don't use forEach, to gain some performance.
+                marker = markersArray[i];
+                if (marker.position.lat === coordinate.lat && marker.position.lng === coordinate.lng) {
+                    isAvailable = false;
+                    break;
+                }
+            }
+            return isAvailable;
+        }
+
+        while (!isCoordinateAvailable(proposedCoordinate)) {
+            proposedCoordinate.lat = proposedCoordinate.lat + 0.000017;
+            proposedCoordinate.lng = proposedCoordinate.lng + 0.000016;
+        }
+        return proposedCoordinate;
+    }
+
+    function isMarkerVisible(age, periodToShow) {
+        switch (periodToShow) {
+        case "3d":
+            return age <= 3;
+        case "7d":
+            return age <= 7;
+        case "14d":
+            return age <= 14;
+        default:
+            return true;
+        }
+    }
+
+    function addMarker(feature, periodToShow) {
         // 2022-09-05T09:04:57.175Z;
         // https://zoek.officielebekendmakingen.nl/gmb-2022-396401.html;
         // "Besluit apv vergunning Verleend Monnikendammerweg 27";
@@ -150,13 +225,19 @@ function initBekendmakingenMap() {
         // 125171;
         // 488983
         // https://developers.google.com/maps/documentation/javascript/reference#MarkerOptions
+        var datumGepubliceerd = new Date(feature.properties.datum_tijdstip);
+        var position = findUniquePosition(convertRijksdriehoekToLatLng(feature.geometry.coordinates[0], feature.geometry.coordinates[1]));
+        var age = getDaysPassed(datumGepubliceerd);
         var marker = new google.maps.Marker({
             "map": map,
-            "position": convertRijksdriehoekToLatLng(feature.geometry.coordinates[0], feature.geometry.coordinates[1]),
+            "position": position,
             "clickable": true,
             "optimized": true,
-            "visible": true,
-            //"icon": "https://elektrischdeelrijden.nl/wp-content/include-me/map/auto.png",
+            "visible": isMarkerVisible(age, periodToShow),
+            //"icon": "wegwerkzaamheden-40.svg",
+            "icon": {
+                "url": getIcon(feature.properties.titel)
+            },
             //"zIndex": property.zIndex,
             "title": feature.properties.titel
         });
@@ -164,22 +245,30 @@ function initBekendmakingenMap() {
             "click",
             function () {
                 var gmbNumber = getGmbNumberFromUrl(feature.properties.url);
-                var datumGepubliceerd = new Date(feature.properties.datum_tijdstip);
                 var description = feature.properties.beschrijving + "<br /><br />Meer info: <a href=\"" + feature.properties.url + "\" target=\"blank\">" + feature.properties.url + "</a>.";
                 showInfoWindow(marker, feature.properties.titel, "<div id=\"" + gmbNumber + "\"><br /><br /><br /></div>" + description);
                 collectBezwaartermijn(gmbNumber, datumGepubliceerd);
             }
         );
-        //markersArray.push({
-        //    "marker": marker,
-        //    "maxZoomLevel": property.maxZoomLevel,
-        //    "minZoomLevel": property.minZoomLevel
-        //});
-        return marker;
+        markersArray.push({
+            "age": age,
+            "position": position,
+            "marker": marker
+        });
     }
 
     function addMarkers() {
-        inputData.features.forEach(addMarker);
+        const periodToShow = document.getElementById("idCbxPeriod").value;
+        inputData.features.forEach(function (feature) {
+            addMarker(feature, periodToShow);
+        });
+    }
+
+    function updateDisplayLevel() {
+        const periodToShow = document.getElementById("idCbxPeriod").value;
+        markersArray.forEach(function (marker) {
+            marker.marker.setVisible(isMarkerVisible(marker.age, periodToShow));
+        });
     }
 
     function internalInitMap() {
@@ -197,35 +286,28 @@ function initBekendmakingenMap() {
             }
         );
         map.addListener("zoom_changed", function () {
+            var periodElm = document.getElementById("idCbxPeriod");
             var zoom = map.getZoom();
-        //    // Iterate over markers and call setVisible
-        //    markersArray.forEach(function (marker) {
-        //        marker.marker.setVisible(isMarkerVisible(zoom, marker.minZoomLevel, marker.maxZoomLevel));
-        //    });
-        //    infoWindow.close();
+            // Iterate over markers and call setVisible
+            if (zoom <= 13 && (periodElm.value === "7d" || periodElm.value === "14d" || periodElm.value === "all")) {
+                // Set to 3 days
+                periodElm.value = "3d";
+                updateDisplayLevel();
+            } else if (zoom <= 14 && (periodElm.value === "14d" || periodElm.value === "all")) {
+                // Set to 7 days
+                periodElm.value = "7d";
+                updateDisplayLevel();
+            } else if (zoom <= 15 && (periodElm.value === "all")) {
+                // Set to 14 days
+                periodElm.value = "14d";
+                updateDisplayLevel();
+            }
+            infoWindow.close();
             console.log("ZoomLevel: " + zoom);
         });
         map.addListener("center_changed", function () {
             console.log("New center: " + map.getCenter());
         });
-    }
-
-    function isKnownBekendmakingType(titel) {
-        const filters = [
-            "besluit",
-            "ontwerpbesluit",
-            "gemeente amsterdam",
-            "verlenging",
-            "aanvraag",
-            "vergunning verleend"
-        ];
-        var isKnown = false;
-        filters.forEach(function (filter) {
-            if (titel.substring(0, filter.length).toLowerCase() === filter) {
-                isKnown = true;
-            }
-        });
-        return isKnown;
     }
 
     function loadData() {
@@ -259,4 +341,5 @@ function initBekendmakingenMap() {
 
     internalInitMap();
     loadData();
+    document.getElementById("idCbxPeriod").addEventListener("change", updateDisplayLevel);
 }
