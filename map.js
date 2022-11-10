@@ -175,6 +175,9 @@ function initBekendmakingenMap() {
         if (title.indexOf("exploitatievergunning") >= 0 || title.indexOf("alcoholwetvergunning") >= 0) {
             return "img/bar.svg";
         }
+        if (title.indexOf("evenement") >= 0) {
+            return "img/evenement.svg";
+        }
         if (title.indexOf("bed & breakfast") >= 0 || title.indexOf("vakantieverhuur") >= 0) {
             return "img/hotel.svg";
         }
