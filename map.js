@@ -1,15 +1,6 @@
 /*jslint browser: true, for: true, long: true, unordered: true */
 /*global window console google */
 
-/*
-tedoen:
-- "Verzonden naar aanvrager op :" (https://zoek.officielebekendmakingen.nl/gmb-2022-441976.html)
-  ..en https://zoek.officielebekendmakingen.nl/gmb-2022-463945.html
-
-Verzonden naar aanvrager op: --
-- https://zoek.officielebekendmakingen.nl/gmb-2022-440164.html
-*/
-
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
 function initBekendmakingenMap() {
     var mapDetails = {
@@ -77,6 +68,20 @@ function initBekendmakingenMap() {
     }
 
     function parseBekendmaking(responseXml, datumGepubliceerd, gmbNumber) {
+
+        function parseDate(value) {
+            var year = value.substr(35, 4);
+            var month = value.substr(32, 2);
+            var day = value.substr(29, 2);
+            var datumBekendgemaakt;
+            if (isNaN(parseInt(year, 10)) || isNaN(parseInt(month, 10)) || isNaN(parseInt(day, 10))) {
+                console.log("Error parsing date (" + value + ") of license " + gmbNumber);
+                return false;
+            }
+            datumBekendgemaakt = new Date(year + "-" + month + "-" + day);
+            return new Date(datumBekendgemaakt.toDateString());
+        }
+
         const identifier = "Verzonden naar aanvrager op: ";
         const alineas = getAlineas(responseXml);
         const maxLooptijd = (6 * 7) + 1;  // 6 weken de tijd om bezwaar te maken
@@ -88,6 +93,7 @@ function initBekendmakingenMap() {
         var j;
         var alinea;
         var value;
+        var textToShow = "";
         var isBezwaartermijnFound = false;
         datumGepubliceerd = new Date(datumGepubliceerd.toDateString());
         for (i = 0; i < alineas.length; i += 1) {
@@ -95,28 +101,32 @@ function initBekendmakingenMap() {
             if (alinea.childNodes.length > 0) {
                 for (j = 0; j < alinea.childNodes.length; j += 1) {
                     if (alinea.childNodes[j].nodeName === "#text") {
-                        value = alinea.childNodes[j].nodeValue;
+                        // Fix "Verzonden naar aanvrager op :" (https://zoek.officielebekendmakingen.nl/gmb-2022-441976.html)
+                        value = alinea.childNodes[j].nodeValue.replace("op :", "op:");
                         if (value.substr(0, identifier.length) === identifier) {
                             // Verzonden naar aanvrager op: 02-09-2022
-                            isBezwaartermijnFound = true;
                             // Remove time from dates:
-                            datumBekendgemaakt = new Date(value.substr(35, 4) + "-" + value.substr(32, 2) + "-" + value.substr(29, 2));
-                            datumBekendgemaakt = new Date(datumBekendgemaakt.toDateString());
-                            looptijd = getDaysPassed(datumBekendgemaakt);
-                            resterendAantalDagenBezwaartermijn = maxLooptijd - looptijd;
-                            document.getElementById(gmbNumber).innerHTML = "Gepubliceerd: " + datumGepubliceerd.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />Bekendgemaakt aan belanghebbende: " + datumBekendgemaakt.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />" + (
-                                resterendAantalDagenBezwaartermijn > 0
-                                ? "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
-                                : "<b>Geen bezwaar meer mogelijk.</b>"
-                            ) + "<br /><br />";
+                            datumBekendgemaakt = parseDate(value);
+                            if (datumBekendgemaakt !== false) {
+                                isBezwaartermijnFound = true;
+                                looptijd = getDaysPassed(datumBekendgemaakt);
+                                resterendAantalDagenBezwaartermijn = maxLooptijd - looptijd;
+                                textToShow = "Gepubliceerd: " + datumGepubliceerd.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />Bekendgemaakt aan belanghebbende: " + datumBekendgemaakt.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />" + (
+                                    resterendAantalDagenBezwaartermijn > 0
+                                    ? "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
+                                    : "<b>Geen bezwaar meer mogelijk.</b>"
+                                ) + "<br /><br />";
+                            }
+                            break;
                         }
                     }
                 }
             }
         }
         if (!isBezwaartermijnFound) {
-            document.getElementById(gmbNumber).innerHTML = "Gepubliceerd: " + datumGepubliceerd.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br /><br />";
+            textToShow = "Gepubliceerd: " + datumGepubliceerd.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br /><br />";
         }
+        document.getElementById(gmbNumber).innerHTML = textToShow;
     }
 
     function collectBezwaartermijn(gmbNumber, datumGepubliceerd) {
@@ -276,10 +286,11 @@ function initBekendmakingenMap() {
     }
 
     function internalInitMap() {
+        var containerElm = document.getElementById("overzicht-bekendmakingen");
         infoWindow = new google.maps.InfoWindow();
         // https://developers.google.com/maps/documentation/javascript/overview#MapOptions
         map = new google.maps.Map(
-            document.getElementById("overzicht-bekendmakingen"),
+            containerElm,
             {
                 "clickableIcons": false,
                 // Paid feature - "mapId": "c2a918307d540be7",  // https://console.cloud.google.com/google/maps-apis/studio/styles?project=eddepijp
