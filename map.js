@@ -153,6 +153,7 @@ function initBekendmakingenMap() {
     }
 
     function getIcon(title) {
+        // Images are converted to SVG using https://png2svg.com/
         const aanvraagFilters = [
             "verlenging",
             "aanvraag"
@@ -166,18 +167,18 @@ function initBekendmakingenMap() {
             }
         });
         if (isAanvraag) {
-            return "img/aanvraag.png";
+            return "img/aanvraag.svg";
         }
         if (title.substring(0, apvFilter.length) === apvFilter) {
-            return "img/apv.png";
+            return "img/apv.svg";
         }
         if (title.indexOf("exploitatievergunning") >= 0 || title.indexOf("alcoholwetvergunning") >= 0) {
-            return "img/bar.png";
+            return "img/bar.svg";
         }
         if (title.indexOf("bed & breakfast") >= 0 || title.indexOf("vakantieverhuur") >= 0) {
-            return "img/hotel.png";
+            return "img/hotel.svg";
         }
-        return "img/constructie.png";
+        return "img/constructie.svg";
     }
 
     function findUniquePosition(proposedCoordinate) {
@@ -236,7 +237,8 @@ function initBekendmakingenMap() {
             "visible": isMarkerVisible(age, periodToShow),
             //"icon": "wegwerkzaamheden-40.svg",
             "icon": {
-                "url": getIcon(feature.properties.titel)
+                "url": getIcon(feature.properties.titel),
+                "scaledSize": new google.maps.Size(40, 40)
             },
             //"zIndex": property.zIndex,
             "title": feature.properties.titel
