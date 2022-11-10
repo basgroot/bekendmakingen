@@ -235,10 +235,9 @@ function initBekendmakingenMap() {
             "clickable": true,
             "optimized": true,
             "visible": isMarkerVisible(age, periodToShow),
-            //"icon": "wegwerkzaamheden-40.svg",
             "icon": {
                 "url": getIcon(feature.properties.titel),
-                "scaledSize": new google.maps.Size(40, 40)
+                "scaledSize": new google.maps.Size(35, 45)
             },
             //"zIndex": property.zIndex,
             "title": feature.properties.titel
