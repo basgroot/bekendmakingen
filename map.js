@@ -1,6 +1,8 @@
 /*jslint browser: true, for: true, long: true, unordered: true */
 /*global window console google */
 
+// Check ook exploitatievergunningen horeca met terrasgrenzen en ontheffingen: https://api.data.amsterdam.nl/v1/wfs/horeca/?REQUEST=GetFeature&SERVICE=WFS&version=2.0.0&count=5000&typenames=exploitatievergunning&BBOX=4.58565,52.03560,5.31360,52.48769,urn:ogc:def:crs:EPSG::4326&outputformat=geojson&srsName=urn:ogc:def:crs:EPSG::4326
+
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
 function initBekendmakingenMap() {
     var map;
@@ -285,6 +287,9 @@ function initBekendmakingenMap() {
             //"zIndex": property.zIndex,
             "title": feature.properties.titel
         });
+        if (feature.geometry.type !== "Point") {
+            console.error("Geometry not of type 'Point': " + JSON.stringify(feature));
+        }
         marker.addListener(
             "click",
             function () {
