@@ -3,17 +3,47 @@
 
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
 function initBekendmakingenMap() {
-    var mapDetails = {
-        "initialZoomLevel": 17,
-        "center": {
-            "lat": 52.35430482656097,
-            "lng": 4.896706237692308
-        }
-    };
     var map;
     var infoWindow;
     var inputData;
     var markersArray = [];
+
+    function isNumeric(n) {
+        return !Number.isNaN(parseFloat(n)) && isFinite(n);
+    }
+
+    function getInitialMapSettings() {
+        var zoomLevel = 17;
+        var center = {
+            "lat": 52.3545428061,
+            "lng": 4.8963664691
+        };
+        var urlParams;
+        var zoomParam;
+        var centerParam;
+        // ?zoom=15&center=52.436606513567,4.844183950027
+        if (window.URLSearchParams) {
+            urlParams = new window.URLSearchParams(window.location.search);
+            zoomParam = urlParams.get("zoom");
+            centerParam = urlParams.get("center");
+            if (zoomParam && centerParam) {
+                zoomParam = parseFloat(zoomParam);
+                if (zoomParam >= 15 && zoomParam <= 20) {
+                    zoomLevel = zoomParam;
+                }
+                centerParam = centerParam.split(",");
+                if (isNumeric(centerParam[0]) && isNumeric(centerParam[1])) {
+                    center.lat = centerParam[0];
+                    center.lng = centerParam[1];
+                }
+            }
+            updateUrl(zoomLevel, new google.maps.LatLng(center.lat, center.lng));
+        }
+        return {
+            "zoomLevel": zoomLevel,
+            "center": center
+        };
+    }
 
     function convertRijksdriehoekToLatLng(x, y) {
         // The city "Amsterfoort" is used as reference "Rijksdriehoek" coordinate.
@@ -74,7 +104,7 @@ function initBekendmakingenMap() {
             var month = value.substr(32, 2);
             var day = value.substr(29, 2);
             var datumBekendgemaakt;
-            if (isNaN(parseInt(year, 10)) || isNaN(parseInt(month, 10)) || isNaN(parseInt(day, 10))) {
+            if (Number.isNaN(parseInt(year, 10)) || Number.isNaN(parseInt(month, 10)) || Number.isNaN(parseInt(day, 10))) {
                 console.log("Error parsing date (" + value + ") of license " + gmbNumber);
                 return false;
             }
@@ -285,8 +315,19 @@ function initBekendmakingenMap() {
         });
     }
 
+    function updateUrl(zoom, center) {
+        // Add to URL: /?zoom=15&center=52.43660651356703,4.84418395002761
+        if (window.URLSearchParams) {
+            const searchParams = new URLSearchParams(window.location.search);
+            searchParams.set("zoom", zoom);
+            searchParams.set("center", center.toUrlValue(10));
+            window.history.replaceState(null, "", window.location.pathname + "?" + searchParams.toString());
+        }
+    }
+
     function internalInitMap() {
         var containerElm = document.getElementById("overzicht-bekendmakingen");
+        var mapSettings = getInitialMapSettings();
         infoWindow = new google.maps.InfoWindow();
         // https://developers.google.com/maps/documentation/javascript/overview#MapOptions
         map = new google.maps.Map(
@@ -294,15 +335,17 @@ function initBekendmakingenMap() {
             {
                 "clickableIcons": false,
                 // Paid feature - "mapId": "c2a918307d540be7",  // https://console.cloud.google.com/google/maps-apis/studio/styles?project=eddepijp
-                "center": new google.maps.LatLng(mapDetails.center.lat, mapDetails.center.lng),
+                "center": new google.maps.LatLng(mapSettings.center.lat, mapSettings.center.lng),
                 "mapTypeId": google.maps.MapTypeId.ROADMAP,  // https://developers.google.com/maps/documentation/javascript/reference/map#MapTypeId
                 "gestureHandling": "cooperative",  // When scrolling, keep scrolling
-                "zoom": mapDetails.initialZoomLevel
+                "zoom": mapSettings.zoomLevel
             }
         );
         map.addListener("zoom_changed", function () {
+            // Add to URL: /?zoom=15&center=52.43660651356703,4.84418395002761
             var periodElm = document.getElementById("idCbxPeriod");
             var zoom = map.getZoom();
+            updateUrl(zoom, map.getCenter());
             // Iterate over markers and call setVisible
             if (zoom <= 13 && (periodElm.value === "7d" || periodElm.value === "14d" || periodElm.value === "all")) {
                 // Set to 3 days
@@ -318,10 +361,9 @@ function initBekendmakingenMap() {
                 updateDisplayLevel();
             }
             infoWindow.close();
-            console.log("ZoomLevel: " + zoom);
         });
         map.addListener("center_changed", function () {
-            console.log("New center: " + map.getCenter());
+            updateUrl(map.getZoom(), map.getCenter());
         });
     }
 
