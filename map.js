@@ -12,7 +12,7 @@ function initBekendmakingenMap() {
     var delayedMarkersArray = [];
 
     function isNumeric(n) {
-        return !Number.isNaN(parseFloat(n)) && isFinite(n);
+        return !Number.isNaN(parseFloat(n)) && Number.isFinite(n);
     }
 
     function getInitialMapSettings() {
@@ -323,7 +323,6 @@ function initBekendmakingenMap() {
         const periodToShow = document.getElementById("idCbxPeriod").value;
         const bounds = map.getBounds();
         inputData.features.forEach(function (feature) {
-            var markerObject;
             var position;
             switch (feature.geometry.type) {
             case "Point":
@@ -402,7 +401,8 @@ function initBekendmakingenMap() {
             const bounds = map.getBounds();
             var delayedMarker;
             var i = delayedMarkersArray.length;
-            while (i--) {
+            while (i > 0) {
+                i = i - 1;
                 delayedMarker = delayedMarkersArray[i];
                 if (bounds.contains(delayedMarker.position)) {
                     addMarker(delayedMarker.feature, delayedMarker.periodToShow, delayedMarker.position);
