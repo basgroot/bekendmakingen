@@ -9,6 +9,7 @@ function initBekendmakingenMap() {
     var infoWindow;
     var inputData;
     var markersArray = [];
+    var delayedMarkersArray = [];
 
     function isNumeric(n) {
         return !Number.isNaN(parseFloat(n)) && isFinite(n);
@@ -30,7 +31,7 @@ function initBekendmakingenMap() {
             centerParam = urlParams.get("center");
             if (zoomParam && centerParam) {
                 zoomParam = parseFloat(zoomParam);
-                if (zoomParam >= 15 && zoomParam <= 20) {
+                if (zoomParam > 12 && zoomParam <= 20) {
                     zoomLevel = zoomParam;
                 }
                 centerParam = centerParam.split(",");
@@ -263,7 +264,7 @@ function initBekendmakingenMap() {
         }
     }
 
-    function addMarker(feature, periodToShow, position, bounds) {
+    function addMarker(feature, periodToShow, position) {
         // 2022-09-05T09:04:57.175Z;
         // https://zoek.officielebekendmakingen.nl/gmb-2022-396401.html;
         // "Besluit apv vergunning Verleend Monnikendammerweg 27";
@@ -277,7 +278,7 @@ function initBekendmakingenMap() {
             "map": map,
             "position": position,
             "clickable": true,
-            //"optimized": true,
+            "optimized": true,
             //"gestureHandling": "greedy",
             //"scaleControl": true,
             "visible": isMarkerVisible(age, periodToShow),
@@ -288,11 +289,9 @@ function initBekendmakingenMap() {
             //"zIndex": property.zIndex,
             "title": feature.properties.titel
         });
-        //var isMarkerInViewport = bounds.contains(position);
         var markerObject = {
             "age": age,
             "position": position,
-            //"isInViewport": isMarkerInViewport,
             "marker": marker
         };
         marker.addListener(
@@ -304,11 +303,20 @@ function initBekendmakingenMap() {
                 collectBezwaartermijn(gmbNumber, datumGepubliceerd);
             }
         );
-        //if (isMarkerInViewport) {
-        //    markerObject.marker.setMap(map);
-        //}
         markersArray.push(markerObject);
         return markerObject;
+    }
+
+    function prepareToAddMarker(feature, periodToShow, position, bounds) {
+        if (bounds.contains(position)) {
+            addMarker(feature, periodToShow, position);
+        } else {
+            delayedMarkersArray.push({
+                "feature": feature,
+                "periodToShow": periodToShow,
+                "position": position
+            });
+        }
     }
 
     function addMarkers() {
@@ -320,20 +328,17 @@ function initBekendmakingenMap() {
             switch (feature.geometry.type) {
             case "Point":
                 position = findUniquePosition(convertRijksdriehoekToLatLng(feature.geometry.coordinates[0], feature.geometry.coordinates[1]));
-                markerObject = addMarker(feature, periodToShow, position, bounds);
+                prepareToAddMarker(feature, periodToShow, position, bounds);
                 break;
             case "MultiPoint":  // Example: https://zoek.officielebekendmakingen.nl/gmb-2022-502520.html
                 feature.geometry.coordinates.forEach(function (coordinate) {
                     position = findUniquePosition(convertRijksdriehoekToLatLng(coordinate[0], coordinate[1]));
-                    markerObject = addMarker(feature, periodToShow, position, bounds);
+                    prepareToAddMarker(feature, periodToShow, position, bounds);
                 });
                 break;
             default:
                 console.error("Unknown geometry type (['Point', 'MultiPoint']): " + JSON.stringify(feature));
             }
-            //if (feature.map == null || feature.map == undefined) {
-            //    feature.setMap(map)
-            //}
         });
     }
 
@@ -367,14 +372,14 @@ function initBekendmakingenMap() {
                 "center": new google.maps.LatLng(mapSettings.center.lat, mapSettings.center.lng),
                 "mapTypeId": google.maps.MapTypeId.ROADMAP,  // https://developers.google.com/maps/documentation/javascript/reference/map#MapTypeId
                 "gestureHandling": "cooperative",  // When scrolling, keep scrolling
-                "zoom": mapSettings.zoomLevel
+                "zoom": mapSettings.zoomLevel,
+                "minZoom": 13
             }
         );
         map.addListener("zoom_changed", function () {
             // Add to URL: /?zoom=15&center=52.43660651356703,4.84418395002761
             var periodElm = document.getElementById("idCbxPeriod");
             var zoom = map.getZoom();
-            updateUrl(zoom, map.getCenter());
             // Iterate over markers and call setVisible
             if (zoom <= 13 && (periodElm.value === "7d" || periodElm.value === "14d" || periodElm.value === "all")) {
                 // Set to 3 days
@@ -390,9 +395,22 @@ function initBekendmakingenMap() {
                 updateDisplayLevel();
             }
             infoWindow.close();
+            console.log("Zoom changed to " + zoom);
         });
-        map.addListener("center_changed", function () {
+        map.addListener("idle", function () {
+            // Time to display other markers..
+            const bounds = map.getBounds();
+            var delayedMarker;
+            var i = delayedMarkersArray.length;
+            while (i--) {
+                delayedMarker = delayedMarkersArray[i];
+                if (bounds.contains(delayedMarker.position)) {
+                    addMarker(delayedMarker.feature, delayedMarker.periodToShow, delayedMarker.position);
+                    delayedMarkersArray.splice(i, 1);
+                }
+            }
             updateUrl(map.getZoom(), map.getCenter());
+            console.log("Remaining items to add to the map: " + delayedMarkersArray.length);
         });
     }
 
