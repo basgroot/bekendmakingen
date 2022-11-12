@@ -263,7 +263,7 @@ function initBekendmakingenMap() {
         }
     }
 
-    function addMarker(feature, periodToShow) {
+    function addMarker(feature, periodToShow, position, bounds) {
         // 2022-09-05T09:04:57.175Z;
         // https://zoek.officielebekendmakingen.nl/gmb-2022-396401.html;
         // "Besluit apv vergunning Verleend Monnikendammerweg 27";
@@ -272,13 +272,14 @@ function initBekendmakingenMap() {
         // 488983
         // https://developers.google.com/maps/documentation/javascript/reference#MarkerOptions
         var datumGepubliceerd = new Date(feature.properties.datum_tijdstip);
-        var position = findUniquePosition(convertRijksdriehoekToLatLng(feature.geometry.coordinates[0], feature.geometry.coordinates[1]));
         var age = getDaysPassed(datumGepubliceerd);
         var marker = new google.maps.Marker({
             "map": map,
             "position": position,
             "clickable": true,
-            "optimized": true,
+            //"optimized": true,
+            //"gestureHandling": "greedy",
+            //"scaleControl": true,
             "visible": isMarkerVisible(age, periodToShow),
             "icon": {
                 "url": getIcon(feature.properties.titel),
@@ -287,9 +288,13 @@ function initBekendmakingenMap() {
             //"zIndex": property.zIndex,
             "title": feature.properties.titel
         });
-        if (feature.geometry.type !== "Point") {
-            console.error("Geometry not of type 'Point': " + JSON.stringify(feature));
-        }
+        //var isMarkerInViewport = bounds.contains(position);
+        var markerObject = {
+            "age": age,
+            "position": position,
+            //"isInViewport": isMarkerInViewport,
+            "marker": marker
+        };
         marker.addListener(
             "click",
             function () {
@@ -299,17 +304,36 @@ function initBekendmakingenMap() {
                 collectBezwaartermijn(gmbNumber, datumGepubliceerd);
             }
         );
-        markersArray.push({
-            "age": age,
-            "position": position,
-            "marker": marker
-        });
+        //if (isMarkerInViewport) {
+        //    markerObject.marker.setMap(map);
+        //}
+        markersArray.push(markerObject);
+        return markerObject;
     }
 
     function addMarkers() {
         const periodToShow = document.getElementById("idCbxPeriod").value;
+        const bounds = map.getBounds();
         inputData.features.forEach(function (feature) {
-            addMarker(feature, periodToShow);
+            var markerObject;
+            var position;
+            switch (feature.geometry.type) {
+            case "Point":
+                position = findUniquePosition(convertRijksdriehoekToLatLng(feature.geometry.coordinates[0], feature.geometry.coordinates[1]));
+                markerObject = addMarker(feature, periodToShow, position, bounds);
+                break;
+            case "MultiPoint":  // Example: https://zoek.officielebekendmakingen.nl/gmb-2022-502520.html
+                feature.geometry.coordinates.forEach(function (coordinate) {
+                    position = findUniquePosition(convertRijksdriehoekToLatLng(coordinate[0], coordinate[1]));
+                    markerObject = addMarker(feature, periodToShow, position, bounds);
+                });
+                break;
+            default:
+                console.error("Unknown geometry type (['Point', 'MultiPoint']): " + JSON.stringify(feature));
+            }
+            //if (feature.map == null || feature.map == undefined) {
+            //    feature.setMap(map)
+            //}
         });
     }
 
