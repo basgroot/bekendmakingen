@@ -199,7 +199,7 @@ function initBekendmakingenMap() {
             elm.style.borderRadius = "3px";
             elm.style.boxShadow = "0 2px 6px rgba(0,0,0,.3)";
             elm.style.color = "rgb(25,25,25)";
-            elm.style.cursor = "pointer";
+            elm.style.cursor = "default";
             elm.style.fontFamily = "Roboto,Arial,sans-serif";
             elm.style.fontSize = "16px";
             elm.style.lineHeight = "38px";
