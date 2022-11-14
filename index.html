@@ -10,20 +10,7 @@
 </head>
 <body>
 
-<div id="idHeader">
-<center>
-<label>
-    Toon publicaties: <select id="idCbxPeriod">
-        <option value="3d">Laatste drie dagen</option>
-        <option value="7d">Laatste week</option>
-        <option value="14d" selected>Laatste twee weken</option>
-        <option value="all">Alle vergunningen</option>
-    </select>
-</label>
-</center>
-</div>
-
-<div id="overzicht-bekendmakingen"></div>
+<div id="map"></div>
 
 <script type="text/javascript" src="map.js" defer></script>
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=weekly&key=AIzaSyB2VxJuGd7PQLeh6UDBR8Q8qC4ql_sYmI0&language=nl&region=nl&callback=initBekendmakingenMap" defer></script>

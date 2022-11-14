@@ -1,14 +1,14 @@
-html, body {
-    height: 100%;
-}
-
-#overzicht-bekendmakingen {
+#map {
     width: 100%;
-    height: 95%;
+    height: 100%;
     position: absolute;
 }
 
-/* #D9D764 */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
 
 h2.info_window_heading {
     color: #9BC8D4;
