@@ -2,6 +2,7 @@
 /*global window console google */
 
 // Check ook exploitatievergunningen horeca met terrasgrenzen en ontheffingen: https://api.data.amsterdam.nl/v1/wfs/horeca/?REQUEST=GetFeature&SERVICE=WFS&version=2.0.0&count=5000&typenames=exploitatievergunning&BBOX=4.58565,52.03560,5.31360,52.48769,urn:ogc:def:crs:EPSG::4326&outputformat=geojson&srsName=urn:ogc:def:crs:EPSG::4326
+// Verbeter performance door SVG in te wisselen met chars: https://icomoon.io/app/#/select/font
 
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
 function initBekendmakingenMap() {
@@ -31,7 +32,7 @@ function initBekendmakingenMap() {
             centerParam = urlParams.get("center");
             if (zoomParam && centerParam) {
                 zoomParam = parseFloat(zoomParam);
-                if (zoomParam > 12 && zoomParam <= 20) {
+                if (zoomParam > 12 && zoomParam <= 19) {
                     zoomLevel = zoomParam;
                 }
                 centerParam = centerParam.split(",");
@@ -190,6 +191,49 @@ function initBekendmakingenMap() {
         });
     }
 
+    function createCenterControl() {
+
+        function addStyle(elm) {
+            elm.style.backgroundColor = "#fff";
+            elm.style.border = "2px solid #fff";
+            elm.style.borderRadius = "3px";
+            elm.style.boxShadow = "0 2px 6px rgba(0,0,0,.3)";
+            elm.style.color = "rgb(25,25,25)";
+            elm.style.cursor = "pointer";
+            elm.style.fontFamily = "Roboto,Arial,sans-serif";
+            elm.style.fontSize = "16px";
+            elm.style.lineHeight = "38px";
+            elm.style.height = "40px";
+            elm.style.margin = "8px 0 22px";
+            elm.style.padding = "0 5px";
+            elm.style.textAlign = "center";
+        }
+
+        function createOption(value, displayValue, isSelected) {
+            const option = document.createElement("option");
+            option.text = displayValue;
+            option.value = value;
+            if (isSelected) {
+                option.setAttribute("selected", true);
+            }
+            return option;
+        }
+
+        const centerControlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
+        const combobox = document.createElement("select");
+        combobox.addEventListener("change", updateDisplayLevel);
+        combobox.add(createOption("3d", "Publicaties van laatste drie dagen", false));
+        combobox.add(createOption("7d", "Publicaties van laatste week", false));
+        combobox.add(createOption("14d", "Publicaties van laatste twee weken", true));
+        combobox.add(createOption("all", "Alle recente publicaties", false));
+        combobox.id = "idCbxPeriod";
+        addStyle(combobox);
+        centerControlDiv.appendChild(combobox);
+        // Add the control to the map at a designated control position by pushing it on the position's array.
+        // This code will implicitly add the control to the DOM, through the Map object. You should not attach the control manually.
+        map.controls[google.maps.ControlPosition.TOP_CENTER].push(centerControlDiv);
+    }
+
     function getGmbNumberFromUrl(websiteUrl) {
         // gmb-2022-425209
         return websiteUrl.substr(40, websiteUrl.length - 45);
@@ -279,7 +323,6 @@ function initBekendmakingenMap() {
             "position": position,
             "clickable": true,
             "optimized": true,
-            //"gestureHandling": "greedy",
             //"scaleControl": true,
             "visible": isMarkerVisible(age, periodToShow),
             "icon": {
@@ -292,6 +335,7 @@ function initBekendmakingenMap() {
         var markerObject = {
             "age": age,
             "position": position,
+            "isSvg": true,
             "marker": marker
         };
         marker.addListener(
@@ -343,8 +387,8 @@ function initBekendmakingenMap() {
 
     function updateDisplayLevel() {
         const periodToShow = document.getElementById("idCbxPeriod").value;
-        markersArray.forEach(function (marker) {
-            marker.marker.setVisible(isMarkerVisible(marker.age, periodToShow));
+        markersArray.forEach(function (markerObject) {
+            markerObject.marker.setVisible(isMarkerVisible(markerObject.age, periodToShow));
         });
     }
 
@@ -359,7 +403,7 @@ function initBekendmakingenMap() {
     }
 
     function internalInitMap() {
-        var containerElm = document.getElementById("overzicht-bekendmakingen");
+        var containerElm = document.getElementById("map");
         var mapSettings = getInitialMapSettings();
         infoWindow = new google.maps.InfoWindow();
         // https://developers.google.com/maps/documentation/javascript/overview#MapOptions
@@ -370,17 +414,28 @@ function initBekendmakingenMap() {
                 // Paid feature - "mapId": "c2a918307d540be7",  // https://console.cloud.google.com/google/maps-apis/studio/styles?project=eddepijp
                 "center": new google.maps.LatLng(mapSettings.center.lat, mapSettings.center.lng),
                 "mapTypeId": google.maps.MapTypeId.ROADMAP,  // https://developers.google.com/maps/documentation/javascript/reference/map#MapTypeId
-                "gestureHandling": "cooperative",  // When scrolling, keep scrolling
-                "zoom": mapSettings.zoomLevel,
-                "minZoom": 13
+                "gestureHandling": "greedy",  // When scrolling, keep scrolling
+                "zoom": mapSettings.zoomLevel
             }
         );
+        createCenterControl();
         map.addListener("zoom_changed", function () {
             // Add to URL: /?zoom=15&center=52.43660651356703,4.84418395002761
             var periodElm = document.getElementById("idCbxPeriod");
             var zoom = map.getZoom();
             // Iterate over markers and call setVisible
-            if (zoom <= 13 && (periodElm.value === "7d" || periodElm.value === "14d" || periodElm.value === "all")) {
+            if (zoom <= 12) {
+                // Someone is playing with zoom - keep the map responsive.
+                markersArray.forEach(function (markerObject) {
+                    if (markerObject.isSvg) {
+                        markerObject.isSvg = false;
+                        markerObject.marker.setIcon({
+                            "url": "img/small-20x26.png",
+                            "size": new google.maps.Size(20, 26)
+                        });
+                    }
+                });
+            } else if (zoom <= 13 && (periodElm.value === "7d" || periodElm.value === "14d" || periodElm.value === "all")) {
                 // Set to 3 days
                 periodElm.value = "3d";
                 updateDisplayLevel();
@@ -445,5 +500,4 @@ function initBekendmakingenMap() {
 
     internalInitMap();
     loadData();
-    document.getElementById("idCbxPeriod").addEventListener("change", updateDisplayLevel);
 }
