@@ -364,7 +364,12 @@ function initBekendmakingenMap() {
     }
 
     function addMarkers() {
-        const periodToShow = document.getElementById("idCbxPeriod").value;
+        const periodComboElm = document.getElementById("idCbxPeriod");
+        const periodToShow = (
+            periodComboElm === null
+            ? "14d"
+            : document.getElementById("idCbxPeriod").value
+        );
         const bounds = map.getBounds();
         inputData.features.forEach(function (feature) {
             var position;
