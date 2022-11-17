@@ -11,10 +11,11 @@ function initBekendmakingenMap() {
     var inputData;
     var markersArray = [];
     var delayedMarkersArray = [];
-
-    function isNumeric(n) {
-        return !Number.isNaN(parseFloat(n)) && Number.isFinite(n);
-    }
+    // When the location of a marker is outside Amsterdam (sometimes "Nieuw-Amsterdam", don't ask), the markers are located in the IJ
+    var outOfBoundariesLocation = {
+        "lat": 52.3812243196,
+        "lng": 4.9237401283
+    };
 
     function getInitialMapSettings() {
         var zoomLevel = 17;
@@ -25,6 +26,8 @@ function initBekendmakingenMap() {
         var urlParams;
         var zoomParam;
         var centerParam;
+        var lat;
+        var lng;
         // ?zoom=15&center=52.436606513567,4.844183950027
         if (window.URLSearchParams) {
             urlParams = new window.URLSearchParams(window.location.search);
@@ -32,13 +35,17 @@ function initBekendmakingenMap() {
             centerParam = urlParams.get("center");
             if (zoomParam && centerParam) {
                 zoomParam = parseFloat(zoomParam);
-                if (zoomParam > 12 && zoomParam <= 19) {
+                if (zoomParam > 12 && zoomParam < 20) {
                     zoomLevel = zoomParam;
+                    console.log("Adjusted zoom level from URL");
                 }
                 centerParam = centerParam.split(",");
-                if (isNumeric(centerParam[0]) && isNumeric(centerParam[1])) {
-                    center.lat = centerParam[0];
-                    center.lng = centerParam[1];
+                lat = parseFloat(centerParam[0]);
+                lng = parseFloat(centerParam[1]);
+                if (Number.isFinite(lat) && Number.isFinite(lng)) {
+                    center.lat = lat;
+                    center.lng = lng;
+                    console.log("Adjusted center from URL");
                 }
             }
             updateUrl(zoomLevel, new google.maps.LatLng(center.lat, center.lng));
@@ -288,9 +295,27 @@ function initBekendmakingenMap() {
             return isAvailable;
         }
 
-        while (!isCoordinateAvailable(proposedCoordinate)) {
-            proposedCoordinate.lat = proposedCoordinate.lat + 0.000017;
-            proposedCoordinate.lng = proposedCoordinate.lng + 0.000016;
+        function isOutsideAmsterdam(coordinate) {
+            var topLeftOfAmsterdam = {
+                "lat": 52.45795157026,
+                "lng": 4.67850240510
+            };
+            var bottomRightOfAmsterdam = {
+                "lat": 52.2582676433,
+                "lng": 5.0932702714
+            };
+            return coordinate.lat < bottomRightOfAmsterdam.lat || coordinate.lat > topLeftOfAmsterdam.lat || coordinate.lng < topLeftOfAmsterdam.lng || coordinate.lng > bottomRightOfAmsterdam.lng;
+        }
+
+        if (isOutsideAmsterdam(proposedCoordinate)) {
+            proposedCoordinate = Object.assign({}, outOfBoundariesLocation);
+            outOfBoundariesLocation.lat = outOfBoundariesLocation.lat + 0.000011;
+            outOfBoundariesLocation.lng = outOfBoundariesLocation.lng + 0.000155;
+        } else {
+            while (!isCoordinateAvailable(proposedCoordinate)) {
+                proposedCoordinate.lat = proposedCoordinate.lat + 0.000017;
+                proposedCoordinate.lng = proposedCoordinate.lng + 0.000016;
+            }
         }
         return proposedCoordinate;
     }
