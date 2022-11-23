@@ -1,11 +1,8 @@
 /*jslint browser: true, for: true, long: true, unordered: true */
 /*global window console google */
 
-// Check ook exploitatievergunningen horeca met terrasgrenzen en ontheffingen: https://api.data.amsterdam.nl/v1/wfs/horeca/?REQUEST=GetFeature&SERVICE=WFS&version=2.0.0&count=5000&typenames=exploitatievergunning&BBOX=4.58565,52.03560,5.31360,52.48769,urn:ogc:def:crs:EPSG::4326&outputformat=geojson&srsName=urn:ogc:def:crs:EPSG::4326
-// Verbeter performance door SVG in te wisselen met chars: https://icomoon.io/app/#/select/font
-
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
-function initBekendmakingenMap() {
+function initMap() {
     var map;
     var infoWindow;
     var inputData;
@@ -35,7 +32,7 @@ function initBekendmakingenMap() {
             centerParam = urlParams.get("center");
             if (zoomParam && centerParam) {
                 zoomParam = parseFloat(zoomParam);
-                if (zoomParam > 12 && zoomParam < 20) {
+                if (zoomParam > 14 && zoomParam < 20) {
                     zoomLevel = zoomParam;
                     console.log("Adjusted zoom level from URL");
                 }
@@ -178,8 +175,8 @@ function initBekendmakingenMap() {
 
         // URL: https://zoek.officielebekendmakingen.nl/gmb-2022-425209.html
         // Endpoint: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-425209/1/xml/gmb-2022-425209.xml
-        //const url = "http://localhost/proxy-server/index.php?number=" + gmbNumber + "&year=" + getYearFromGmbNumber(gmbNumber);
-        const url = "https://basement.nl/proxy-server/index.php?number=" + gmbNumber + "&year=" + getYearFromGmbNumber(gmbNumber);
+        //const url = "http://localhost/proxy-server/index.php?number=" + gmbNumber + "&year=" + getYearFromGmbNumber();
+        const url = "https://basement.nl/proxy-server/index.php?number=" + gmbNumber + "&year=" + getYearFromGmbNumber();
         fetch(
             url,
             {
@@ -502,7 +499,7 @@ function initBekendmakingenMap() {
     function loadData() {
 
         function sortBekendmakingen(a, b) {
-            // Sort on time, so newer licences are projected above the older ones.
+            // Sort on time, so newer licenses are projected above the older ones.
             return a.properties.datum_tijdstip.localeCompare(b.properties.datum_tijdstip);
         }
 
