@@ -499,8 +499,8 @@ function initMap() {
     function loadData() {
 
         function sortBekendmakingen(a, b) {
-            // Sort on time, so newer licenses are projected above the older ones.
-            return a.properties.datum_tijdstip.localeCompare(b.properties.datum_tijdstip);
+            // Sort on time, so newer permits are projected above the older ones.
+            return b.properties.datum_tijdstip.localeCompare(a.properties.datum_tijdstip);
         }
 
         const url = "https://api.data.amsterdam.nl/v1/wfs/bekendmakingen/?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=bekendmakingen&OUTPUTFORMAT=geojson";
