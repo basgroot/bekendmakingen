@@ -245,6 +245,8 @@ function initMap() {
 
     function getIcon(title) {
         // Images are converted to SVG using https://png2svg.com/
+        // Resized to 35x45 using https://www.iloveimg.com/resize-image/resize-svg#resize-options,pixels
+        // Optmized using https://svgoptimizer.com/
         const aanvraagFilters = [
             "verlenging",
             "aanvraag"
@@ -349,7 +351,7 @@ function initMap() {
             "visible": isMarkerVisible(age, periodToShow),
             "icon": {
                 "url": getIcon(feature.properties.titel),
-                "scaledSize": new google.maps.Size(35, 45)
+                "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
             },
             //"zIndex": property.zIndex,
             "title": feature.properties.titel
