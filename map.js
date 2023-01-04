@@ -1,6 +1,9 @@
 /*jslint browser: true, for: true, long: true, unordered: true */
 /*global window console google */
 
+// Todo houtopstand
+// todo oplaadplaats verkeersbesluit
+
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
 function initMap() {
     var map;
