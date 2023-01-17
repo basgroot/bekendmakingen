@@ -384,19 +384,22 @@ function initMap() {
         } else {
             delayedMarkersArray.push({
                 "feature": feature,
-                "periodToShow": periodToShow,
                 "position": position
             });
         }
     }
 
-    function addMarkers() {
+    function getPeriodToShow() {
         const periodComboElm = document.getElementById("idCbxPeriod");
-        const periodToShow = (
+        return (
             periodComboElm === null
             ? "14d"
             : document.getElementById("idCbxPeriod").value
         );
+    }
+
+    function addMarkers() {
+        const periodToShow = getPeriodToShow();
         const bounds = map.getBounds();
         inputData.features.forEach(function (feature) {
             var position;
@@ -418,7 +421,7 @@ function initMap() {
     }
 
     function updateDisplayLevel() {
-        const periodToShow = document.getElementById("idCbxPeriod").value;
+        const periodToShow = getPeriodToShow();
         markersArray.forEach(function (markerObject) {
             markerObject.marker.setVisible(isMarkerVisible(markerObject.age, periodToShow));
         });
@@ -486,13 +489,14 @@ function initMap() {
         map.addListener("idle", function () {
             // Time to display other markers..
             const bounds = map.getBounds();
+            const periodToShow = getPeriodToShow();
             var delayedMarker;
             var i = delayedMarkersArray.length;
             while (i > 0) {
                 i = i - 1;
                 delayedMarker = delayedMarkersArray[i];
                 if (bounds.contains(delayedMarker.position)) {
-                    addMarker(delayedMarker.feature, delayedMarker.periodToShow, delayedMarker.position);
+                    addMarker(delayedMarker.feature, periodToShow, delayedMarker.position);
                     delayedMarkersArray.splice(i, 1);
                 }
             }
