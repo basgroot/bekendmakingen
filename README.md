@@ -2,7 +2,7 @@
 
 Bekijk vergunningen aangevraagd en verleend in uw omgeving.
 
-<https://basgroot.github.io/bekendmakingen-amsterdam/>
+<https://basgroot.github.io/bekendmakingen/>
 
 ## Legenda
 
