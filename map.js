@@ -9,16 +9,143 @@ function initMap() {
     var map;
     var infoWindow;
     var inputData;
+    var proxyHost = "https://basement.nl/";
     var markersArray = [];
     var delayedMarkersArray = [];
-    // When the location of a marker is outside Amsterdam (sometimes "Nieuw-Amsterdam", don't ask), the markers are located in the IJ
-    var outOfBoundariesLocation = {
-        "lat": 52.3812243196,
-        "lng": 4.9237401283
+    var initialZoomLevel = 16;
+    var zIndex = 2147483647;  // Some high number
+    var activeMunicipality = "Amsterdam";
+    var municipalities = {
+        "Alkmaar": {
+            "center": {
+                "lat": 52.632537715707635,
+                "lng": 4.7440344469319635
+            },
+            "outOfBoundariesLocation": {
+                "lat": 52.63071912212641,
+                "lng": 4.785791317273437
+            },
+            "topLeft": {
+                "lat": 52.71543517416514,
+                "lng": 4.693307715910542
+            },
+            "bottomRight": {
+                "lat": 52.48166613438109,
+                "lng": 4.996166361044465
+            }
+        },
+        "Amsterdam": {
+            "center": {
+                "lat": 52.37316382970684,
+                "lng": 4.891668068639931
+            },
+            "outOfBoundariesLocation": {
+                "lat": 52.38064494967111,
+                "lng": 4.929089861461639
+            },
+            "topLeft": {
+                "lat": 52.45795157026,
+                "lng": 4.67850240510
+            },
+            "bottomRight": {
+                "lat": 52.2582676433,
+                "lng": 5.0932702714
+            }
+        },
+        "Enkhuizen": {
+            "center": {
+                "lat": 52.70377677370959,
+                "lng": 5.292977507978052
+            },
+            "outOfBoundariesLocation": {
+                "lat": 52.696134665287985,
+                "lng": 5.291385252509872
+            },
+            "topLeft": {
+                "lat": 52.73680990277149,
+                "lng": 5.21718274791674
+            },
+            "bottomRight": {
+                "lat": 52.66735157297621,
+                "lng": 5.318838693002863
+            }
+        },
+        "Hoorn": {
+            "center": {
+                "lat": 52.63934466558749,
+                "lng": 5.059246352878882
+            },
+            "outOfBoundariesLocation": {
+                "lat": 52.63137532899831,
+                "lng": 5.0603241485226995
+            },
+            "topLeft": {
+                "lat": 52.69284247732121,
+                "lng": 4.995165086595127
+            },
+            "bottomRight": {
+                "lat": 52.61656595669616,
+                "lng": 5.158588525124523
+            }
+        },
+        "Land van Cuijk": {
+            "center": {
+                "lat": 51.59628376948155,
+                "lng": 6.010974779479997
+            },
+            "outOfBoundariesLocation": {
+                "lat": 51.71876529499613,
+                "lng": 5.92705687347763
+            },
+            "topLeft": {
+                "lat": 51.78021971492207,
+                "lng": 5.68705377313658
+            },
+            "bottomRight": {
+                "lat": 51.52473113459177,
+                "lng": 6.193971634401763
+            }
+        },
+        "Utrecht": {
+            "center": {
+                "lat": 52.090794732191675,
+                "lng": 5.121395209571712
+            },
+            "outOfBoundariesLocation": {
+                "lat": 52.065686835354505,
+                "lng": 5.149651282630879
+            },
+            "topLeft": {
+                "lat": 52.19995884981444,
+                "lng": 4.947455124765134
+            },
+            "bottomRight": {
+                "lat": 51.97326219532962,
+                "lng": 5.292356769041799
+            }
+        },
+        "Zaanstad": {
+            "center": {
+                "lat": 52.438994120373096,
+                "lng": 4.824222540987905
+            },
+            "outOfBoundariesLocation": {
+                "lat": 52.453661242986456,
+                "lng": 4.847946629673501
+            },
+            "topLeft": {
+                "lat": 52.53921830233221,
+                "lng": 4.644745522818427
+            },
+            "bottomRight": {
+                "lat": 52.40413541633434,
+                "lng": 4.910918619309868
+            }
+        }
     };
 
     function getInitialMapSettings() {
-        var zoomLevel = 17;
+        var zoomLevel = initialZoomLevel;
         var center = {
             "lat": 52.3545428061,
             "lng": 4.8963664691
@@ -53,31 +180,6 @@ function initMap() {
         return {
             "zoomLevel": zoomLevel,
             "center": center
-        };
-    }
-
-    function convertRijksdriehoekToLatLng(x, y) {
-        // The city "Amsterfoort" is used as reference "Rijksdriehoek" coordinate.
-        const referenceRdX = 155000;
-        const referenceRdY = 463000;
-        const dX = (x - referenceRdX) * (Math.pow(10, -5));
-        const dY = (y - referenceRdY) * (Math.pow(10, -5));
-        const sumN = (3235.65389 * dY) + (-32.58297 * Math.pow(dX, 2)) + (-0.2475 * Math.pow(dY, 2)) + (-0.84978 * Math.pow(dX, 2) * dY) + (-0.0655 * Math.pow(dY, 3)) + (-0.01709 * Math.pow(dX, 2) * Math.pow(dY, 2)) + (-0.00738 * dX) + (0.0053 * Math.pow(dX, 4)) + (-0.00039 * Math.pow(dX, 2) * Math.pow(dY, 3)) + (0.00033 * Math.pow(dX, 4) * dY) + (-0.00012 * dX * dY);
-        const sumE = (5260.52916 * dX) + (105.94684 * dX * dY) + (2.45656 * dX * Math.pow(dY, 2)) + (-0.81885 * Math.pow(dX, 3)) + (0.05594 * dX * Math.pow(dY, 3)) + (-0.05607 * Math.pow(dX, 3) * dY) + (0.01199 * dY) + (-0.00256 * Math.pow(dX, 3) * Math.pow(dY, 2)) + (0.00128 * dX * Math.pow(dY, 4)) + (0.00022 * Math.pow(dY, 2)) + (-0.00022 * Math.pow(dX, 2)) + (0.00026 * Math.pow(dX, 5));
-        // The city "Amsterfoort" is used as reference "WGS84" coordinate.
-        const referenceWgs84X = 52.15517;
-        const referenceWgs84Y = 5.387206;
-        const latitude = referenceWgs84X + (sumN / 3600);
-        const longitude = referenceWgs84Y + (sumE / 3600);
-        // Input
-        // x = 122202
-        // y = 487250
-        //
-        // Result
-        // "52.372143838117, 4.90559760435224"
-        return {
-            "lat": latitude,
-            "lng": longitude
         };
     }
 
@@ -116,7 +218,7 @@ function initMap() {
             var day = value.substr(29, 2);
             var datumBekendgemaakt;
             if (Number.isNaN(parseInt(year, 10)) || Number.isNaN(parseInt(month, 10)) || Number.isNaN(parseInt(day, 10))) {
-                console.log("Error parsing date (" + value + ") of license " + gmbNumber);
+                console.error("Error parsing date (" + value + ") of license " + gmbNumber);
                 return false;
             }
             datumBekendgemaakt = new Date(year + "-" + month + "-" + day);
@@ -142,8 +244,10 @@ function initMap() {
             if (alinea.childNodes.length > 0) {
                 for (j = 0; j < alinea.childNodes.length; j += 1) {
                     if (alinea.childNodes[j].nodeName === "#text") {
+                        value = alinea.childNodes[j].nodeValue;
+                        value = value.replace("Besluit verzonden", "Verzonden naar aanvrager op");
                         // Fix "Verzonden naar aanvrager op :" (https://zoek.officielebekendmakingen.nl/gmb-2022-441976.html)
-                        value = alinea.childNodes[j].nodeValue.replace("op :", "op:");
+                        value = value.replace("op :", "op:");
                         if (value.substr(0, identifier.length) === identifier) {
                             // Verzonden naar aanvrager op: 02-09-2022
                             // Remove time from dates:
@@ -178,8 +282,12 @@ function initMap() {
 
         // URL: https://zoek.officielebekendmakingen.nl/gmb-2022-425209.html
         // Endpoint: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-425209/1/xml/gmb-2022-425209.xml
-        //const url = "http://localhost/proxy-server/index.php?number=" + gmbNumber + "&year=" + getYearFromGmbNumber();
-        const url = "https://basement.nl/proxy-server/index.php?number=" + gmbNumber + "&year=" + getYearFromGmbNumber();
+        const year = getYearFromGmbNumber();
+        const url = proxyHost + "proxy-server/index.php?number=" + gmbNumber + "&year=" + year;
+        if (Number.isNaN(parseInt(year, 10))) {
+            console.error("Unable to gat data for gmbNumber " + gmbNumber);
+            return;
+        }
         fetch(
             url,
             {
@@ -198,34 +306,56 @@ function initMap() {
         });
     }
 
-    function createCenterControl() {
+    function addCenterControlStyle(elm) {
+        elm.style.backgroundColor = "#fff";
+        elm.style.border = "2px solid #fff";
+        elm.style.borderRadius = "3px";
+        elm.style.boxShadow = "0 2px 6px rgba(0,0,0,.3)";
+        elm.style.color = "rgb(25,25,25)";
+        elm.style.cursor = "default";
+        elm.style.fontFamily = "Roboto,Arial,sans-serif";
+        elm.style.fontSize = "16px";
+        elm.style.lineHeight = "38px";
+        elm.style.height = "40px";
+        elm.style.margin = "8px 0 22px";
+        elm.style.padding = "0 5px";
+        elm.style.textAlign = "center";
+    }
 
-        function addStyle(elm) {
-            elm.style.backgroundColor = "#fff";
-            elm.style.border = "2px solid #fff";
-            elm.style.borderRadius = "3px";
-            elm.style.boxShadow = "0 2px 6px rgba(0,0,0,.3)";
-            elm.style.color = "rgb(25,25,25)";
-            elm.style.cursor = "default";
-            elm.style.fontFamily = "Roboto,Arial,sans-serif";
-            elm.style.fontSize = "16px";
-            elm.style.lineHeight = "38px";
-            elm.style.height = "40px";
-            elm.style.margin = "8px 0 22px";
-            elm.style.padding = "0 5px";
-            elm.style.textAlign = "center";
+    function createOption(value, displayValue, isSelected) {
+        const option = document.createElement("option");
+        option.text = displayValue;
+        option.value = value;
+        if (isSelected) {
+            option.setAttribute("selected", true);
         }
+        return option;
+    }
 
-        function createOption(value, displayValue, isSelected) {
-            const option = document.createElement("option");
-            option.text = displayValue;
-            option.value = value;
-            if (isSelected) {
-                option.setAttribute("selected", true);
-            }
-            return option;
-        }
+    function createOptionEx(value) {
+        return createOption(value, value, value === activeMunicipality);
+    }
 
+    function createCenterControlMunicipalities() {
+        const centerControlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
+        const combobox = document.createElement("select");
+        combobox.addEventListener("change", loadData);
+        combobox.add(createOptionEx("Alkmaar"));
+        combobox.add(createOptionEx("Amsterdam"));
+        combobox.add(createOptionEx("Enkhuizen"));
+        combobox.add(createOptionEx("Hoorn"));
+        combobox.add(createOptionEx("Land van Cuijk"));
+        combobox.add(createOptionEx("Utrecht"));
+        combobox.add(createOptionEx("Zaanstad"));
+        combobox.id = "idCbxMunicipality";
+        addCenterControlStyle(combobox);
+        centerControlDiv.appendChild(combobox);
+        // Add the control to the map at a designated control position by pushing it on the position's array.
+        // This code will implicitly add the control to the DOM, through the Map object. You should not attach the control manually.
+        map.controls[google.maps.ControlPosition.TOP_CENTER].push(centerControlDiv);
+    }
+
+    function createCenterControlPeriods() {
         const centerControlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
         const combobox = document.createElement("select");
         combobox.addEventListener("change", updateDisplayLevel);
@@ -234,11 +364,16 @@ function initMap() {
         combobox.add(createOption("14d", "Publicaties van laatste twee weken", true));
         combobox.add(createOption("all", "Alle recente publicaties", false));
         combobox.id = "idCbxPeriod";
-        addStyle(combobox);
+        addCenterControlStyle(combobox);
         centerControlDiv.appendChild(combobox);
         // Add the control to the map at a designated control position by pushing it on the position's array.
         // This code will implicitly add the control to the DOM, through the Map object. You should not attach the control manually.
-        map.controls[google.maps.ControlPosition.TOP_CENTER].push(centerControlDiv);
+        map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(centerControlDiv);
+    }
+
+    function createCenterControls() {
+        createCenterControlMunicipalities();
+        createCenterControlPeriods();
     }
 
     function getGmbNumberFromUrl(websiteUrl) {
@@ -263,24 +398,42 @@ function initMap() {
             }
         });
         if (isAanvraag) {
-            return "img/aanvraag.svg";
+            return {
+                "url": "img/aanvraag.png",
+                "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
+            };
         }
         if (title.substring(0, apvFilter.length) === apvFilter) {
-            return "img/apv.svg";
+            return {
+                "url": "img/apv.png",
+                "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
+            };
         }
         if (title.indexOf("exploitatievergunning") >= 0 || title.indexOf("alcoholwetvergunning") >= 0) {
-            return "img/bar.svg";
+            return {
+                "url": "img/bar.png",
+                "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
+            };
         }
         if (title.indexOf("evenement") >= 0) {
-            return "img/evenement.svg";
+            return {
+                "url": "img/evenement.png",
+                "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
+            };
         }
         if (title.indexOf("bed & breakfast") >= 0 || title.indexOf("vakantieverhuur") >= 0) {
-            return "img/hotel.svg";
+            return {
+                "url": "img/hotel.png",
+                "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
+            };
         }
-        return "img/constructie.svg";
+        return {
+            "url": "img/constructie.png",
+            "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
+        };
     }
 
-    function findUniquePosition(proposedCoordinate) {
+    function findUniquePosition(proposedCoordinate, title) {
 
         function isCoordinateAvailable(coordinate) {
             var isAvailable = true;  // Be positive
@@ -298,21 +451,15 @@ function initMap() {
         }
 
         function isOutsideAmsterdam(coordinate) {
-            var topLeftOfAmsterdam = {
-                "lat": 52.45795157026,
-                "lng": 4.67850240510
-            };
-            var bottomRightOfAmsterdam = {
-                "lat": 52.2582676433,
-                "lng": 5.0932702714
-            };
-            return coordinate.lat < bottomRightOfAmsterdam.lat || coordinate.lat > topLeftOfAmsterdam.lat || coordinate.lng < topLeftOfAmsterdam.lng || coordinate.lng > bottomRightOfAmsterdam.lng;
+            return coordinate.lat < municipalities[activeMunicipality].bottomRight.lat || coordinate.lat > municipalities[activeMunicipality].topLeft.lat || coordinate.lng < municipalities[activeMunicipality].topLeft.lng || coordinate.lng > municipalities[activeMunicipality].bottomRight.lng;
         }
 
         if (isOutsideAmsterdam(proposedCoordinate)) {
-            proposedCoordinate = Object.assign({}, outOfBoundariesLocation);
-            outOfBoundariesLocation.lat = outOfBoundariesLocation.lat + 0.000011;
-            outOfBoundariesLocation.lng = outOfBoundariesLocation.lng + 0.000155;
+            // When the location of a marker is outside Amsterdam (sometimes "Nieuw-Amsterdam", don't ask), the markers are located in the center
+            proposedCoordinate = Object.assign({}, municipalities[activeMunicipality].outOfBoundariesLocation);
+            municipalities[activeMunicipality].outOfBoundariesLocation.lat = municipalities[activeMunicipality].outOfBoundariesLocation.lat + 0.000011;
+            municipalities[activeMunicipality].outOfBoundariesLocation.lng = municipalities[activeMunicipality].outOfBoundariesLocation.lng + 0.000155;
+            console.log("Location outside municipality " + activeMunicipality + " : " + title);
         } else {
             while (!isCoordinateAvailable(proposedCoordinate)) {
                 proposedCoordinate.lat = proposedCoordinate.lat + 0.000017;
@@ -343,7 +490,7 @@ function initMap() {
         // 125171;
         // 488983
         // https://developers.google.com/maps/documentation/javascript/reference#MarkerOptions
-        var datumGepubliceerd = new Date(feature.properties.datum_tijdstip);
+        var datumGepubliceerd = new Date(feature.recordData.gzd.originalData.meta.tpmeta.geldigheidsperiode_startdatum);
         var age = getDaysPassed(datumGepubliceerd);
         var marker = new google.maps.Marker({
             "map": map,
@@ -352,12 +499,9 @@ function initMap() {
             "optimized": true,
             //"scaleControl": true,
             "visible": isMarkerVisible(age, periodToShow),
-            "icon": {
-                "url": getIcon(feature.properties.titel),
-                "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
-            },
-            //"zIndex": property.zIndex,
-            "title": feature.properties.titel
+            "icon": getIcon(feature.recordData.gzd.originalData.meta.owmskern.title),
+            "zIndex": zIndex,
+            "title": feature.recordData.gzd.originalData.meta.owmskern.title
         });
         var markerObject = {
             "age": age,
@@ -365,12 +509,13 @@ function initMap() {
             "isSvg": true,
             "marker": marker
         };
+        zIndex -= 1;  // Input is sorted by modification date - newest are first. Give them a higher zIndex, so Besluit is in front of Verlenging (which is in front of Aanvraag)
         marker.addListener(
             "click",
             function () {
-                var gmbNumber = getGmbNumberFromUrl(feature.properties.url);
-                var description = feature.properties.beschrijving + "<br /><br />Meer info: <a href=\"" + feature.properties.url + "\" target=\"blank\">" + feature.properties.url + "</a>.";
-                showInfoWindow(marker, feature.properties.titel, "<div id=\"" + gmbNumber + "\"><br /><br /><br /></div>" + description);
+                var gmbNumber = getGmbNumberFromUrl(feature.recordData.gzd.originalData.meta.tpmeta.bronIdentifier);
+                var description = feature.recordData.gzd.originalData.meta.owmsmantel.description + "<br /><br />Meer info: <a href=\"" + feature.recordData.gzd.originalData.meta.tpmeta.bronIdentifier + "\" target=\"blank\">" + feature.recordData.gzd.originalData.meta.tpmeta.bronIdentifier + "</a>.";
+                showInfoWindow(marker, feature.recordData.gzd.originalData.meta.owmskern.title, "<div id=\"" + gmbNumber + "\"><br /><br /><br /></div>" + description);
                 collectBezwaartermijn(gmbNumber, datumGepubliceerd);
             }
         );
@@ -394,30 +539,40 @@ function initMap() {
         return (
             periodComboElm === null
             ? "14d"
-            : document.getElementById("idCbxPeriod").value
+            : periodComboElm.value
         );
     }
 
-    function addMarkers() {
+    function createCoordinate(locatiepunt) {
+        const coordinate = locatiepunt.split(" ");  // Example: "52.35933 4.893097"
+        return {
+            "lat": parseFloat(coordinate[0]),
+            "lng": parseFloat(coordinate[1])
+        };
+    }
+
+    function addMarkers(startRecord) {
         const periodToShow = getPeriodToShow();
         const bounds = map.getBounds();
-        inputData.features.forEach(function (feature) {
-            var position;
-            switch (feature.geometry.type) {
-            case "Point":
-                position = findUniquePosition(convertRijksdriehoekToLatLng(feature.geometry.coordinates[0], feature.geometry.coordinates[1]));
+        var position;
+        var i;
+        var feature;
+        console.log("Adding markers " + startRecord + " to " + inputData.searchRetrieveResponse.records.record.length);
+        for (i = startRecord - 1; i < inputData.searchRetrieveResponse.records.record.length; i += 1) {
+            feature = inputData.searchRetrieveResponse.records.record[i];
+            if (typeof feature.recordData.gzd.originalData.meta.tpmeta.locatiepunt === "string") {
+                position = findUniquePosition(createCoordinate(feature.recordData.gzd.originalData.meta.tpmeta.locatiepunt), feature.recordData.gzd.originalData.meta.owmskern.title);
                 prepareToAddMarker(feature, periodToShow, position, bounds);
-                break;
-            case "MultiPoint":  // Example: https://zoek.officielebekendmakingen.nl/gmb-2022-502520.html
-                feature.geometry.coordinates.forEach(function (coordinate) {
-                    position = findUniquePosition(convertRijksdriehoekToLatLng(coordinate[0], coordinate[1]));
+            } else if (Array.isArray(feature.recordData.gzd.originalData.meta.tpmeta.locatiepunt)) {
+                feature.recordData.gzd.originalData.meta.tpmeta.locatiepunt.forEach(function (locatiepunt) {
+                    position = findUniquePosition(createCoordinate(locatiepunt), feature.recordData.gzd.originalData.meta.owmskern.title);
                     prepareToAddMarker(feature, periodToShow, position, bounds);
                 });
-                break;
-            default:
-                console.error("Unknown geometry type (['Point', 'MultiPoint']): " + JSON.stringify(feature));
+            } else {
+                console.error("Unsupported feature:");
+                console.error(feature);
             }
-        });
+        }
     }
 
     function updateDisplayLevel() {
@@ -453,24 +608,13 @@ function initMap() {
                 "zoom": mapSettings.zoomLevel
             }
         );
-        createCenterControl();
+        createCenterControls();
         map.addListener("zoom_changed", function () {
             // Add to URL: /?zoom=15&center=52.43660651356703,4.84418395002761
             var periodElm = document.getElementById("idCbxPeriod");
             var zoom = map.getZoom();
             // Iterate over markers and call setVisible
-            if (zoom <= 12) {
-                // Someone is playing with zoom - keep the map responsive.
-                markersArray.forEach(function (markerObject) {
-                    if (markerObject.isSvg) {
-                        markerObject.isSvg = false;
-                        markerObject.marker.setIcon({
-                            "url": "img/small-20x26.png",
-                            "size": new google.maps.Size(20, 26)
-                        });
-                    }
-                });
-            } else if (zoom <= 13 && (periodElm.value === "7d" || periodElm.value === "14d" || periodElm.value === "all")) {
+            if (zoom <= 13 && (periodElm.value === "7d" || periodElm.value === "14d" || periodElm.value === "all")) {
                 // Set to 3 days
                 periodElm.value = "3d";
                 updateDisplayLevel();
@@ -505,26 +649,35 @@ function initMap() {
         });
     }
 
-    function loadData() {
+    function navigateTo(municipality) {
+        const center = municipalities[municipality].center;
+        map.setCenter(new google.maps.LatLng(center.lat, center.lng), initialZoomLevel);
+    }
 
-        function sortBekendmakingen(a, b) {
-            // Sort on time, so newer permits are projected above the older ones.
-            return b.properties.datum_tijdstip.localeCompare(a.properties.datum_tijdstip);
-        }
-
-        const url = "https://api.data.amsterdam.nl/v1/wfs/bekendmakingen/?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=bekendmakingen&OUTPUTFORMAT=geojson";
+    function loadDataForMunicipality(municipality, startRecord) {
         fetch(
-            url,
+            proxyHost + "proxy-server/index.php?type=list&municipality=" + encodeURIComponent(municipality) + "&startRecord=" + startRecord,
             {
                 "method": "GET"
             }
         ).then(function (response) {
             if (response.ok) {
                 response.json().then(function (responseJson) {
-                    inputData = responseJson;
-                    console.log("Found " + inputData.features.length + " bekendmakingen in Amsterdam.");
-                    inputData.features.sort(sortBekendmakingen);
-                    addMarkers();
+                    if (municipality !== activeMunicipality) {
+                        // We are loading a different municipality, but user selected another one.
+                        return;
+                    }
+                    if (startRecord === 1) {
+                        inputData = responseJson;
+                    } else {
+                        Array.prototype.push.apply(inputData.searchRetrieveResponse.records.record, responseJson.searchRetrieveResponse.records.record);
+                    }
+                    console.log("Found " + inputData.searchRetrieveResponse.records.record.length + " bekendmakingen of " + inputData.searchRetrieveResponse.numberOfRecords + " in " + municipality);
+                    if (responseJson.searchRetrieveResponse.hasOwnProperty("nextRecordPosition")) {
+                        // Add next page:
+                        loadDataForMunicipality(municipality, responseJson.searchRetrieveResponse.nextRecordPosition);
+                    }
+                    addMarkers(startRecord);
                 });
             } else {
                 console.error(response);
@@ -532,6 +685,25 @@ function initMap() {
         }).catch(function (error) {
             console.error(error);
         });
+    }
+
+    function clearMarkers() {
+        // https://developers.google.com/maps/documentation/javascript/markers#remove
+        markersArray.forEach(function (markerObject) {
+            markerObject.marker.setMap(null);
+        });
+        markersArray = [];
+        delayedMarkersArray = [];
+    }
+
+    function loadData() {
+        const municipalityComboElm = document.getElementById("idCbxMunicipality");
+        if (municipalityComboElm !== null) {
+            activeMunicipality = municipalityComboElm.value;
+            clearMarkers();
+            navigateTo(activeMunicipality);
+        }
+        loadDataForMunicipality(activeMunicipality, 1);
     }
 
     internalInitMap();
