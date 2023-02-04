@@ -3,6 +3,9 @@
 
 // Todo houtopstand
 // todo oplaadplaats verkeersbesluit
+// todo loading indicator
+// todo link to source
+// todo remember selected municipality in url
 
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
 function initMap() {
@@ -15,7 +18,7 @@ function initMap() {
     var delayedMarkersArray = [];
     var initialZoomLevel = 16;
     var zIndex = 2147483647;  // Some high number
-    var activeMunicipality = "Hoorn";
+    var activeMunicipality = "Zwolle";
     // Source: https://organisaties.overheid.nl/Gemeenten/
     var municipalities = {
         "Aa en Hunze": {
@@ -2074,10 +2077,7 @@ function initMap() {
 
     function getInitialMapSettings() {
         var zoomLevel = initialZoomLevel;
-        var center = {
-            "lat": 52.3545428061,
-            "lng": 4.8963664691
-        };
+        var center = municipalities[activeMunicipality].center;
         var urlParams;
         var zoomParam;
         var centerParam;
