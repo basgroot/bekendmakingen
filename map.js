@@ -4,7 +4,6 @@
 // Todo houtopstand
 // todo oplaadplaats verkeersbesluit
 // todo loading indicator
-// todo link to source
 // todo remember selected municipality in url
 
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
@@ -2234,22 +2233,6 @@ function initMap() {
         });
     }
 
-    function addCenterControlStyle(elm) {
-        elm.style.backgroundColor = "#fff";
-        elm.style.border = "2px solid #fff";
-        elm.style.borderRadius = "3px";
-        elm.style.boxShadow = "0 2px 6px rgba(0,0,0,.3)";
-        elm.style.color = "rgb(25,25,25)";
-        elm.style.cursor = "default";
-        elm.style.fontFamily = "Roboto,Arial,sans-serif";
-        elm.style.fontSize = "16px";
-        elm.style.lineHeight = "38px";
-        elm.style.height = "40px";
-        elm.style.margin = "8px 0 22px";
-        elm.style.padding = "0 5px";
-        elm.style.textAlign = "center";
-    }
-
     function createOption(value, displayValue, isSelected) {
         const option = document.createElement("option");
         option.text = displayValue;
@@ -2264,8 +2247,8 @@ function initMap() {
         return createOption(value, value, value === activeMunicipality);
     }
 
-    function createCenterControlMunicipalities() {
-        const centerControlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
+    function createMapsControlMunicipalities() {
+        const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
         const combobox = document.createElement("select");
         const municipalityNames = Object.keys(municipalities);
         combobox.id = "idCbxMunicipality";
@@ -2273,13 +2256,13 @@ function initMap() {
             combobox.add(createOptionEx(municipalityName));
         });
         combobox.addEventListener("change", loadData);
-        addCenterControlStyle(combobox);
-        centerControlDiv.appendChild(combobox);
-        map.controls[google.maps.ControlPosition.TOP_CENTER].push(centerControlDiv);
+        combobox.classList.add("controlStyle");
+        controlDiv.appendChild(combobox);
+        map.controls[google.maps.ControlPosition.TOP_CENTER].push(controlDiv);
     }
 
-    function createCenterControlPeriods() {
-        const centerControlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
+    function createMapsControlPeriods() {
+        const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
         const combobox = document.createElement("select");
         combobox.id = "idCbxPeriod";
         combobox.add(createOption("3d", "Publicaties van laatste drie dagen", false));
@@ -2287,14 +2270,31 @@ function initMap() {
         combobox.add(createOption("14d", "Publicaties van laatste twee weken", true));
         combobox.add(createOption("all", "Alle recente publicaties", false));
         combobox.addEventListener("change", updateDisplayLevel);
-        addCenterControlStyle(combobox);
-        centerControlDiv.appendChild(combobox);
-        map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(centerControlDiv);
+        combobox.classList.add("controlStyle");
+        controlDiv.appendChild(combobox);
+        map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(controlDiv);
     }
 
-    function createCenterControls() {
-        createCenterControlMunicipalities();
-        createCenterControlPeriods();
+    function createMapsControlSource() {
+        const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
+        const button = document.createElement("button");
+        button.id = "idBtnSource";
+        button.textContent = "Bekijk broncode";
+        button.title = "Bekijk de source op GitHub";
+        button.type = "button";
+        button.addEventListener("click", function () {
+            window.location.href = "https://github.com/basgroot/bekendmakingen";
+        });
+        button.classList.add("controlStyle");
+        controlDiv.appendChild(button);
+        map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(controlDiv);
+    }
+
+    function createMapsControls() {
+        // https://developers.google.com/maps/documentation/javascript/examples/control-custom
+        createMapsControlMunicipalities();
+        createMapsControlPeriods();
+        createMapsControlSource();
     }
 
     function getGmbNumberFromUrl(websiteUrl) {
@@ -2517,7 +2517,7 @@ function initMap() {
                 "zoom": mapSettings.zoomLevel
             }
         );
-        createCenterControls();
+        createMapsControls();
         map.addListener("zoom_changed", function () {
             // Add to URL: /?zoom=15&center=52.43660651356703,4.84418395002761
             var periodElm = document.getElementById("idCbxPeriod");

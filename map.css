@@ -17,3 +17,19 @@ h2.info_window_heading {
 .info_window_body {
     color: #4F8053;
 }
+
+.controlStyle {
+    background-color: #fff;
+    border: 2px solid #fff;
+    border-radius: 3px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.3);
+    color: rgb(25,25,25);
+    cursor: default;
+    font-family: Roboto, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 38px;
+    height: 40px;
+    margin: 8px 0 22px;
+    padding: 0 5px;
+    text-align: center;
+}
