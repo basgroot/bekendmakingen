@@ -20,7 +20,7 @@ function initMap() {
 
     function getInitialMapSettings() {
         var zoomLevel = initialZoomLevel;
-        var center = municipalities[activeMunicipality].center;
+        var center = Object.assign({}, municipalities[activeMunicipality].center);
         var urlParams;
         var zoomParam;
         var centerParam;
@@ -529,7 +529,8 @@ function initMap() {
     }
 
     function fillNumber(startRecord, length) {
-        var result = (startRecord - 1) + "";
+        var startRecordToDisplay = (startRecord - 1) / 1000;
+        var result = startRecordToDisplay.toString();
         while (result.length < length) {
             result = "0" + result;
         }
@@ -560,7 +561,7 @@ function initMap() {
                         Array.prototype.push.apply(inputData.searchRetrieveResponse.records.record, responseJson.searchRetrieveResponse.records.record);
                     }
                     // Option to save the history to a file
-                    // saveFile(responseJson, lookupMunicipality.toLowerCase().replace(/\s/g, "-") + "-2023-01-" + fillNumber(startRecord, 5) + ".json");
+                    //saveFile(responseJson, lookupMunicipality.toLowerCase().replace(/\s/g, "-") + "-2023-01-" + fillNumber(startRecord, 2) + ".json");
                     console.log("Found " + inputData.searchRetrieveResponse.records.record.length + " bekendmakingen of " + inputData.searchRetrieveResponse.numberOfRecords + " in " + municipality);
                     if (responseJson.searchRetrieveResponse.hasOwnProperty("nextRecordPosition")) {
                         // Add next page:
