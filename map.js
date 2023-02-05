@@ -1,9 +1,9 @@
 /*jslint browser: true, for: true, long: true, unordered: true */
 /*global window console google municipalities */
 
-// Todo houtopstand
-// todo oplaadplaats verkeersbesluit
-// todo loading indicator
+// TODO houtopstand
+// TODO oplaadplaats verkeersbesluit
+// TODO loading indicator
 
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
 function initMap() {
@@ -513,6 +513,29 @@ function initMap() {
         map.setCenter(new google.maps.LatLng(center.lat, center.lng), initialZoomLevel);
     }
 
+    /**
+     * Download a file and give it a name. Source: https://stackoverflow.com/a/48968694.
+     * @param {Object} exportObj The downloaded JSON from the response.
+     * @return {void}
+     */
+    function saveFile(exportObj, fileName) {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+        const a = document.createElement("a");
+        a.href = dataStr;
+        a.download = fileName;
+        document.body.appendChild(a);  // Required for Firefox
+        a.click();
+        a.remove();
+    }
+
+    function fillNumber(startRecord, length) {
+        var result = (startRecord - 1) + "";
+        while (result.length < length) {
+            result = "0" + result;
+        }
+        return result;
+    }
+
     function loadDataForMunicipality(municipality, startRecord) {
         const lookupMunicipality = (
             municipalities[municipality].hasOwnProperty("lookupName")
@@ -536,6 +559,8 @@ function initMap() {
                     } else {
                         Array.prototype.push.apply(inputData.searchRetrieveResponse.records.record, responseJson.searchRetrieveResponse.records.record);
                     }
+                    // Option to save the history to a file
+                    // saveFile(responseJson, lookupMunicipality.toLowerCase().replace(/\s/g, "-") + "-2023-01-" + fillNumber(startRecord, 5) + ".json");
                     console.log("Found " + inputData.searchRetrieveResponse.records.record.length + " bekendmakingen of " + inputData.searchRetrieveResponse.numberOfRecords + " in " + municipality);
                     if (responseJson.searchRetrieveResponse.hasOwnProperty("nextRecordPosition")) {
                         // Add next page:
