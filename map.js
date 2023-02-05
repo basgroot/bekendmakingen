@@ -16,7 +16,7 @@ function initMap() {
     var delayedMarkersArray = [];
     var initialZoomLevel = 16;
     var zIndex = 2147483647;  // Some high number
-    var activeMunicipality = "Zwolle";
+    var activeMunicipality = "Hoorn";
 
     function getInitialMapSettings() {
         var zoomLevel = initialZoomLevel;
@@ -33,7 +33,7 @@ function initMap() {
             zoomParam = urlParams.get("zoom");
             centerParam = urlParams.get("center");
             municipality =  urlParams.get("in");
-            if (zoomParam && centerParam && municipality) {
+            if (zoomParam && centerParam && municipality && municipalities[municipality] !== undefined) {
                 zoomParam = parseFloat(zoomParam);
                 if (zoomParam > 14 && zoomParam < 20) {
                     zoomLevel = zoomParam;
@@ -47,10 +47,8 @@ function initMap() {
                     center.lng = lng;
                     console.log("Adjusted center from URL");
                 }
-                if (municipalities[municipality] !== undefined) {
-                    activeMunicipality = municipality;
-                    console.log("Adjusted municipality from URL");
-                }
+                activeMunicipality = municipality;
+                console.log("Adjusted municipality from URL");
             }
             updateUrl(zoomLevel, new google.maps.LatLng(center.lat, center.lng));
         }
