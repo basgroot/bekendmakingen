@@ -1,5 +1,5 @@
 /*jslint browser: true, for: true, long: true, unordered: true */
-/*global window console google */
+/*global window console google municipalities */
 
 // Todo houtopstand
 // todo oplaadplaats verkeersbesluit
@@ -32,7 +32,7 @@ function initMap() {
             urlParams = new window.URLSearchParams(window.location.search);
             zoomParam = urlParams.get("zoom");
             centerParam = urlParams.get("center");
-            municipality =  urlParams.get("in");
+            municipality = urlParams.get("in");
             if (zoomParam && centerParam && municipality && municipalities[municipality] !== undefined) {
                 zoomParam = parseFloat(zoomParam);
                 if (zoomParam > 14 && zoomParam < 20) {
@@ -192,7 +192,13 @@ function initMap() {
     }
 
     function createOptionEx(value) {
-        return createOption(value, value, value === activeMunicipality);
+        const municipality = municipalities[value];
+        const displayName = (
+            municipality.hasOwnProperty("displayName")
+            ? municipality.displayName
+            : value
+        );
+        return createOption(value, displayName, value === activeMunicipality);
     }
 
     function createMapsControlMunicipalities() {
@@ -302,7 +308,7 @@ function initMap() {
         };
     }
 
-    function findUniquePosition(proposedCoordinate, title) {
+    function findUniquePosition(proposedCoordinate) {
 
         function isCoordinateAvailable(coordinate) {
             var isAvailable = true;  // Be positive
@@ -418,11 +424,11 @@ function initMap() {
         for (i = startRecord - 1; i < inputData.searchRetrieveResponse.records.record.length; i += 1) {
             feature = inputData.searchRetrieveResponse.records.record[i];
             if (typeof feature.recordData.gzd.originalData.meta.tpmeta.locatiepunt === "string") {
-                position = findUniquePosition(createCoordinate(feature.recordData.gzd.originalData.meta.tpmeta.locatiepunt), feature.recordData.gzd.originalData.meta.owmskern.title);
+                position = findUniquePosition(createCoordinate(feature.recordData.gzd.originalData.meta.tpmeta.locatiepunt));
                 prepareToAddMarker(feature, periodToShow, position, bounds);
             } else if (Array.isArray(feature.recordData.gzd.originalData.meta.tpmeta.locatiepunt)) {
                 feature.recordData.gzd.originalData.meta.tpmeta.locatiepunt.forEach(function (locatiepunt) {
-                    position = findUniquePosition(createCoordinate(locatiepunt), feature.recordData.gzd.originalData.meta.owmskern.title);
+                    position = findUniquePosition(createCoordinate(locatiepunt));
                     prepareToAddMarker(feature, periodToShow, position, bounds);
                 });
             } else {
@@ -440,7 +446,13 @@ function initMap() {
     }
 
     function updateUrl(zoom, center) {
-        // Add to URL: /?zoom=15&center=52.43660651356703,4.84418395002761
+        const municipality = municipalities[activeMunicipality];
+        const displayName = (
+            municipality.hasOwnProperty("displayName")
+            ? municipality.displayName
+            : activeMunicipality
+        );
+        // Add to URL: /?in=Alkmaar&zoom=15&center=52.43660651356703,4.84418395002761
         if (window.URLSearchParams) {
             const searchParams = new URLSearchParams(window.location.search);
             searchParams.set("in", activeMunicipality);
@@ -448,6 +460,7 @@ function initMap() {
             searchParams.set("center", center.toUrlValue(10));
             window.history.replaceState(null, "", window.location.pathname + "?" + searchParams.toString());
         }
+        document.title = "Bekendmakingen " + displayName;
     }
 
     function internalInitMap() {
