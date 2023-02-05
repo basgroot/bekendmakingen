@@ -192,13 +192,7 @@ function initMap() {
     }
 
     function createOptionEx(value) {
-        const municipality = municipalities[value];
-        const displayName = (
-            municipality.hasOwnProperty("displayName")
-            ? municipality.displayName
-            : value
-        );
-        return createOption(value, displayName, value === activeMunicipality);
+        return createOption(value, value, value === activeMunicipality);
     }
 
     function createMapsControlMunicipalities() {
@@ -446,12 +440,6 @@ function initMap() {
     }
 
     function updateUrl(zoom, center) {
-        const municipality = municipalities[activeMunicipality];
-        const displayName = (
-            municipality.hasOwnProperty("displayName")
-            ? municipality.displayName
-            : activeMunicipality
-        );
         // Add to URL: /?in=Alkmaar&zoom=15&center=52.43660651356703,4.84418395002761
         if (window.URLSearchParams) {
             const searchParams = new URLSearchParams(window.location.search);
@@ -460,7 +448,7 @@ function initMap() {
             searchParams.set("center", center.toUrlValue(10));
             window.history.replaceState(null, "", window.location.pathname + "?" + searchParams.toString());
         }
-        document.title = "Bekendmakingen " + displayName;
+        document.title = "Bekendmakingen " + activeMunicipality;
     }
 
     function internalInitMap() {
@@ -526,8 +514,13 @@ function initMap() {
     }
 
     function loadDataForMunicipality(municipality, startRecord) {
+        const lookupMunicipality = (
+            municipalities[municipality].hasOwnProperty("lookupName")
+            ? municipalities[municipality].lookupName
+            : municipality
+        );
         fetch(
-            proxyHost + "proxy-server/index.php?type=list&municipality=" + encodeURIComponent(municipality) + "&startRecord=" + startRecord,
+            proxyHost + "proxy-server/index.php?type=list&municipality=" + encodeURIComponent(lookupMunicipality) + "&startRecord=" + startRecord,
             {
                 "method": "GET"
             }
@@ -572,6 +565,7 @@ function initMap() {
         if (municipalityComboElm !== null) {
             activeMunicipality = municipalityComboElm.value;
             clearMarkers();
+            console.log("Navigating to " + activeMunicipality);
             navigateTo(activeMunicipality);
         }
         loadDataForMunicipality(activeMunicipality, 1);

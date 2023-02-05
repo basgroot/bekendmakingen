@@ -1,4 +1,7 @@
 // Source: https://organisaties.overheid.nl/Gemeenten/
+
+// TODO: 6 digits is enough..
+
 var municipalities = {
     "Aa en Hunze": {
         "center": {
@@ -174,18 +177,18 @@ var municipalities = {
             "lng": 5.3581361561183325
         }
     },
-    "Bergen": {
-        "displayName": "Bergen (Limburg)",
+    "Bergen (Limburg)": {
+        "lookupName": "Bergen",
         "center": {
             "lat": 51.60343148488419,
             "lng": 6.049589438377449
         }
     },
-    "Bergen NH": {
-        "displayName": "Bergen (Noordholland)",
+    "Bergen (Noord-Holland)": {
+        "lookupName": "Bergen NH",
         "center": {
-            "lat": 52.644168108147284,
-            "lng": 4.724298889286184
+            "lat": 52.6693513185488,
+            "lng": 4.700431094366388
         }
     },
     "Bergen op Zoom": {
@@ -320,270 +323,271 @@ var municipalities = {
             "lng": 5.334117895087897
         }
     },
-    // "Capelle aan den IJssel": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Castricum": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Coevorden": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Cranendonck": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Culemborg": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Dalfsen": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Dantumadiel": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "De Bilt": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "De Fryske Marren": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "De Ronde Venen": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "De Wolden": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Delft": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Den Haag": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Den Helder": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Deurne": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Deventer": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Diemen": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Dijk en Waard": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Dinkelland": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Doesburg": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Doetinchem": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Dongen": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Dordrecht": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Drechterland": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Drimmelen": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Dronten": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Druten": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Duiven": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Echt-Susteren": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Edam-Volendam": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Ede": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Eemnes": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Eemsdelta": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Eersel": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Eijsden-Margraten": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Eindhoven": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Elburg": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Emmen": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
+    "Capelle aan den IJssel": {
+        "center": {
+            "lat": 51.93125354273982,
+            "lng": 4.589052507124982
+        }
+    },
+    "Castricum": {
+        "center": {
+            "lat": 52.54650943330472,
+            "lng": 4.662178732575621
+        }
+    },
+    "Coevorden": {
+        "center": {
+            "lat": 52.66111429782369,
+            "lng": 6.740799539374788
+        }
+    },
+    "Cranendonck": {
+        "center": {
+            "lat": 51.274564849482054,
+            "lng": 5.574966607143551
+        }
+    },
+    "Culemborg": {
+        "center": {
+            "lat": 51.958225074745584,
+            "lng": 5.224832432753468
+        }
+    },
+    "Dalfsen": {
+        "center": {
+            "lat": 52.504800988635566,
+            "lng": 6.261338779238001
+        }
+    },
+    "Dantumadiel": {
+        "center": {
+            "lat": 53.285811274499316,
+            "lng": 5.990702244753164
+        }
+    },
+    "De Bilt": {
+        "center": {
+            "lat": 52.10924978348316,
+            "lng": 5.180798268645334
+        }
+    },
+    "De Fryske Marren": {
+        "center": {
+            "lat": 52.96777251001521,
+            "lng": 5.796878962841155
+        }
+    },
+    "De Ronde Venen": {
+        "center": {
+            "lat": 52.206689073276415,
+            "lng": 4.86858271681268
+        }
+    },
+    "De Wolden": {
+        "center": {
+            "lat": 52.67673440370352,
+            "lng": 6.421728064275672
+        }
+    },
+    "Delft": {
+        "center": {
+            "lat": 52.01143263717549,
+            "lng": 4.358344213759128
+        }
+    },
+    "Den Haag": {
+        "lookupName": "'s-Gravenhage",
+        "center": {
+            "lat": 52.08026322554246,
+            "lng": 4.3122970696803975
+        }
+    },
+    "Den Helder": {
+        "center": {
+            "lat": 52.956547038107345,
+            "lng": 4.760745171155383
+        }
+    },
+    "Deurne": {
+        "center": {
+            "lat": 51.46237968262502,
+            "lng": 5.79480543907788
+        }
+    },
+    "Deventer": {
+        "center": {
+            "lat": 52.2530399618842,
+            "lng": 6.1600436171169175
+        }
+    },
+    "Diemen": {
+        "center": {
+            "lat": 52.34099197251554,
+            "lng": 4.963317205558724
+        }
+    },
+    "Dijk en Waard": {
+        "center": {
+            "lat": 52.67968577098219,
+            "lng": 4.802546600821589
+        }
+    },
+    "Dinkelland": {
+        "center": {
+            "lat": 52.375873543886776,
+            "lng": 7.004666438145462
+        }
+    },
+    "Doesburg": {
+        "center": {
+            "lat": 52.01464687550235,
+            "lng": 6.134576825005305
+        }
+    },
+    "Doetinchem": {
+        "center": {
+            "lat": 51.965574085245,
+            "lng": 6.288603783505202
+        }
+    },
+    "Dongen": {
+        "center": {
+            "lat": 51.626103300275894,
+            "lng": 4.943696364089522
+        }
+    },
+    "Dordrecht": {
+        "center": {
+            "lat": 51.80269359208175,
+            "lng": 4.719395859179748
+        }
+    },
+    "Drechterland": {
+        "center": {
+            "lat": 52.66581122665847,
+            "lng": 5.204803765744141
+        }
+    },
+    "Drimmelen": {
+        "center": {
+            "lat": 51.7089126135366,
+            "lng": 4.810686094479279
+        }
+    },
+    "Dronten": {
+        "center": {
+            "lat": 52.52486333333145,
+            "lng": 5.717973835857836
+        }
+    },
+    "Druten": {
+        "center": {
+            "lat": 51.89078434663308,
+            "lng": 5.61021961875411
+        }
+    },
+    "Duiven": {
+        "center": {
+            "lat": 51.95007578301019,
+            "lng": 6.023620643400308
+        }
+    },
+    "Echt-Susteren": {
+        "center": {
+            "lat": 51.10658836750678,
+            "lng": 5.8670798025158595
+        }
+    },
+    "Edam-Volendam": {
+        "center": {
+            "lat": 52.49500121281478,
+            "lng": 5.074391540060796
+        }
+    },
+    "Ede": {
+        "center": {
+            "lat": 52.043204871229385,
+            "lng": 5.668083039469153
+        }
+    },
+    "Eemnes": {
+        "center": {
+            "lat": 52.251431743918324,
+            "lng": 5.257094985398528
+        }
+    },
+    "Eemsdelta": {
+        "center": {
+            "lat": 53.334684806997146,
+            "lng": 6.746138545560588
+        }
+    },
+    "Eersel": {
+        "center": {
+            "lat": 51.35512290838889,
+            "lng": 5.30705209596547
+        }
+    },
+    "Eijsden-Margraten": {
+        "center": {
+            "lat": 50.79555178492198,
+            "lng": 5.764456552948754
+        }
+    },
+    "Eindhoven": {
+        "center": {
+            "lat": 51.43931079246596,
+            "lng": 5.478440018426966
+        }
+    },
+    "Elburg": {
+        "center": {
+            "lat": 52.44850767114021,
+            "lng": 5.833852937510138
+        }
+    },
+    "Emmen": {
+        "center": {
+            "lat": 52.78283737844013,
+            "lng": 6.894502775369131
+        }
+    },
     "Enkhuizen": {
         "center": {
             "lat": 52.70377677370959,
             "lng": 5.292977507978052
         }
     },
-    // "Enschede": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Epe": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Ermelo": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Etten-Leur": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Geertruidenberg": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
+    "Enschede": {
+        "center": {
+            "lat": 52.21975818222247,
+            "lng": 6.89593563573639
+        }
+    },
+    "Epe": {
+        "center": {
+            "lat": 52.34823153144568,
+            "lng": 5.98338763549258
+        }
+    },
+    "Ermelo": {
+        "center": {
+            "lat": 52.29923324907279,
+            "lng": 5.621382913815161
+        }
+    },
+    "Etten-Leur": {
+        "center": {
+            "lat": 51.568889456264905,
+            "lng": 4.640666224729519
+        }
+    },
+    "Geertruidenberg": {
+        "center": {
+            "lat": 51.700824040376425,
+            "lng": 4.8612465124764075
+        }
+    },
     // "Geldrop-Mierlo": {
     //     "center": {
     //         "lat": 
@@ -812,12 +816,12 @@ var municipalities = {
     //         "lng": 
     //     }
     // },
-    // "Hilversum": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
+    "Hilversum": {
+        "center": {
+            "lat": 52.2249705951335,
+            "lng": 5.173145858716096
+        }
+    },
     // "Hoeksche Waard": {
     //     "center": {
     //         "lat": 
@@ -830,12 +834,12 @@ var municipalities = {
     //         "lng": 
     //     }
     // },
-    // "Hollands Kroon": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
+    "Hollands Kroon": {
+        "center": {
+            "lat": 52.81234709335166,
+            "lng": 4.998216569556734
+        }
+    },
     // "Hoogeveen": {
     //     "center": {
     //         "lat": 
@@ -1971,7 +1975,6 @@ var municipalities = {
     //     }
     // },
     "Zaanstad": {
-        "displayName": "Zaanstad (Zaandam e.o.)",
         "center": {
             "lat": 52.438994120373096,
             "lng": 4.824222540987905
