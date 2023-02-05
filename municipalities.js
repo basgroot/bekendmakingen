@@ -126,198 +126,200 @@ var municipalities = {
             "lng": 4.93050396614348
         }
     },
-    // "Baarn": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Barendrecht": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Barneveld": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Beek": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Beekdaelen": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Beesel": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Berg en Dal": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Bergeijk": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Bergen": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Bergen NH": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Bergen op Zoom": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Berkelland": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Bernheze": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Best": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Beuningen": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Beverwijk": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Bladel": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Blaricum": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Bloemendaal": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Bodegraven-Reeuwijk": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Boekel": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Borger-Odoorn": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Borne": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Borsele": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Boxtel": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Breda": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Bronckhorst": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Brummen": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Brunssum": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Bunnik": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Bunschoten": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
-    // "Buren": {
-    //     "center": {
-    //         "lat": 
-    //         "lng": 
-    //     }
-    // },
+    "Baarn": {
+        "center": {
+            "lat": 52.211281048409276,
+            "lng": 5.286489387807764
+        }
+    },
+    "Barendrecht": {
+        "center": {
+            "lat": 51.854827582620224,
+            "lng": 4.539664949245387
+        }
+    },
+    "Barneveld": {
+        "center": {
+            "lat": 52.13977529943519,
+            "lng": 5.58673497612922
+        }
+    },
+    "Beek": {
+        "center": {
+            "lat": 50.93989592804056,
+            "lng": 5.795631627069195
+        }
+    },
+    "Beekdaelen": {
+        "center": {
+            "lat": 50.91941187901919,
+            "lng": 5.886744386864704
+        }
+    },
+    "Beesel": {
+        "center": {
+            "lat": 51.28380191330509,
+            "lng": 6.077703832615308
+        }
+    },
+    "Berg en Dal": {
+        "center": {
+            "lat": 51.777576820983164,
+            "lng": 5.932811421164774
+        }
+    },
+    "Bergeijk": {
+        "center": {
+            "lat": 51.32227019601866,
+            "lng": 5.3581361561183325
+        }
+    },
+    "Bergen": {
+        "displayName": "Bergen (Limburg)",
+        "center": {
+            "lat": 51.60343148488419,
+            "lng": 6.049589438377449
+        }
+    },
+    "Bergen NH": {
+        "displayName": "Bergen (Noordholland)",
+        "center": {
+            "lat": 52.644168108147284,
+            "lng": 4.724298889286184
+        }
+    },
+    "Bergen op Zoom": {
+        "center": {
+            "lat": 51.4945343334312,
+            "lng": 4.28708898265745
+        }
+    },
+    "Berkelland": {
+        "center": {
+            "lat": 52.11623523343072,
+            "lng": 6.524741677695935
+        }
+    },
+    "Bernheze": {
+        "center": {
+            "lat": 51.67832344587338,
+            "lng": 5.508106384265428
+        }
+    },
+    "Best": {
+        "center": {
+            "lat": 51.512130547774184,
+            "lng": 5.3942688667929515
+        }
+    },
+    "Beuningen": {
+        "center": {
+            "lat": 51.861742621416134,
+            "lng": 5.769362594289125
+        }
+    },
+    "Beverwijk": {
+        "center": {
+            "lat": 52.47852156246992,
+            "lng": 4.654587123788182
+        }
+    },
+    "Bladel": {
+        "center": {
+            "lat": 51.3664926619841,
+            "lng": 5.215204742194617
+        }
+    },
+    "Blaricum": {
+        "center": {
+            "lat": 52.27265920385601,
+            "lng": 5.243120649458144
+        }
+    },
+    "Bloemendaal": {
+        "center": {
+            "lat": 52.405058603640725,
+            "lng": 4.6186547760820345
+        }
+    },
+    "Bodegraven-Reeuwijk": {
+        "center": {
+            "lat": 52.0848836217298,
+            "lng": 4.747131782016204
+        }
+    },
+    "Boekel": {
+        "center": {
+            "lat": 51.60289173759971,
+            "lng": 5.67398776056684
+        }
+    },
+    "Borger-Odoorn": {
+        "center": {
+            "lat": 52.92399600427173,
+            "lng": 6.791399425591608
+        }
+    },
+    "Borne": {
+        "center": {
+            "lat": 52.300275131688956,
+            "lng": 6.757133444736606
+        }
+    },
+    "Borsele": {
+        "center": {
+            "lat": 51.4489473306328,
+            "lng": 3.819375449336804
+        }
+    },
+    "Boxtel": {
+        "center": {
+            "lat": 51.58869421380566,
+            "lng": 5.326273547999635
+        }
+    },
+    "Breda": {
+        "center": {
+            "lat": 51.595394367774745,
+            "lng": 4.779629207734773
+        }
+    },
+    "Bronckhorst": {
+        "center": {
+            "lat": 52.05224731200893,
+            "lng": 6.310706467265059
+        }
+    },
+    "Brummen": {
+        "center": {
+            "lat": 52.09319985939109,
+            "lng": 6.154384548607773
+        }
+    },
+    "Brunssum": {
+        "center": {
+            "lat": 50.94563860858295,
+            "lng": 5.971410015672849
+        }
+    },
+    "Bunnik": {
+        "center": {
+            "lat": 52.06714285754249,
+            "lng": 5.20011209871148
+        }
+    },
+    "Bunschoten": {
+        "center": {
+            "lat": 52.24380134931101,
+            "lng": 5.375011097419156
+        }
+    },
+    "Buren": {
+        "center": {
+            "lat": 51.912415613602924,
+            "lng": 5.334117895087897
+        }
+    },
     // "Capelle aan den IJssel": {
     //     "center": {
     //         "lat": 
@@ -1969,6 +1971,7 @@ var municipalities = {
     //     }
     // },
     "Zaanstad": {
+        "displayName": "Zaanstad (Zaandam e.o.)",
         "center": {
             "lat": 52.438994120373096,
             "lng": 4.824222540987905
