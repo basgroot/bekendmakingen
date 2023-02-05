@@ -19,12 +19,12 @@ h2.info_window_heading {
 }
 
 .controlStyle {
-    background-color: #fff;
-    border: 2px solid #fff;
+    background-color: #FFFFFF;
+    border: 2px solid #FFFFFF;
     border-radius: 3px;
     box-shadow: 0 2px 6px rgba(0,0,0,.3);
     color: rgb(25,25,25);
-    cursor: default;
+    cursor: pointer;
     font-family: Roboto, Arial, sans-serif;
     font-size: 16px;
     line-height: 38px;
@@ -32,4 +32,16 @@ h2.info_window_heading {
     margin: 8px 0 22px;
     padding: 0 5px;
     text-align: center;
+}
+
+.controlStyle:hover {
+    background-color: #EBEBEB;
+    border: 2px solid #EBEBEB;
+    transition: 0.4s;
+}
+
+.controlStyle:focus {
+    outline-color: transparent;
+    outline-style: solid;
+    box-shadow: 0 0 0 4px #5A01A7;
 }
