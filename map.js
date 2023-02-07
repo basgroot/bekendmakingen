@@ -4,6 +4,8 @@
 // TODO houtopstand
 // TODO oplaadplaats verkeersbesluit
 // TODO loading indicator
+// TODO display municipalities on map
+// TODO option to list historical licenses
 
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
 function initMap() {
@@ -20,7 +22,7 @@ function initMap() {
 
     function getInitialMapSettings() {
         var zoomLevel = initialZoomLevel;
-        var center = Object.assign({}, municipalities[activeMunicipality].center);
+        var center;
         var urlParams;
         var zoomParam;
         var centerParam;
@@ -33,7 +35,12 @@ function initMap() {
             zoomParam = urlParams.get("zoom");
             centerParam = urlParams.get("center");
             municipality = urlParams.get("in");
-            if (zoomParam && centerParam && municipality && municipalities[municipality] !== undefined) {
+            if (municipality && municipalities[municipality] !== undefined) {
+                activeMunicipality = municipality;
+                console.log("Adjusted municipality from URL");
+            }
+            center = Object.assign({}, municipalities[activeMunicipality].center);
+            if (zoomParam && centerParam) {
                 zoomParam = parseFloat(zoomParam);
                 if (zoomParam > 14 && zoomParam < 20) {
                     zoomLevel = zoomParam;
@@ -47,8 +54,6 @@ function initMap() {
                     center.lng = lng;
                     console.log("Adjusted center from URL");
                 }
-                activeMunicipality = municipality;
-                console.log("Adjusted municipality from URL");
             }
             updateUrl(zoomLevel, new google.maps.LatLng(center.lat, center.lng));
         }
