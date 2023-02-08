@@ -1,9 +1,11 @@
 /*jslint browser: true, for: true, long: true, unordered: true */
 /*global window console google municipalities */
 
-// TODO houtopstand
-// TODO oplaadplaats verkeersbesluit
-// TODO loading indicator
+/*
+ * Op zoek naar de website?
+ * Bezoek https://basgroot.github.io/bekendmakingen/?in=Hoorn
+ */
+
 // TODO display municipalities on map
 // TODO option to list historical licenses
 
@@ -19,6 +21,7 @@ function initMap() {
     var initialZoomLevel = 16;
     var zIndex = 2147483647;  // Some high number
     var activeMunicipality = "Hoorn";
+    var loadingIndicator = document.createElement("img");
 
     function getInitialMapSettings() {
         var zoomLevel = initialZoomLevel;
@@ -29,7 +32,8 @@ function initMap() {
         var municipality;
         var lat;
         var lng;
-        // ?zoom=15&center=52.436606513567,4.844183950027
+        // ?in=Hoorn&zoom=15&center=52.6603118963%2C5.0608995325
+        // ?in=Oostzaan
         if (window.URLSearchParams) {
             urlParams = new window.URLSearchParams(window.location.search);
             zoomParam = urlParams.get("zoom");
@@ -200,6 +204,12 @@ function initMap() {
         return createOption(value, value, value === activeMunicipality);
     }
 
+    function createMapsControlLoadingIndicator() {
+        const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
+        controlDiv.appendChild(loadingIndicator);
+        map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(controlDiv);
+    }
+
     function createMapsControlMunicipalities() {
         const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
         const combobox = document.createElement("select");
@@ -245,6 +255,7 @@ function initMap() {
 
     function createMapsControls() {
         // https://developers.google.com/maps/documentation/javascript/examples/control-custom
+        createMapsControlLoadingIndicator();
         createMapsControlMunicipalities();
         createMapsControlPeriods();
         createMapsControlSource();
@@ -255,54 +266,35 @@ function initMap() {
         return websiteUrl.substr(40, websiteUrl.length - 45);
     }
 
-    function getIcon(title) {
+    function getIcon(title, subject) {
         // Images are converted to SVG using https://png2svg.com/
         // Resized to 35x45 using https://www.iloveimg.com/resize-image/resize-svg#resize-options,pixels
         // Optmized using https://svgoptimizer.com/
-        const aanvraagFilters = [
-            "verlenging",
-            "aanvraag"
-        ];
-        var apvFilter = "besluit apv";
-        var isAanvraag = false;
+        var imageName;
         title = title.toLowerCase();
-        aanvraagFilters.forEach(function (filter) {
-            if (title.substring(0, filter.length) === filter) {
-                isAanvraag = true;
-            }
-        });
-        if (isAanvraag) {
-            return {
-                "url": "img/aanvraag.png",
-                "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
-            };
-        }
-        if (title.substring(0, apvFilter.length) === apvFilter) {
-            return {
-                "url": "img/apv.png",
-                "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
-            };
-        }
-        if (title.indexOf("exploitatievergunning") >= 0 || title.indexOf("alcoholwetvergunning") >= 0) {
-            return {
-                "url": "img/bar.png",
-                "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
-            };
-        }
-        if (title.indexOf("evenement") >= 0) {
-            return {
-                "url": "img/evenement.png",
-                "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
-            };
-        }
-        if (title.indexOf("bed & breakfast") >= 0 || title.indexOf("vakantieverhuur") >= 0) {
-            return {
-                "url": "img/hotel.png",
-                "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
-            };
+        subject = subject.toLowerCase();
+        if (title.indexOf("aanvraag") >= 0 || title.indexOf("verlenging") >= 0) {
+            imageName = "aanvraag";
+        } else if (subject === "exploitatievergunning" || title.indexOf("exploitatievergunning") >= 0 || title.indexOf("alcoholwetvergunning") >= 0) {
+            imageName = "bar";
+        } else if (subject === "evenementenvergunning" || title.indexOf("evenement") >= 0) {
+            imageName = "evenement";
+        } else if (title.indexOf("bed & breakfast") >= 0 || title.indexOf("vakantieverhuur") >= 0) {
+            imageName = "hotel";
+        } else if (subject === "kapvergunning" || title.indexOf("houtopstand") >= 0 || title.indexOf("(kap)") >= 0) {
+            imageName = "boomkap";
+        } else if (title.indexOf("oplaadplaats") >= 0 || title.indexOf("opladen") >= 0 || title.indexOf("laadpaal") >= 0) {
+            imageName = "laadpaal";
+        } else if (title.indexOf("parkeervakken") >= 0 || title.indexOf("tvm") >= 0) {
+            // Verify this after 'laadpaal':
+            imageName = "apv";
+        } else if (subject === "milieuvergunning") {
+            imageName = "milieu";
+        } else {
+            imageName = "constructie";
         }
         return {
-            "url": "img/constructie.png",
+            "url": "img/" + imageName + ".png",
             "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
         };
     }
@@ -361,7 +353,12 @@ function initMap() {
             "optimized": true,
             //"scaleControl": true,
             "visible": isMarkerVisible(age, periodToShow),
-            "icon": getIcon(feature.recordData.gzd.originalData.meta.owmskern.title),
+            "icon": getIcon(feature.recordData.gzd.originalData.meta.owmskern.title, (
+                // Sometimes multiple subjects, when both bouwvergunning and omgevingsvergunning are requested
+                Array.isArray(feature.recordData.gzd.originalData.meta.owmsmantel.subject)
+                ? feature.recordData.gzd.originalData.meta.owmsmantel.subject[0].$
+                : feature.recordData.gzd.originalData.meta.owmsmantel.subject.$
+            )),
             "zIndex": zIndex,
             "title": feature.recordData.gzd.originalData.meta.owmskern.title
         });
@@ -413,7 +410,7 @@ function initMap() {
         };
     }
 
-    function addMarkers(startRecord) {
+    function addMarkers(startRecord, isMoreDataAvailable) {
         const periodToShow = getPeriodToShow();
         const bounds = map.getBounds();
         var position;
@@ -434,6 +431,10 @@ function initMap() {
                 console.error("Unsupported feature:");
                 console.error(feature);
             }
+        }
+        if (!isMoreDataAvailable) {
+            // Hide loading indicator
+            loadingIndicator.style.visibility = "hidden";
         }
     }
 
@@ -459,6 +460,8 @@ function initMap() {
     function internalInitMap() {
         var containerElm = document.getElementById("map");
         var mapSettings = getInitialMapSettings();
+        loadingIndicator.id = "idLoadingIndicator";
+        loadingIndicator.src = "img/ajax-loader.gif";  // ConnectedWizard, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
         infoWindow = new google.maps.InfoWindow();
         // https://developers.google.com/maps/documentation/javascript/overview#MapOptions
         map = new google.maps.Map(
@@ -548,6 +551,8 @@ function initMap() {
             ? municipalities[municipality].lookupName
             : municipality
         );
+        // Show loading indicator
+        loadingIndicator.style.visibility = "visible";
         fetch(
             proxyHost + "proxy-server/index.php?type=list&municipality=" + encodeURIComponent(lookupMunicipality) + "&startRecord=" + startRecord,
             {
@@ -556,6 +561,7 @@ function initMap() {
         ).then(function (response) {
             if (response.ok) {
                 response.json().then(function (responseJson) {
+                    var isMoreDataAvailable;
                     if (municipality !== activeMunicipality) {
                         // We are loading a different municipality, but user selected another one.
                         return;
@@ -568,11 +574,12 @@ function initMap() {
                     // Option to save the history to a file
                     //saveFile(responseJson, lookupMunicipality.toLowerCase().replace(/\s/g, "-") + "-2023-01-" + fillNumber(startRecord, 2) + ".json");
                     console.log("Found " + inputData.searchRetrieveResponse.records.record.length + " bekendmakingen of " + inputData.searchRetrieveResponse.numberOfRecords + " in " + municipality);
-                    if (responseJson.searchRetrieveResponse.hasOwnProperty("nextRecordPosition")) {
+                    isMoreDataAvailable = responseJson.searchRetrieveResponse.hasOwnProperty("nextRecordPosition");
+                    if (isMoreDataAvailable) {
                         // Add next page:
                         loadDataForMunicipality(municipality, responseJson.searchRetrieveResponse.nextRecordPosition);
                     }
-                    addMarkers(startRecord);
+                    addMarkers(startRecord, isMoreDataAvailable);
                 });
             } else {
                 console.error(response);

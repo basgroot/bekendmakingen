@@ -7,8 +7,11 @@ Bekijk vergunningen aangevraagd en verleend in uw omgeving.
 ## Legenda
 
 - <img src="img/aanvraag.svg" alt="Aanvraag" width="40"/> Aangevraagde vergunning, of aankondiging uitstel besluit.
-- <img src="img/apv.svg" alt="APV" width="40"/> Reservering parkeerplek, of tijdelijke verkeersmaatregel.
 - <img src="img/bar.svg" alt="Exploitatievergunning" width="40"/> Exploitatie-, of alcoholvergunning.
 - <img src="img/hotel.svg" alt="Bed and breakfast" width="40"/> Bed & Breakfast, of vakantieverhuur.
+- <img src="img/laadpaal.svg" alt="Elektrische laadpaal" width="40"/> Oplaadplaats elektrisch vervoermiddel.
 - <img src="img/evenement.svg" alt="Evenement" width="40"/> Evenement.
+- <img src="img/boomkap.svg" alt="Kapvergunning" width="40"/> Kapvergunning.
+- <img src="img/milieu.svg" alt="Milieuvergunning" width="40"/> Milieuvergunning.
+- <img src="img/apv.svg" alt="APV" width="40"/> Reservering parkeerplek, of tijdelijke verkeersmaatregel.
 - <img src="img/constructie.svg" alt="Aanvraag" width="40"/> De rest. Meestal bouwvergunningen.
