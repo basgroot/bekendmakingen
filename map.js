@@ -67,8 +67,8 @@ function initMap() {
         };
     }
 
-    function showInfoWindow(marker, header, body) {
-        infoWindow.setContent("<div class='info_window'><h2 class='info_window_heading'>" + header + "</h2><div class='info_window_body'><p>" + body + "</p></div></div>");
+    function showInfoWindow(marker, iconName, header, body) {
+        infoWindow.setContent("<div><img src=\"img/" + iconName + ".svg\" width=\"105\" height=\"135\" class=\"info_window_image\"><h2 class=\"info_window_heading\">" + header + "</h2><div class=\"info_window_body\"><p>" + body + "</p></div></div>");
         infoWindow.open({
             "anchor": marker,
             "map": map,
@@ -266,46 +266,52 @@ function initMap() {
         return websiteUrl.substr(40, websiteUrl.length - 45);
     }
 
-    function getIcon(title, subject) {
+    function getIconName(title, subject) {
         // Images are converted to SVG using https://png2svg.com/
         // Resized to 35x45 using https://www.iloveimg.com/resize-image/resize-svg#resize-options,pixels
         // Optmized using https://svgoptimizer.com/
-        var imageName;
         title = title.toLowerCase();
         subject = subject.toLowerCase();
         if (title.indexOf("aanvraag") >= 0 || title.indexOf("verlenging") >= 0) {
-            imageName = "aanvraag";
-        } else if (subject === "exploitatievergunning" || title.indexOf("exploitatievergunning") >= 0 || title.indexOf("alcoholwetvergunning") >= 0) {
-            imageName = "bar";
-        } else if (subject === "evenementenvergunning" || title.indexOf("evenement") >= 0) {
-            imageName = "evenement";
-        } else if (title.indexOf("bed & breakfast") >= 0 || title.indexOf("vakantieverhuur") >= 0) {
-            imageName = "hotel";
-        } else if (subject === "kapvergunning" || title.indexOf("houtopstand") >= 0 || title.indexOf("(kap)") >= 0) {
-            imageName = "boomkap";
-        } else if (title.indexOf("oplaadplaats") >= 0 || title.indexOf("opladen") >= 0 || title.indexOf("laadpaal") >= 0) {
-            imageName = "laadpaal";
-        } else if (title.indexOf("apv vergunning") >= 0 || title.indexOf("parkeervakken") >= 0 || title.indexOf("tvm") >= 0) {
-            // Verify this after 'laadpaal':
-            imageName = "tvm";
-        } else if (subject === "verkeersbesluit") {
-            // Verify this after 'parkeervakken/tvm':
-            imageName = "verkeer";
-        } else if (subject === "splitsingsvergunning" || subject === "onttrekkingsvergunning") {
-            imageName = "kamerverhuur";  // EpicPupper, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
-        } else if (subject === "ligplaatsvergunning" || subject === "watervergunning") {
-            imageName = "boot";  // Barbetorte, CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0>, via Wikimedia Commons
-        } else if (subject === "reclamevergunning") {
-            imageName = "reclame";  // Verdy_p (complete construction and vectorisation, based on mathematical properties of the symbol, and not drawn manually, and then manually edited without using any SVG editor)., Public domain, via Wikimedia Commons
-        } else if (subject === "milieuvergunning") {
-            imageName = "milieu";
-        } else {
-            imageName = "constructie";
+            return "aanvraag";
         }
-        return {
-            "url": "img/" + imageName + ".png",
-            "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
-        };
+        if (subject === "exploitatievergunning" || title.indexOf("exploitatievergunning") >= 0 || title.indexOf("alcoholwetvergunning") >= 0) {
+            return "bar";
+        }
+        if (subject === "evenementenvergunning" || title.indexOf("evenement") >= 0) {
+            return "evenement";
+            // De 'loterij' met subject 'overig' valt eruit!
+        }
+        if (title.indexOf("bed & breakfast") >= 0 || title.indexOf("vakantieverhuur") >= 0) {
+            return "hotel";
+        }
+        if (subject === "kapvergunning" || title.indexOf("houtopstand") >= 0 || title.indexOf("(kap)") >= 0) {
+            return "boomkap";
+        }
+        if (title.indexOf("oplaadplaats") >= 0 || title.indexOf("opladen") >= 0 || title.indexOf("laadpaal") >= 0) {
+            return "laadpaal";
+        }
+        if (title.indexOf("apv vergunning") >= 0 || title.indexOf("parkeervakken") >= 0 || title.indexOf("tvm") >= 0) {
+            // Verify this after 'laadpaal':
+            return "tvm";
+        }
+        if (subject === "verkeersbesluit") {
+            // Verify this after 'parkeervakken/tvm':
+            return "verkeer";
+        }
+        if (subject === "splitsingsvergunning" || subject === "onttrekkingsvergunning") {
+            return "kamerverhuur";  // EpicPupper, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
+        }
+        if (subject === "ligplaatsvergunning" || subject === "watervergunning") {
+            return "boot";  // Barbetorte, CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0>, via Wikimedia Commons
+        }
+        if (subject === "reclamevergunning") {
+            return "reclame";  // Verdy_p (complete construction and vectorisation, based on mathematical properties of the symbol, and not drawn manually, and then manually edited without using any SVG editor)., Public domain, via Wikimedia Commons
+        }
+        if (subject === "milieuvergunning") {
+            return "milieu";
+        }
+        return "constructie";
     }
 
     function findUniquePosition(proposedCoordinate) {
@@ -353,21 +359,25 @@ function initMap() {
         // 125171;
         // 488983
         // https://developers.google.com/maps/documentation/javascript/reference#MarkerOptions
-        var datumGepubliceerd = new Date(feature.recordData.gzd.originalData.meta.tpmeta.geldigheidsperiode_startdatum);
-        var age = getDaysPassed(datumGepubliceerd);
-        var marker = new google.maps.Marker({
+        const datumGepubliceerd = new Date(feature.recordData.gzd.originalData.meta.tpmeta.geldigheidsperiode_startdatum);
+        const age = getDaysPassed(datumGepubliceerd);
+        const iconName = getIconName(feature.recordData.gzd.originalData.meta.owmskern.title, (
+            // Sometimes multiple subjects, when both bouwvergunning and omgevingsvergunning are requested
+            Array.isArray(feature.recordData.gzd.originalData.meta.owmsmantel.subject)
+            ? feature.recordData.gzd.originalData.meta.owmsmantel.subject[0].$
+            : feature.recordData.gzd.originalData.meta.owmsmantel.subject.$
+        ));
+        const marker = new google.maps.Marker({
             "map": map,
             "position": position,
             "clickable": true,
             "optimized": true,
             //"scaleControl": true,
             "visible": isMarkerVisible(age, periodToShow),
-            "icon": getIcon(feature.recordData.gzd.originalData.meta.owmskern.title, (
-                // Sometimes multiple subjects, when both bouwvergunning and omgevingsvergunning are requested
-                Array.isArray(feature.recordData.gzd.originalData.meta.owmsmantel.subject)
-                ? feature.recordData.gzd.originalData.meta.owmsmantel.subject[0].$
-                : feature.recordData.gzd.originalData.meta.owmsmantel.subject.$
-            )),
+            "icon": {
+                "url": "img/" + iconName + ".png",
+                "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
+            },
             "zIndex": zIndex,
             "title": feature.recordData.gzd.originalData.meta.owmskern.title
         });
@@ -383,7 +393,7 @@ function initMap() {
             function () {
                 var gmbNumber = getGmbNumberFromUrl(feature.recordData.gzd.originalData.meta.tpmeta.bronIdentifier);
                 var description = feature.recordData.gzd.originalData.meta.owmsmantel.description + "<br /><br />Meer info: <a href=\"" + feature.recordData.gzd.originalData.meta.tpmeta.bronIdentifier + "\" target=\"blank\">" + feature.recordData.gzd.originalData.meta.tpmeta.bronIdentifier + "</a>.";
-                showInfoWindow(marker, feature.recordData.gzd.originalData.meta.owmskern.title, "<div id=\"" + gmbNumber + "\"><br /><br /><br /></div>" + description);
+                showInfoWindow(marker, iconName, feature.recordData.gzd.originalData.meta.owmskern.title, "<div id=\"" + gmbNumber + "\"><br /><br /><br /></div>" + description);
                 collectBezwaartermijn(gmbNumber, datumGepubliceerd);
             }
         );
@@ -565,10 +575,6 @@ function initMap() {
     function navigateTo(municipality) {
         const center = municipalities[municipality].center;
         map.setCenter(new google.maps.LatLng(center.lat, center.lng), initialZoomLevel);
-        // Show all labels except selected one
-        municipalityMarkers.forEach(function (markerObject) {
-            markerObject.marker.setVisible(markerObject.municipalityName !== activeMunicipality);
-        });
     }
 
     /**
@@ -618,6 +624,10 @@ function initMap() {
                     }
                     if (startRecord === 1) {
                         inputData = responseJson;
+                        // Show all labels except selected one
+                        municipalityMarkers.forEach(function (markerObject) {
+                            markerObject.marker.setVisible(markerObject.municipalityName !== activeMunicipality);
+                        });
                     } else {
                         Array.prototype.push.apply(inputData.searchRetrieveResponse.records.record, responseJson.searchRetrieveResponse.records.record);
                     }
