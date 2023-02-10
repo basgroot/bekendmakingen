@@ -6,22 +6,22 @@
  * Bezoek https://basgroot.github.io/bekendmakingen/?in=Hoorn
  */
 
-// TODO display municipalities on map
 // TODO option to list historical licenses
 
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
 function initMap() {
+    const proxyHost = "https://basement.nl/";
+    //const proxyHost = "http://localhost/";
+    const municipalityMarkers = [];
+    const initialZoomLevel = 16;
+    const loadingIndicator = document.createElement("img");
+    var markersArray = [];
+    var delayedMarkersArray = [];
+    var zIndex = 2147483647;  // Some high number
     var map;
     var infoWindow;
     var inputData;
-    var proxyHost = "https://basement.nl/";
-    //var proxyHost = "http://localhost/";
-    var markersArray = [];
-    var delayedMarkersArray = [];
-    var initialZoomLevel = 16;
-    var zIndex = 2147483647;  // Some high number
     var activeMunicipality = "Hoorn";
-    var loadingIndicator = document.createElement("img");
 
     function getInitialMapSettings() {
         var zoomLevel = initialZoomLevel;
@@ -285,9 +285,18 @@ function initMap() {
             imageName = "boomkap";
         } else if (title.indexOf("oplaadplaats") >= 0 || title.indexOf("opladen") >= 0 || title.indexOf("laadpaal") >= 0) {
             imageName = "laadpaal";
-        } else if (title.indexOf("parkeervakken") >= 0 || title.indexOf("tvm") >= 0) {
+        } else if (title.indexOf("apv vergunning") >= 0 || title.indexOf("parkeervakken") >= 0 || title.indexOf("tvm") >= 0) {
             // Verify this after 'laadpaal':
-            imageName = "apv";
+            imageName = "tvm";
+        } else if (subject === "verkeersbesluit") {
+            // Verify this after 'parkeervakken/tvm':
+            imageName = "verkeer";
+        } else if (subject === "splitsingsvergunning" || subject === "onttrekkingsvergunning") {
+            imageName = "kamerverhuur";  // EpicPupper, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
+        } else if (subject === "ligplaatsvergunning" || subject === "watervergunning") {
+            imageName = "boot";  // Barbetorte, CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0>, via Wikimedia Commons
+        } else if (subject === "reclamevergunning") {
+            imageName = "reclame";  // Verdy_p (complete construction and vectorisation, based on mathematical properties of the symbol, and not drawn manually, and then manually edited without using any SVG editor)., Public domain, via Wikimedia Commons
         } else if (subject === "milieuvergunning") {
             imageName = "milieu";
         } else {
@@ -438,6 +447,42 @@ function initMap() {
         }
     }
 
+    function addMunicipalitiyMarkers() {
+        const municipalityNames = Object.keys(municipalities);
+        municipalityNames.forEach(function (municipalityName) {
+            const municipalityObject = municipalities[municipalityName];
+            var marker = new google.maps.Marker({
+                "map": map,
+                "position": municipalityObject.center,
+                "label": municipalityName,  // https://developers.google.com/maps/documentation/javascript/reference/marker#MarkerLabel
+                "clickable": true,
+                "optimized": true,
+                //"scaleControl": true,
+                "visible": municipalityName !== activeMunicipality,
+                "icon": {
+                    "url": "img/gemeente.png",
+                    "size": new google.maps.Size(50, 61)  // Make sure image is already scaled
+                },
+                "title": municipalityName
+            });
+            municipalityMarkers.push({
+                "municipalityName": municipalityName,
+                "marker": marker
+            });
+            marker.addListener(
+                "click",
+                function () {
+                    const municipalityComboElm = document.getElementById("idCbxMunicipality");
+                    if (municipalityComboElm !== null) {
+                        municipalityComboElm.value = municipalityName;
+                    }
+                    activeMunicipality = municipalityName;
+                    loadData();
+                }
+            );
+        });
+    }
+
     function updateDisplayLevel() {
         const periodToShow = getPeriodToShow();
         markersArray.forEach(function (markerObject) {
@@ -476,6 +521,7 @@ function initMap() {
             }
         );
         createMapsControls();
+        addMunicipalitiyMarkers();
         map.addListener("zoom_changed", function () {
             // Add to URL: /?zoom=15&center=52.43660651356703,4.84418395002761
             var periodElm = document.getElementById("idCbxPeriod");
@@ -519,6 +565,10 @@ function initMap() {
     function navigateTo(municipality) {
         const center = municipalities[municipality].center;
         map.setCenter(new google.maps.LatLng(center.lat, center.lng), initialZoomLevel);
+        // Show all labels except selected one
+        municipalityMarkers.forEach(function (markerObject) {
+            markerObject.marker.setVisible(markerObject.municipalityName !== activeMunicipality);
+        });
     }
 
     /**
