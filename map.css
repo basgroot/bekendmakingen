@@ -10,6 +10,11 @@ html, body {
     padding: 0;
 }
 
+.info_window_image {
+    float: left;
+    margin: 0 15px 15px 0;
+}
+
 h2.info_window_heading {
     color: #9BC8D4;
 }
