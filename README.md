@@ -19,3 +19,5 @@ Bekijk vergunningen aangevraagd en verleend in uw omgeving.
 - <img src="img/reclame.svg" alt="Reclamevergunning" width="40"/> Reclamevergunning.
 - <img src="img/verkeer.svg" alt="Verkeersbesluit" width="40"/> Verkeersbesluit.
 - <img src="img/constructie.svg" alt="Aanvraag" width="40"/> De rest. Meestal bouwvergunningen.
+
+Deze website maakt gebruik van de [Open Overheid](https://data.overheid.nl/dataset/officiele-bekendmakingen).
