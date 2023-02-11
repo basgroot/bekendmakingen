@@ -10,7 +10,7 @@
 
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
 function initMap() {
-    const proxyHost = "https://basement.nl/";
+    const proxyHost = "https://elektrischdeelrijden.nl/";
     //const proxyHost = "http://localhost/";
     const municipalityMarkers = [];
     const initialZoomLevel = 16;
