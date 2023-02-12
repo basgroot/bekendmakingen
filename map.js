@@ -445,8 +445,8 @@ function initMap() {
             }
         }
         if (!isMoreDataAvailable) {
-            // Hide loading indicator
-            loadingIndicator.style.visibility = "hidden";
+            // Hide loading indicator - don't use style.visibility = "hidden", because then it keeps occupying space and prevents clicking on the map
+            loadingIndicator.style.display = "none";
         }
     }
 
@@ -632,7 +632,7 @@ function initMap() {
             : municipality
         );
         // Show loading indicator
-        loadingIndicator.style.visibility = "visible";
+        loadingIndicator.style.display = "block";
         fetch(
             proxyHost + "proxy-server/index.php?type=list&municipality=" + encodeURIComponent(lookupMunicipality) + "&startRecord=" + startRecord,
             {
