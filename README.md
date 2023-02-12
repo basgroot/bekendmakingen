@@ -21,3 +21,5 @@ Bekijk vergunningen aangevraagd en verleend in uw omgeving.
 - <img src="img/constructie.svg" alt="Aanvraag" width="40"/> De rest. Meestal bouwvergunningen.
 
 Deze website maakt gebruik van de [Open Overheid](https://data.overheid.nl/dataset/officiele-bekendmakingen).
+
+Zie verder de [SRU-standaard](https://www.loc.gov/standards/sru/sru-2-0.html).
