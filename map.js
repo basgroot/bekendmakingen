@@ -10,8 +10,6 @@
 
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
 function initMap() {
-    const proxyHost = "https://elektrischdeelrijden.nl/";
-    //const proxyHost = "http://localhost/";
     const municipalityMarkers = [];
     const initialZoomLevel = 16;
     const loadingIndicator = document.createElement("img");
@@ -69,6 +67,7 @@ function initMap() {
 
     function showInfoWindow(marker, iconName, header, body) {
         infoWindow.setContent("<div><img src=\"img/" + iconName + ".svg\" width=\"105\" height=\"135\" class=\"info_window_image\"><h2 class=\"info_window_heading\">" + header + "</h2><div class=\"info_window_body\"><p>" + body + "</p></div></div>");
+        // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.open
         infoWindow.open({
             "anchor": marker,
             "map": map,
@@ -95,6 +94,10 @@ function initMap() {
     }
 
     function parseBekendmaking(responseXml, datumGepubliceerd, gmbNumber) {
+
+        function convertMonthNames(value) {
+            return value.replace("januari", "01").replace("februari", "02").replace("maart", "03").replace("april", "04").replace("mei", "05").replace("juni", "06").replace("juli", "07").replace("augustus", "08").replace("september", "09").replace("oktober", "10").replace("november", "11").replace("december", "12");
+        }
 
         function parseDate(value) {
             var year = value.substr(35, 4);
@@ -128,13 +131,15 @@ function initMap() {
                 for (j = 0; j < alinea.childNodes.length; j += 1) {
                     if (alinea.childNodes[j].nodeName === "#text") {
                         value = alinea.childNodes[j].nodeValue;
-                        value = value.replace("Besluit verzonden", "Verzonden naar aanvrager op");
+                        // <al>Besluit verzonden: 26-01-2023</al>
+                        // <al><!--Element br verwijderd -->Besluit verzonden: 29 december 2022</al>
+                        value = value.replace("Besluit verzonden", "Verzonden naar aanvrager op").replace("<!--Element br verwijderd -->", "").trim();
                         // Fix "Verzonden naar aanvrager op :" (https://zoek.officielebekendmakingen.nl/gmb-2022-441976.html)
                         value = value.replace("op :", "op:");
                         if (value.substr(0, identifier.length) === identifier) {
                             // Verzonden naar aanvrager op: 02-09-2022
                             // Remove time from dates:
-                            datumBekendgemaakt = parseDate(value);
+                            datumBekendgemaakt = parseDate(convertMonthNames(value));
                             if (datumBekendgemaakt !== false) {
                                 isBezwaartermijnFound = true;
                                 looptijd = getDaysPassed(datumBekendgemaakt);
@@ -166,9 +171,9 @@ function initMap() {
         // URL: https://zoek.officielebekendmakingen.nl/gmb-2022-425209.html
         // Endpoint: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-425209/1/xml/gmb-2022-425209.xml
         const year = getYearFromGmbNumber();
-        const url = proxyHost + "proxy-server/index.php?number=" + gmbNumber + "&year=" + year;
+        const url = "https://repository.overheid.nl/frbr/officielepublicaties/" + gmbNumber.substring(0, 3) + "/" + year + "/" + gmbNumber + "/1/xml/" + gmbNumber + ".xml";
         if (Number.isNaN(parseInt(year, 10))) {
-            console.error("Unable to gat data for gmbNumber " + gmbNumber);
+            console.error("Unable to get data for gmbNumber " + gmbNumber);
             return;
         }
         fetch(
@@ -261,7 +266,10 @@ function initMap() {
     }
 
     function getGmbNumberFromUrl(websiteUrl) {
-        // gmb-2022-425209
+        // Options: https://zoek.officielebekendmakingen.nl/prb-2023-962.html
+        //          https://zoek.officielebekendmakingen.nl/gmb-2023-56454.html
+        //          https://www.zaanstad.nl/mozard/!suite42.scherm1260?mObj=211278
+        //          https://bekendmakingen.amsterdam.nl/bekendmakingen/overige/decos/C174AC3CD0754F9089D1553C31CD5B7A
         return websiteUrl.substr(40, websiteUrl.length - 45);
     }
 
@@ -270,7 +278,6 @@ function initMap() {
         // Resized to 35x45 using https://www.iloveimg.com/resize-image/resize-svg#resize-options,pixels
         // Optmized using https://svgoptimizer.com/
         title = title.toLowerCase();
-        type = type.toLowerCase();
         if (title.indexOf("aanvraag") >= 0 || title.indexOf("verlenging") >= 0) {
             return "aanvraag";
         }
@@ -365,7 +372,6 @@ function initMap() {
             "position": position,
             "clickable": true,
             "optimized": true,
-            //"scaleControl": true,
             "visible": isMarkerVisible(age, periodToShow),
             "icon": {
                 "url": "img/" + iconName + ".png",
@@ -374,7 +380,7 @@ function initMap() {
             "zIndex": zIndex,
             "title": feature.title
         });
-        var markerObject = {
+        const markerObject = {
             "age": age,
             "position": position,
             "isSvg": true,
@@ -384,10 +390,22 @@ function initMap() {
         marker.addListener(
             "click",
             function () {
-                var gmbNumber = getGmbNumberFromUrl(feature.url);
-                var description = feature.description + "<br /><br />Meer info: <a href=\"" + feature.url + "\" target=\"blank\">" + feature.url + "</a>.";
-                showInfoWindow(marker, iconName, feature.title, "<div id=\"" + gmbNumber + "\"><br /><br /><br /></div>" + description);
-                collectBezwaartermijn(gmbNumber, feature.date);
+                const startOfUrl = "https://zoek.officielebekendmakingen.nl/";
+                const isMoreInfoAvailable = feature.url.substring(0, startOfUrl.length) === startOfUrl;
+                const description = feature.description + "<br /><br />Meer info: <a href=\"" + feature.url + "\" target=\"blank\">" + feature.url + "</a>.";
+                var gmbNumber;
+                // Supported are "Gemeentelijk besluit (gmb)" and "Provinciaal besluit (prb)"
+                // Options: https://zoek.officielebekendmakingen.nl/prb-2023-962.html
+                //          https://zoek.officielebekendmakingen.nl/gmb-2023-56454.html
+                if (isMoreInfoAvailable) {
+                    gmbNumber = getGmbNumberFromUrl(feature.url);
+                    showInfoWindow(marker, iconName, feature.title, "<div id=\"" + gmbNumber + "\"><br /><br /><br /></div>" + description);
+                    collectBezwaartermijn(gmbNumber, feature.date);
+                } else {
+                    // Errors:  https://www.zaanstad.nl/mozard/!suite42.scherm1260?mObj=211278
+                    //          https://bekendmakingen.amsterdam.nl/bekendmakingen/overige/decos/C174AC3CD0754F9089D1553C31CD5B7A
+                    showInfoWindow(marker, iconName, feature.title, description);
+                }
             }
         );
         markersArray.push(markerObject);
@@ -510,13 +528,15 @@ function initMap() {
         var mapSettings = getInitialMapSettings();
         loadingIndicator.id = "idLoadingIndicator";
         loadingIndicator.src = "img/ajax-loader.gif";  // ConnectedWizard, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
+        // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindowOptions
         infoWindow = new google.maps.InfoWindow();
         // https://developers.google.com/maps/documentation/javascript/overview#MapOptions
         map = new google.maps.Map(
             containerElm,
             {
-                "clickableIcons": false,
-                // Paid feature - "mapId": "c2a918307d540be7",  // https://console.cloud.google.com/google/maps-apis/studio/styles?project=eddepijp
+                "backgroundColor": "#9CC0F9",  // https://developers.google.com/maps/documentation/javascript/reference/map#MapOptions.backgroundColor
+                "clickableIcons": false,  // https://developers.google.com/maps/documentation/javascript/reference/map#MapOptions.clickableIcons
+                // Paid feature - "mapId": "c2a918307d540be7",
                 "center": new google.maps.LatLng(mapSettings.center.lat, mapSettings.center.lng),
                 "mapTypeId": google.maps.MapTypeId.ROADMAP,  // https://developers.google.com/maps/documentation/javascript/reference/map#MapTypeId
                 "gestureHandling": "greedy",  // When scrolling, keep scrolling
@@ -543,7 +563,7 @@ function initMap() {
                 periodElm.value = "14d";
                 updateDisplayLevel();
             }
-            infoWindow.close();
+            infoWindow.close();  // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.close
             console.log("Zoom changed to " + zoom);
         });
         map.addListener("idle", function () {
@@ -570,48 +590,25 @@ function initMap() {
         map.setCenter(new google.maps.LatLng(center.lat, center.lng), initialZoomLevel);
     }
 
-    /**
-     * Download a file and give it a name. Source: https://stackoverflow.com/a/48968694.
-     * @param {Object} exportObj The downloaded JSON from the response.
-     * @return {void}
-     */
-    function saveFile(exportObj, fileName) {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
-        const a = document.createElement("a");
-        a.href = dataStr;
-        a.download = fileName;
-        document.body.appendChild(a);  // Required for Firefox
-        a.click();
-        a.remove();
-    }
-
-    function fillNumber(startRecord, length) {
-        var startRecordToDisplay = (startRecord - 1) / 1000;
-        var result = startRecordToDisplay.toString();
-        while (result.length < length) {
-            result = "0" + result;
-        }
-        return result;
-    }
-
     function addPublications(responseJson) {
         responseJson.searchRetrieveResponse.records.record.forEach(function (inputRecord) {
             const feature = {
                 // Example "kapvergunning"
                 "type": (
                     // Sometimes multiple subjects, when both bouwvergunning and omgevingsvergunning are requested
+                    // Used for matching, so trim and lowercase
                     Array.isArray(inputRecord.recordData.gzd.originalData.meta.owmsmantel.subject)
-                    ? inputRecord.recordData.gzd.originalData.meta.owmsmantel.subject[0].$
-                    : inputRecord.recordData.gzd.originalData.meta.owmsmantel.subject.$
+                    ? inputRecord.recordData.gzd.originalData.meta.owmsmantel.subject[0].$.trim().toLowerCase()
+                    : inputRecord.recordData.gzd.originalData.meta.owmsmantel.subject.$.trim().toLowerCase()
                 ),
                 // Example: "Besluit apv vergunning Verleend Overtoom 10-H"
-                "title": inputRecord.recordData.gzd.originalData.meta.owmskern.title,
+                "title": inputRecord.recordData.gzd.originalData.meta.owmskern.title.trim(),
                 // Example: "TVM 2 vakken - Overtoom 10-12 13 februari 2023, Overtoom 10-H"
-                "description": inputRecord.recordData.gzd.originalData.meta.owmsmantel.description,
+                "description": inputRecord.recordData.gzd.originalData.meta.owmsmantel.description.trim(),
                 // Example: "2023-02-10"
                 "date": new Date(inputRecord.recordData.gzd.originalData.meta.tpmeta.geldigheidsperiode_startdatum),
                 // Example: "https:\/\/zoek.officielebekendmakingen.nl\/gmb-2023-59059.html"
-                "url": inputRecord.recordData.gzd.originalData.meta.tpmeta.bronIdentifier
+                "url": inputRecord.recordData.gzd.originalData.meta.tpmeta.bronIdentifier.trim()
             };
             if (Array.isArray(inputRecord.recordData.gzd.originalData.meta.tpmeta.locatiepunt)) {
                 // Example: ["52.36374 4.877971"]
@@ -634,7 +631,7 @@ function initMap() {
         // Show loading indicator
         loadingIndicator.style.display = "block";
         fetch(
-            proxyHost + "proxy-server/index.php?type=list&municipality=" + encodeURIComponent(lookupMunicipality) + "&startRecord=" + startRecord,
+            "https://repository.overheid.nl/sru?&query=(c.product-area=lokalebekendmakingen%20AND%20cd.afgeleideGemeente=\"" + encodeURIComponent(lookupMunicipality) + "\")%20sortBy%20cd.datumTijdstipWijzigingWork%20/sort.descending&maximumRecords=1000&startRecord=" + startRecord + "&httpAccept=application/json",
             {
                 "method": "GET"
             }
@@ -648,7 +645,7 @@ function initMap() {
                     }
                     if (startRecord === 1) {
                         publicationsArray = [];
-                        // Show all labels except selected one
+                        // Hide active municipality:
                         municipalityMarkers.forEach(function (markerObject) {
                             if (markerObject.municipalityName === activeMunicipality) {
                                 markerObject.marker.setVisible(false);
@@ -656,8 +653,6 @@ function initMap() {
                         });
                     }
                     addPublications(responseJson);
-                    // Option to save the history to a file
-                    //saveFile(responseJson, lookupMunicipality.toLowerCase().replace(/\s/g, "-") + "-2023-01-" + fillNumber(startRecord, 2) + ".json");
                     console.log("Found " + responseJson.searchRetrieveResponse.records.record.length + " bekendmakingen of " + responseJson.searchRetrieveResponse.numberOfRecords + " in " + municipality);
                     isMoreDataAvailable = responseJson.searchRetrieveResponse.hasOwnProperty("nextRecordPosition");
                     if (isMoreDataAvailable) {
