@@ -7,6 +7,7 @@
  */
 
 // TODO option to list historical licenses
+// https://zoek.officielebekendmakingen.nl/stcrt-2023-128.html
 
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
 function initMap() {
@@ -93,7 +94,7 @@ function initMap() {
         return Math.round((today.getTime() - dateFrom.getTime()) / (1000 * 60 * 60 * 24));
     }
 
-    function parseBekendmaking(responseXml, datumGepubliceerd, gmbNumber) {
+    function parseBekendmaking(responseXml, datumGepubliceerd, licenseId) {
 
         function convertMonthNames(value) {
             return value.replace("januari", "01").replace("februari", "02").replace("maart", "03").replace("april", "04").replace("mei", "05").replace("juni", "06").replace("juli", "07").replace("augustus", "08").replace("september", "09").replace("oktober", "10").replace("november", "11").replace("december", "12");
@@ -105,7 +106,7 @@ function initMap() {
             var day = value.substr(29, 2);
             var datumBekendgemaakt;
             if (Number.isNaN(parseInt(year, 10)) || Number.isNaN(parseInt(month, 10)) || Number.isNaN(parseInt(day, 10))) {
-                console.error("Error parsing date (" + value + ") of license " + gmbNumber);
+                console.error("Error parsing date (" + value + ") of license " + licenseId);
                 return false;
             }
             datumBekendgemaakt = new Date(year + "-" + month + "-" + day);
@@ -159,21 +160,20 @@ function initMap() {
         if (!isBezwaartermijnFound) {
             textToShow = "Gepubliceerd: " + datumGepubliceerd.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br /><br />";
         }
-        document.getElementById(gmbNumber).innerHTML = textToShow;
+        document.getElementById(licenseId).innerHTML = textToShow;
     }
 
-    function collectBezwaartermijn(gmbNumber, datumGepubliceerd) {
-
-        function getYearFromGmbNumber() {
-            return gmbNumber.substr(4, 4);
-        }
-
+    function collectBezwaartermijn(licenseId, datumGepubliceerd) {
         // URL: https://zoek.officielebekendmakingen.nl/gmb-2022-425209.html
         // Endpoint: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-425209/1/xml/gmb-2022-425209.xml
-        const year = getYearFromGmbNumber();
-        const url = "https://repository.overheid.nl/frbr/officielepublicaties/" + gmbNumber.substring(0, 3) + "/" + year + "/" + gmbNumber + "/1/xml/" + gmbNumber + ".xml";
-        if (Number.isNaN(parseInt(year, 10))) {
-            console.error("Unable to get data for gmbNumber " + gmbNumber);
+        const licenseIdArray = licenseId.split("-");
+        // Options: prb-2023-962
+        //          gmb-2023-56454
+        //          wsb-2023-801
+        //          stcrt-2023-128
+        const url = "https://repository.overheid.nl/frbr/officielepublicaties/" + licenseIdArray[0] + "/" + licenseIdArray[1] + "/" + licenseId + "/1/xml/" + licenseId + ".xml";
+        if (Number.isNaN(parseInt(licenseIdArray[1], 10))) {
+            console.error("Unable to get data for licenseId " + licenseId);
             return;
         }
         fetch(
@@ -184,7 +184,7 @@ function initMap() {
         ).then(function (response) {
             if (response.ok) {
                 response.text().then(function (xml) {
-                    parseBekendmaking(xml, datumGepubliceerd, gmbNumber);
+                    parseBekendmaking(xml, datumGepubliceerd, licenseId);
                 });
             } else {
                 console.error(response);
@@ -265,15 +265,21 @@ function initMap() {
         createMapsControlSource();
     }
 
-    function getGmbNumberFromUrl(websiteUrl) {
+    function getLicenseIdFromUrl(websiteUrl) {
         // Options: https://zoek.officielebekendmakingen.nl/prb-2023-962.html
         //          https://zoek.officielebekendmakingen.nl/gmb-2023-56454.html
-        //          https://www.zaanstad.nl/mozard/!suite42.scherm1260?mObj=211278
-        //          https://bekendmakingen.amsterdam.nl/bekendmakingen/overige/decos/C174AC3CD0754F9089D1553C31CD5B7A
-        return websiteUrl.substr(40, websiteUrl.length - 45);
+        //          https://zoek.officielebekendmakingen.nl/wsb-2023-801.html
+        //          https://zoek.officielebekendmakingen.nl/stcrt-2023-128.html
+        const startOfUrl = "https://zoek.officielebekendmakingen.nl/";
+        const endOfUrl = ".html";
+        if (websiteUrl.substring(0, startOfUrl.length) === startOfUrl) {
+            return websiteUrl.substring(startOfUrl.length, websiteUrl.length - endOfUrl.length);
+        }
+        return false;
     }
 
     function getIconName(title, type) {
+        // Text mining to get distinguish the different license states and types
         // Images are converted to SVG using https://png2svg.com/
         // Resized to 35x45 using https://www.iloveimg.com/resize-image/resize-svg#resize-options,pixels
         // Optmized using https://svgoptimizer.com/
@@ -386,21 +392,23 @@ function initMap() {
             "isSvg": true,
             "marker": marker
         };
-        zIndex -= 1;  // Input is sorted by modification date - newest are first. Give them a higher zIndex, so Besluit is in front of Verlenging (which is in front of Aanvraag)
+        zIndex -= 1;  // Input is sorted by modification date - most recent first. Give them a higher zIndex, so Besluit is in front of Verlenging (which is in front of Aanvraag)
         marker.addListener(
             "click",
             function () {
-                const startOfUrl = "https://zoek.officielebekendmakingen.nl/";
-                const isMoreInfoAvailable = feature.url.substring(0, startOfUrl.length) === startOfUrl;
                 const description = feature.description + "<br /><br />Meer info: <a href=\"" + feature.url + "\" target=\"blank\">" + feature.url + "</a>.";
-                var gmbNumber;
-                // Supported are "Gemeentelijk besluit (gmb)" and "Provinciaal besluit (prb)"
+                var licenseId = getLicenseIdFromUrl(feature.url);
+                // Supported is "Gemeentelijk blad (gmb)", "Provinciaal blad (prb)", "Waterschapsblad (wsb) and Staatscourant (stcrt)"
                 // Options: https://zoek.officielebekendmakingen.nl/prb-2023-962.html
                 //          https://zoek.officielebekendmakingen.nl/gmb-2023-56454.html
-                if (isMoreInfoAvailable) {
-                    gmbNumber = getGmbNumberFromUrl(feature.url);
-                    showInfoWindow(marker, iconName, feature.title, "<div id=\"" + gmbNumber + "\"><br /><br /><br /></div>" + description);
-                    collectBezwaartermijn(gmbNumber, feature.date);
+                //          https://zoek.officielebekendmakingen.nl/wsb-2023-801.html
+                //          https://zoek.officielebekendmakingen.nl/stcrt-2023-128.html
+                // Not supported:
+                //          https://www.zaanstad.nl/mozard/!suite42.scherm1260?mObj=211278
+                //          https://bekendmakingen.amsterdam.nl/bekendmakingen/overige/decos/C174AC3CD0754F9089D1553C31CD5B7A
+                if (licenseId) {
+                    showInfoWindow(marker, iconName, feature.title, "<div id=\"" + licenseId + "\"><br /><br /><br /></div>" + description);
+                    collectBezwaartermijn(licenseId, feature.date);
                 } else {
                     // Errors:  https://www.zaanstad.nl/mozard/!suite42.scherm1260?mObj=211278
                     //          https://bekendmakingen.amsterdam.nl/bekendmakingen/overige/decos/C174AC3CD0754F9089D1553C31CD5B7A
@@ -631,7 +639,7 @@ function initMap() {
         // Show loading indicator
         loadingIndicator.style.display = "block";
         fetch(
-            "https://repository.overheid.nl/sru?&query=(c.product-area=lokalebekendmakingen%20AND%20cd.afgeleideGemeente=\"" + encodeURIComponent(lookupMunicipality) + "\")%20sortBy%20cd.datumTijdstipWijzigingWork%20/sort.descending&maximumRecords=1000&startRecord=" + startRecord + "&httpAccept=application/json",
+            "https://repository.overheid.nl/sru?query=(c.product-area=lokalebekendmakingen%20AND%20cd.afgeleideGemeente=\"" + encodeURIComponent(lookupMunicipality) + "\")%20sortBy%20cd.datumTijdstipWijzigingWork%20/sort.descending&maximumRecords=1000&startRecord=" + startRecord + "&httpAccept=application/json",
             {
                 "method": "GET"
             }
