@@ -7,7 +7,6 @@
  */
 
 // TODO option to list historical licenses
-// https://zoek.officielebekendmakingen.nl/stcrt-2023-128.html
 
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
 function initMap() {
@@ -77,10 +76,38 @@ function initMap() {
     }
 
     function getAlineas(responseXml) {
+
+        function replaceTags(value) {
+            const tags = [
+                ["<extref doc=\"https://www.alkmaar.nl/bestuur-en-organisatie/het-ergens-niet-mee-eens-zijn/bezwaar-en-beroep\">website</extref>", "website"],  // Alkmaar https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-77888/1/xml/gmb-2023-77888.xml
+                ["<extref doc=\"https://www.alkmaar.nl/direct-regelen/wonen-verhuizen-en-verbouwen/bezwaar-en-beroep\">website</extref>", "website"],  // Alkmaar https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-23049/1/xml/gmb-2023-23049.xml
+                ["<!--Element br verwijderd -->", ""],  // Zaanstad https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-77748/1/xml/gmb-2023-77748.xml
+                ["<nadruk type=\"vet\">", ""],  // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-74922/1/xml/gmb-2023-74922.xml
+                ["<nadruk type=\"cur\">", ""],  // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-577976/1/xml/gmb-2022-577976.xml
+                ["<nadruk type=\"ondlijn\">", ""],  // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-32648/1/xml/gmb-2023-32648.xml
+                ["</nadruk>", ""],  // Hoorn
+                ["  ", " "],  // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-74948/1/xml/gmb-2023-74948.xml
+                [" :", ":"]  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-81009/1/xml/gmb-2023-81009.xml
+            ];
+            var result = value;
+            tags.forEach(function (tag) {
+                result = result.replaceAll(tag[0], tag[1]);
+            });
+            return result;
+        }
+
         const parser = new window.DOMParser();
-        const xmlDoc = parser.parseFromString(responseXml, "text/xml");
+        var xmlDoc;
+        var zakelijkeMededeling;
+        try {
+            xmlDoc = parser.parseFromString(replaceTags(responseXml).toLowerCase(), "text/xml");
+        } catch (e) {
+            console.error("Error parsing " + responseXml);
+            console.error(e);
+            return [];
+        }
         // gemeenteblad / zakelijke-mededeling / zakelijke-mededeling-tekst / tekst / <al>Verzonden naar aanvrager op: 20-09-2022</al>
-        const zakelijkeMededeling = xmlDoc.getElementsByTagName("zakelijke-mededeling-tekst");
+        zakelijkeMededeling = xmlDoc.getElementsByTagName("zakelijke-mededeling-tekst");
         return (
             zakelijkeMededeling.length === 0
             ? []
@@ -94,26 +121,117 @@ function initMap() {
         return Math.round((today.getTime() - dateFrom.getTime()) / (1000 * 60 * 60 * 24));
     }
 
-    function parseBekendmaking(responseXml, datumGepubliceerd, licenseId) {
+    function getDateFromText(value, urlApi) {
 
         function convertMonthNames(value) {
             return value.replace("januari", "01").replace("februari", "02").replace("maart", "03").replace("april", "04").replace("mei", "05").replace("juni", "06").replace("juli", "07").replace("augustus", "08").replace("september", "09").replace("oktober", "10").replace("november", "11").replace("december", "12");
         }
 
         function parseDate(value) {
-            var year = value.substr(35, 4);
-            var month = value.substr(32, 2);
-            var day = value.substr(29, 2);
+            var year = value.substring(6, 10);
+            var month = value.substring(3, 5);
+            var day = value.substring(0, 2);
             var datumBekendgemaakt;
             if (Number.isNaN(parseInt(year, 10)) || Number.isNaN(parseInt(month, 10)) || Number.isNaN(parseInt(day, 10))) {
-                console.error("Error parsing date (" + value + ") of license " + licenseId);
+                console.error("Error parsing date (" + value + ") of license " + urlApi);
                 return false;
             }
             datumBekendgemaakt = new Date(year + "-" + month + "-" + day);
+            // Remove time:
             return new Date(datumBekendgemaakt.toDateString());
         }
 
-        const identifier = "Verzonden naar aanvrager op: ";
+        // Amsterdam:
+        // *Verzonden naar aanvrager op: 02-09-2022
+        // *Besluit verzonden: 02-01-2023
+        // Zaanstad:
+        // *Besluit verzonden: 14 februari 2023
+        // *<!--Element br verwijderd -->Besluit verzonden: 29 december 2022
+        // AA & Hunze:
+        // Papenvoort, Papenvoort 15, 9447 TT, bouwen horecagebouw met bijgebouwen (verzonden 14-12-2022)
+        // Inname standplaats woensdag van 08:00 uur tot 18:00 uur, gedurende de periode 01-01-2023 tot en met 01-07-2023 (verzonden 29-12-2022)
+        // Enkhuizen:
+        // *De gemeente heeft op 18 januari 2023 een besluit genomen op de aanvraag met zaaknummer Z2022-00000175 voo..
+        // *De gemeente heeft op 9 februari 2023 een besluit genomen op de aanvraag met zaaknummer 2022-002470 voor het verbouwen van
+        // Hoorn:
+        // *Verzonden 9 februari 2023 https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-74922/1/xml/gmb-2023-74922.xml
+        // *Verleende omgevingsvergunning is verzonden op 18-01-2023. https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-27285/1/xml/gmb-2023-27285.xml
+        // *de omgevingsvergunning is verzonden op 18-01-2023. https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-576586/1/xml/gmb-2022-576586.xml
+        // Alkmaar:
+        // *Als u het niet eens bent met dit besluit dan kunt u binnen zes weken na de verzenddatum bezwaar maken. Op onze <extref doc="https://www.alkmaar.nl/bestuur-en-organisatie/het-ergens-niet-mee-eens-zijn/bezwaar-en-beroep">website</extref> kunt u lezen hoe u online of per post uw bezwaar kunt indienen. Uw bezwaarschrift moet vóór 26 januari 2023 zijn ontvangen.
+        // Texel:
+        // (1792 AE) Haven 17, Oudeschild: 3304202 Tijdelijk plaatsen van de hotelboot voor opvang van vluchtelingen, verlenging tot 1 maart 2024 (verzonden 16 februari 2023).
+        // Den Helder:
+        // Verzenddatum: 22 december 2022 https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-2603/1/xml/gmb-2023-2603.xml
+        // Besluitdatum : https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-81009/1/xml/gmb-2023-81009.xml
+        const identifier = "@@@";
+        const identifiersStart = [
+            "verzonden naar aanvrager op: ",
+            "de gemeente heeft op ",
+            "besluit verzonden: ",  // Zaandam https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-580371/1/xml/gmb-2022-580371.xml
+            "verzonden ",  // Hoorn
+            "verleende omgevingsvergunning is verzonden op ",  // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-84721/1/xml/gmb-2023-84721.xml
+            "verleende omgevingsvergunning is verzonden ",  // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-29091/1/xml/gmb-2023-29091.xml
+            "verzenddatum: ",  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-2603/1/xml/gmb-2023-2603.xml
+            "verzendatum: ",  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-59281/1/xml/gmb-2023-59281.xml
+            "besluitdatum: ",  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-81009/1/xml/gmb-2023-81009.xml
+            "de burgemeester van den helder maakt bekend, dat hij op "  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-20399/1/xml/gmb-2023-20399.xml
+        ];
+        const identifiersWithDeadline = [
+            "als u het niet eens bent met dit besluit dan kunt u binnen zes weken na de verzenddatum bezwaar maken. op onze website kunt u lezen hoe u online of per post uw bezwaar kunt indienen. uw bezwaarschrift moet vóór "  // Alkmaar
+        ];
+        const identifiersMiddle = [
+            " (verzonden "  // Texel
+        ];
+        var i;
+        var pos;
+        var isDateOfDeadline = false;
+        var result;
+        for (i = 0; i < identifiersStart.length; i += 1) {
+            if (value.substring(0, identifiersStart[i].length) === identifiersStart[i]) {
+                value = value.replace(identifiersStart[i], identifier);
+                break;
+            }
+        }
+        // If not found, try the Alkmaar way of publishing:
+        if (value.substring(0, identifier.length) !== identifier) {
+            for (i = 0; i < identifiersWithDeadline.length; i += 1) {
+                if (value.substring(0, identifiersWithDeadline[i].length) === identifiersWithDeadline[i]) {
+                    value = value.replace(identifiersWithDeadline[i], identifier);
+                    isDateOfDeadline = true;
+                    break;
+                }
+            }
+        }
+        // If not found, try the Texel way of publishing:
+        if (value.substring(0, identifier.length) !== identifier) {
+            for (i = 0; i < identifiersMiddle.length; i += 1) {
+                pos = value.indexOf(identifiersMiddle[i]);
+                if (pos !== -1) {
+                    value = identifier + value.substring(pos + identifiersMiddle[i].length);
+                    break;
+                }
+            }
+        }
+        if (value.substring(0, identifier.length) === identifier) {
+            value = value.substring(identifier.length);
+            if (value.substring(1, 2) === " " || value.substring(1, 2) === "-") {
+                value = "0" + value;
+            }
+            // Remove time from dates:
+            result = parseDate(convertMonthNames(value));
+            if (result !== false) {
+                if (isDateOfDeadline) {
+                    // This is the last date you can object to a decision. Extract 6 weeks.
+                    result.setDate(result.getDate() - (7 * 6));
+                }
+                return result;
+            }
+        }
+        return false;
+    }
+
+    function parseBekendmaking(responseXml, publication, licenseId) {
         const alineas = getAlineas(responseXml);
         const maxLooptijd = (6 * 7) + 1;  // 6 weken de tijd om bezwaar te maken
         const dateFormatOptions = {"weekday": "long", "year": "numeric", "month": "long", "day": "numeric"};
@@ -123,7 +241,6 @@ function initMap() {
         var i;
         var j;
         var alinea;
-        var value;
         var textToShow = "";
         var isBezwaartermijnFound = false;
         for (i = 0; i < alineas.length; i += 1) {
@@ -131,60 +248,43 @@ function initMap() {
             if (alinea.childNodes.length > 0) {
                 for (j = 0; j < alinea.childNodes.length; j += 1) {
                     if (alinea.childNodes[j].nodeName === "#text") {
-                        value = alinea.childNodes[j].nodeValue;
-                        // <al>Besluit verzonden: 26-01-2023</al>
-                        // <al><!--Element br verwijderd -->Besluit verzonden: 29 december 2022</al>
-                        value = value.replace("Besluit verzonden", "Verzonden naar aanvrager op").replace("<!--Element br verwijderd -->", "").trim();
-                        // Fix "Verzonden naar aanvrager op :" (https://zoek.officielebekendmakingen.nl/gmb-2022-441976.html)
-                        value = value.replace("op :", "op:");
-                        if (value.substr(0, identifier.length) === identifier) {
-                            // Verzonden naar aanvrager op: 02-09-2022
-                            // Remove time from dates:
-                            datumBekendgemaakt = parseDate(convertMonthNames(value));
-                            if (datumBekendgemaakt !== false) {
-                                isBezwaartermijnFound = true;
-                                looptijd = getDaysPassed(datumBekendgemaakt);
-                                resterendAantalDagenBezwaartermijn = maxLooptijd - looptijd;
-                                textToShow = "Gepubliceerd: " + datumGepubliceerd.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />Bekendgemaakt aan belanghebbende: " + datumBekendgemaakt.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />" + (
-                                    resterendAantalDagenBezwaartermijn > 0
-                                    ? "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
-                                    : "<b>Geen bezwaar meer mogelijk.</b>"
-                                ) + "<br /><br />";
-                            }
-                            break;
+                        datumBekendgemaakt = getDateFromText(alinea.childNodes[j].nodeValue.trim(), publication.urlApi);
+                        if (datumBekendgemaakt !== false) {
+                            isBezwaartermijnFound = true;
+                            looptijd = getDaysPassed(datumBekendgemaakt);
+                            resterendAantalDagenBezwaartermijn = maxLooptijd - looptijd;
+                            textToShow = "Gepubliceerd: " + publication.date.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />Bekendgemaakt aan belanghebbende: " + datumBekendgemaakt.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />" + (
+                                resterendAantalDagenBezwaartermijn > 0
+                                ? "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
+                                : "<b>Geen bezwaar meer mogelijk.</b>"
+                            ) + "<br /><br />";
                         }
+                        break;
                     }
                 }
             }
         }
         if (!isBezwaartermijnFound) {
-            textToShow = "Gepubliceerd: " + datumGepubliceerd.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br /><br />";
+            textToShow = "Gepubliceerd: " + publication.date.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br /><br />";
         }
         document.getElementById(licenseId).innerHTML = textToShow;
     }
 
-    function collectBezwaartermijn(licenseId, datumGepubliceerd) {
-        // URL: https://zoek.officielebekendmakingen.nl/gmb-2022-425209.html
-        // Endpoint: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-425209/1/xml/gmb-2022-425209.xml
-        const licenseIdArray = licenseId.split("-");
-        // Options: prb-2023-962
-        //          gmb-2023-56454
-        //          wsb-2023-801
-        //          stcrt-2023-128
-        const url = "https://repository.overheid.nl/frbr/officielepublicaties/" + licenseIdArray[0] + "/" + licenseIdArray[1] + "/" + licenseId + "/1/xml/" + licenseId + ".xml";
-        if (Number.isNaN(parseInt(licenseIdArray[1], 10))) {
-            console.error("Unable to get data for licenseId " + licenseId);
+    function collectBezwaartermijn(licenseId, publication) {
+        if (publication.urlApi === "UNAVAILABLE") {
+            console.error("Unable to get data for license " + publication.urlDoc);
             return;
         }
+        // Endpoint: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-425209/1/xml/gmb-2022-425209.xml
         fetch(
-            url,
+            publication.urlApi,
             {
                 "method": "GET"
             }
         ).then(function (response) {
             if (response.ok) {
                 response.text().then(function (xml) {
-                    parseBekendmaking(xml, datumGepubliceerd, licenseId);
+                    parseBekendmaking(xml, publication, licenseId);
                 });
             } else {
                 console.error(response);
@@ -363,7 +463,7 @@ function initMap() {
         }
     }
 
-    function addMarker(feature, periodToShow, position) {
+    function addMarker(publication, periodToShow, position) {
         // 2022-09-05T09:04:57.175Z;
         // https://zoek.officielebekendmakingen.nl/gmb-2022-396401.html;
         // "Besluit apv vergunning Verleend Monnikendammerweg 27";
@@ -371,8 +471,8 @@ function initMap() {
         // 125171;
         // 488983
         // https://developers.google.com/maps/documentation/javascript/reference#MarkerOptions
-        const age = getDaysPassed(feature.date);
-        const iconName = getIconName(feature.title, feature.type);
+        const age = getDaysPassed(publication.date);
+        const iconName = getIconName(publication.title, publication.type);
         const marker = new google.maps.Marker({
             "map": map,
             "position": position,
@@ -384,7 +484,7 @@ function initMap() {
                 "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
             },
             "zIndex": zIndex,
-            "title": feature.title
+            "title": publication.title
         });
         const markerObject = {
             "age": age,
@@ -396,8 +496,8 @@ function initMap() {
         marker.addListener(
             "click",
             function () {
-                const description = feature.description + "<br /><br />Meer info: <a href=\"" + feature.url + "\" target=\"blank\">" + feature.url + "</a>.";
-                var licenseId = getLicenseIdFromUrl(feature.url);
+                const description = publication.description + "<br /><br />Meer info: <a href=\"" + publication.urlDoc + "\" target=\"blank\">" + publication.urlDoc + "</a>.";
+                var licenseId = getLicenseIdFromUrl(publication.urlDoc);
                 // Supported is "Gemeentelijk blad (gmb)", "Provinciaal blad (prb)", "Waterschapsblad (wsb) and Staatscourant (stcrt)"
                 // Options: https://zoek.officielebekendmakingen.nl/prb-2023-962.html
                 //          https://zoek.officielebekendmakingen.nl/gmb-2023-56454.html
@@ -407,12 +507,12 @@ function initMap() {
                 //          https://www.zaanstad.nl/mozard/!suite42.scherm1260?mObj=211278
                 //          https://bekendmakingen.amsterdam.nl/bekendmakingen/overige/decos/C174AC3CD0754F9089D1553C31CD5B7A
                 if (licenseId) {
-                    showInfoWindow(marker, iconName, feature.title, "<div id=\"" + licenseId + "\"><br /><br /><br /></div>" + description);
-                    collectBezwaartermijn(licenseId, feature.date);
+                    showInfoWindow(marker, iconName, publication.title, "<div id=\"" + licenseId + "\"><br /><br /><br /></div>" + description);
+                    collectBezwaartermijn(licenseId, publication);
                 } else {
                     // Errors:  https://www.zaanstad.nl/mozard/!suite42.scherm1260?mObj=211278
                     //          https://bekendmakingen.amsterdam.nl/bekendmakingen/overige/decos/C174AC3CD0754F9089D1553C31CD5B7A
-                    showInfoWindow(marker, iconName, feature.title, description);
+                    showInfoWindow(marker, iconName, publication.title, description);
                 }
             }
         );
@@ -420,12 +520,12 @@ function initMap() {
         return markerObject;
     }
 
-    function prepareToAddMarker(feature, periodToShow, position, bounds) {
+    function prepareToAddMarker(publication, periodToShow, position, bounds) {
         if (bounds.contains(position)) {
-            addMarker(feature, periodToShow, position);
+            addMarker(publication, periodToShow, position);
         } else {
             delayedMarkersArray.push({
-                "feature": feature,
+                "publication": publication,
                 "position": position
             });
         }
@@ -453,21 +553,21 @@ function initMap() {
         const bounds = map.getBounds();
         var position;
         var i;
-        var feature;
+        var publication;
         console.log("Adding markers " + startRecord + " to " + publicationsArray.length);
         for (i = startRecord - 1; i < publicationsArray.length; i += 1) {
-            feature = publicationsArray[i];
-            if (typeof feature.location === "string") {
-                position = findUniquePosition(createCoordinate(feature.location));
-                prepareToAddMarker(feature, periodToShow, position, bounds);
-            } else if (Array.isArray(feature.location)) {
-                feature.location.forEach(function (locatiepunt) {
+            publication = publicationsArray[i];
+            if (typeof publication.location === "string") {
+                position = findUniquePosition(createCoordinate(publication.location));
+                prepareToAddMarker(publication, periodToShow, position, bounds);
+            } else if (Array.isArray(publication.location)) {
+                publication.location.forEach(function (locatiepunt) {
                     position = findUniquePosition(createCoordinate(locatiepunt));
-                    prepareToAddMarker(feature, periodToShow, position, bounds);
+                    prepareToAddMarker(publication, periodToShow, position, bounds);
                 });
             } else {
-                console.error("Unsupported feature:");
-                console.error(feature);
+                console.error("Unsupported publication:");
+                console.error(publication);
             }
         }
         if (!isMoreDataAvailable) {
@@ -584,7 +684,7 @@ function initMap() {
                 i = i - 1;
                 delayedMarker = delayedMarkersArray[i];
                 if (bounds.contains(delayedMarker.position)) {
-                    addMarker(delayedMarker.feature, periodToShow, delayedMarker.position);
+                    addMarker(delayedMarker.publication, periodToShow, delayedMarker.position);
                     delayedMarkersArray.splice(i, 1);
                 }
             }
@@ -598,9 +698,31 @@ function initMap() {
         map.setCenter(new google.maps.LatLng(center.lat, center.lng), initialZoomLevel);
     }
 
+    function getUrlApi(urlDoc) {
+        // URL: https://zoek.officielebekendmakingen.nl/gmb-2022-425209.html
+        // Endpoint: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-425209/1/xml/gmb-2022-425209.xml
+        const licenseId = getLicenseIdFromUrl(urlDoc);
+        if (!licenseId) {
+            return "UNAVAILABLE";
+        }
+        const licenseIdArray = licenseId.split("-");
+        // Options: prb-2023-962
+        //          gmb-2023-56454
+        //          wsb-2023-801
+        //          stcrt-2023-128
+        return "https://repository.overheid.nl/frbr/officielepublicaties/" + licenseIdArray[0] + "/" + licenseIdArray[1] + "/" + licenseId + "/1/xml/" + licenseId + ".xml";
+    }
+
     function addPublications(responseJson) {
         responseJson.searchRetrieveResponse.records.record.forEach(function (inputRecord) {
-            const feature = {
+            const urlDoc = inputRecord.recordData.gzd.originalData.meta.tpmeta.bronIdentifier.trim();
+            const publication = {
+                // Example: "2023-02-10"
+                "date": new Date(inputRecord.recordData.gzd.originalData.meta.tpmeta.geldigheidsperiode_startdatum),
+                // Example: "https:\/\/zoek.officielebekendmakingen.nl\/gmb-2023-59059.html"
+                "urlDoc": urlDoc,
+                // Example: "https:\/\/repository.overheid.nl\/frbr\/officielepublicaties\/gmb\/2023\/gmb-2023-59059\/1\/xml\/gmb-2023-59059.xml"
+                "urlApi": getUrlApi(urlDoc),
                 // Example "kapvergunning"
                 "type": (
                     // Sometimes multiple subjects, when both bouwvergunning and omgevingsvergunning are requested
@@ -612,21 +734,17 @@ function initMap() {
                 // Example: "Besluit apv vergunning Verleend Overtoom 10-H"
                 "title": inputRecord.recordData.gzd.originalData.meta.owmskern.title.trim(),
                 // Example: "TVM 2 vakken - Overtoom 10-12 13 februari 2023, Overtoom 10-H"
-                "description": inputRecord.recordData.gzd.originalData.meta.owmsmantel.description.trim(),
-                // Example: "2023-02-10"
-                "date": new Date(inputRecord.recordData.gzd.originalData.meta.tpmeta.geldigheidsperiode_startdatum),
-                // Example: "https:\/\/zoek.officielebekendmakingen.nl\/gmb-2023-59059.html"
-                "url": inputRecord.recordData.gzd.originalData.meta.tpmeta.bronIdentifier.trim()
+                "description": inputRecord.recordData.gzd.originalData.meta.owmsmantel.description.trim()
             };
             if (Array.isArray(inputRecord.recordData.gzd.originalData.meta.tpmeta.locatiepunt)) {
                 // Example: ["52.36374 4.877971"]
-                feature.location = [];
-                Array.prototype.push.apply(feature.location, inputRecord.recordData.gzd.originalData.meta.tpmeta.locatiepunt);
+                publication.location = [];
+                Array.prototype.push.apply(publication.location, inputRecord.recordData.gzd.originalData.meta.tpmeta.locatiepunt);
             } else {
                 // Example: "52.36374 4.877971"
-                feature.location = inputRecord.recordData.gzd.originalData.meta.tpmeta.locatiepunt;
+                publication.location = inputRecord.recordData.gzd.originalData.meta.tpmeta.locatiepunt;
             }
-            publicationsArray.push(feature);
+            publicationsArray.push(publication);
         });
     }
 
