@@ -193,7 +193,7 @@ function initMap() {
         }
         // If not found, try the Texel way of publishing:
         if (value.substring(0, identifier.length) !== identifier) {
-            // Velsen repeats part of title (Zeeweg 343, interne constructiewijziging (07/02/2022) 143528-2022): 
+            // Velsen repeats part of title (Zeeweg 343, interne constructiewijziging (07/02/2022) 143528-2022):
             identifiersMiddle.push(publication.title.substring(publication.title.length - 4).toLowerCase() + " (");  // Velsen https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-69953/1/xml/gmb-2023-69953.xml
             for (i = 0; i < identifiersMiddle.length; i += 1) {
                 // Bergen, Castricum etc. have this in the title: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-76348/1/xml/gmb-2023-76348.xml
@@ -201,12 +201,11 @@ function initMap() {
                 if (pos !== -1) {
                     value = identifier + publication.title.substring(pos + identifiersMiddle[i].length);
                     break;
-                } else {
-                    pos = value.indexOf(identifiersMiddle[i]);
-                    if (pos !== -1) {
-                        value = identifier + value.substring(pos + identifiersMiddle[i].length);
-                        break;
-                    }
+                }
+                pos = value.indexOf(identifiersMiddle[i]);
+                if (pos !== -1) {
+                    value = identifier + value.substring(pos + identifiersMiddle[i].length);
+                    break;
                 }
             }
         }
@@ -380,47 +379,105 @@ function initMap() {
         // Images are converted to SVG using https://png2svg.com/
         // Resized to 35x45 using https://www.iloveimg.com/resize-image/resize-svg#resize-options,pixels
         // Optmized using https://svgoptimizer.com/
+        const exploitatievergunningen = [
+            "drank- en horecavergunning",
+            "exploitatievergunning",
+            "gebruiksvergunning",
+            "kansspelvergunning",
+            "openingstijden"
+        ];
+        const evenementenvergunningen = [
+            "collectevergunning",
+            "evenementenvergunning",
+            "vuurwerkvergunning"
+        ];
+        const onttrekkingsvergunningen = [
+            "leegstandvergunning",
+            "onttrekkingsvergunning",
+            "splitsingsvergunning"
+        ];
+        const watervergunningen = [
+            "aanlegvergunning",
+            "ligplaatsvergunning",
+            "watervergunning"
+        ];
+        const milieuvergunningen = [
+            "bodembeschermingsvergunning",
+            "geluidvergunning",
+            "huisafval",
+            "milieu-informatie",
+            "milieueffectrapportage besluit",
+            "milieuvergunning",
+            "natuurbeschermingsvergunning"
+        ];
+        const verkeersvergunningen = [
+            "apv vergunning",
+            "gehandicaptenparkeervergunning",
+            "in- en uitritvergunning",
+            "verkeersbesluit"
+        ];
+        const bouwvergunningen = [
+            "bouwvergunning",
+            "monumentenvergunning",
+            "omgevingsvergunning",
+            "sloopvergunning"
+        ];
         title = title.toLowerCase();
-        if (title.indexOf("aanvraag") >= 0 || title.indexOf("verlenging") >= 0) {
+        if (title.indexOf("aanvraag") !== -1 || title.indexOf("verlenging") !== -1) {
             return "aanvraag";
         }
-        if (type === "exploitatievergunning" || title.indexOf("exploitatievergunning") >= 0 || title.indexOf("alcoholwetvergunning") >= 0) {
+        if (exploitatievergunningen.indexOf(type) !== -1 || title.indexOf("exploitatievergunning") !== -1 || title.indexOf("alcoholwetvergunning") !== -1) {
             return "bar";
         }
-        if (type === "evenementenvergunning" || title.indexOf("evenement") >= 0) {
+        if (evenementenvergunningen.indexOf(type) !== -1 || title.indexOf("evenement") !== -1) {
             return "evenement";
             // De 'loterij' met type 'overig' valt eruit!
         }
-        if (title.indexOf("bed & breakfast") >= 0 || title.indexOf("vakantieverhuur") >= 0) {
+        if (title.indexOf("bed & breakfast") !== -1 || title.indexOf("vakantieverhuur") !== -1) {
             return "hotel";
         }
-        if (type === "kapvergunning" || title.indexOf("houtopstand") >= 0 || title.indexOf("(kap)") >= 0) {
+        if (type === "kapvergunning" || title.indexOf("houtopstand") !== -1 || title.indexOf("(kap)") !== -1) {
             return "boomkap";
         }
-        if (title.indexOf("oplaadplaats") >= 0 || title.indexOf("opladen") >= 0 || title.indexOf("laadpaal") >= 0) {
+        if (title.indexOf("oplaadplaats") !== -1 || title.indexOf("opladen") !== -1 || title.indexOf("laadpaal") !== -1) {
             return "laadpaal";
         }
-        if (title.indexOf("apv vergunning") >= 0 || title.indexOf("parkeervakken") >= 0 || title.indexOf("tvm") >= 0) {
+        if (title.indexOf("apv vergunning") !== -1 || title.indexOf("parkeervakken") !== -1 || title.indexOf("tvm") !== -1) {
             // Verify this after 'laadpaal':
             return "tvm";
         }
-        if (type === "verkeersbesluit") {
+        if (verkeersvergunningen.indexOf(type) !== -1) {
             // Verify this after 'parkeervakken/tvm':
             return "verkeer";
         }
-        if (type === "splitsingsvergunning" || type === "onttrekkingsvergunning") {
+        if (onttrekkingsvergunningen.indexOf(type) !== -1) {
             return "kamerverhuur";  // EpicPupper, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
         }
-        if (type === "ligplaatsvergunning" || type === "watervergunning") {
+        if (watervergunningen.indexOf(type) !== -1) {
             return "boot";  // Barbetorte, CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0>, via Wikimedia Commons
         }
         if (type === "reclamevergunning") {
             return "reclame";  // Verdy_p (complete construction and vectorisation, based on mathematical properties of the symbol, and not drawn manually, and then manually edited without using any SVG editor)., Public domain, via Wikimedia Commons
         }
-        if (type === "milieuvergunning") {
+        if (milieuvergunningen.indexOf(type) !== -1) {
             return "milieu";
         }
-        return "constructie";
+        if (bouwvergunningen.indexOf(type) !== -1) {
+            return "constructie";
+        }
+        return "wetboek";  // By No machine-readable author provided. Chris-martin assumed (based on copyright claims). Own work assumed (based on copyright claims)., CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=1010176
+        // "aanwijzingsbesluit",
+        // "agenda en notulen",
+        // "bestemmingsplan",
+        // "inspraak",
+        // "mededelingen",
+        // "meldingen",
+        // "overig",
+        // "rectificatie",
+        // "register kinderopvang",
+        // "standplaatsvergunning",
+        // "verkiezingen",
+        // "verordeningen en reglementen",
     }
 
     function findUniquePosition(proposedCoordinate) {
