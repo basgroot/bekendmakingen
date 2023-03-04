@@ -112,7 +112,7 @@ function initMap() {
         return (
             zakelijkeMededeling.length === 0
             ? []
-            : zakelijkeMededeling[0].getElementsByTagName("al")
+            : zakelijkeMededeling[0].querySelectorAll("al,tussenkop")  // Tussenkop is required for Den Haag https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-78971/1/xml/gmb-2023-78971.xml
         );
     }
 
@@ -122,7 +122,7 @@ function initMap() {
         return Math.round((today.getTime() - dateFrom.getTime()) / (1000 * 60 * 60 * 24));
     }
 
-    function getDateFromText(value, publication) {
+    function parseBekendmaking(responseXml, publication, licenseId) {
 
         function convertMonthNames(value) {
             return value.replace("januari", "01").replace("februari", "02").replace("maart", "03").replace("april", "04").replace("mei", "05").replace("juni", "06").replace("juli", "07").replace("augustus", "08").replace("september", "09").replace("oktober", "10").replace("november", "11").replace("december", "12");
@@ -142,92 +142,121 @@ function initMap() {
             return new Date(datumBekendgemaakt.toDateString());
         }
 
-        const identifier = "@@@";
-        const identifiersStart = [
-            "verzonden naar aanvrager op: ",
-            "de gemeente heeft op ",
-            "de gemeente opmeer heeft op ",  // Opmeer https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-79622/1/xml/gmb-2023-79622.xml
-            "besluit verzonden: ",  // Zaandam https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-580371/1/xml/gmb-2022-580371.xml
-            "besluitdatum: ",  // Landsmeer https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-74508/1/xml/gmb-2023-74508.xml
-            "verzonden op: ",  // Dijk en Waard https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-85385/1/xml/gmb-2023-85385.xml
-            "(verzonden ",  // Waterland https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-67428/1/xml/gmb-2023-67428.xml
-            "verzonden ",  // Hoorn
-            "verleende omgevingsvergunning is verzonden op ",  // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-84721/1/xml/gmb-2023-84721.xml
-            "verleende omgevingsvergunning is verzonden ",  // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-29091/1/xml/gmb-2023-29091.xml
-            "verzenddatum besluit: ",  // Koggenland https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-68991/1/xml/gmb-2023-68991.xml
-            "verzenddatum: ",  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-2603/1/xml/gmb-2023-2603.xml
-            "verzendatum: ",  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-59281/1/xml/gmb-2023-59281.xml
-            "besluitdatum: ",  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-81009/1/xml/gmb-2023-81009.xml
-            "bekendmakingsdatum: ",  // Heemskerk https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-67866/1/xml/gmb-2023-67866.xml
-            "datum besluit: ",  // Edam-Volendam https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-74723/1/xml/gmb-2023-74723.xml
-            "de burgemeester van den helder maakt bekend, dat hij op "  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-20399/1/xml/gmb-2023-20399.xml
-        ];
-        const identifiersWithDeadline = [
-            "als u het niet eens bent met dit besluit dan kunt u binnen zes weken na de verzenddatum bezwaar maken. op onze website kunt u lezen hoe u online of per post uw bezwaar kunt indienen. uw bezwaarschrift moet vóór ",  // Alkmaar
-            "u kunt de gemeente tot "  // Dijk en Waard https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-76678/1/xml/gmb-2023-76678.xml
-        ];
-        const identifiersMiddle = [
-            " (verzonden ",  // Texel
-            ", verzenddatum ",  // Bergen NH https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-76348/1/xml/gmb-2023-76348.xml
-            ", verleend op "  // Beverwijk https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-81123/1/xml/gmb-2023-81123.xml
-        ];
-        var i;
-        var pos;
-        var isDateOfDeadline = false;
-        var result;
-        for (i = 0; i < identifiersStart.length; i += 1) {
-            if (value.substring(0, identifiersStart[i].length) === identifiersStart[i]) {
-                value = value.replace(identifiersStart[i], identifier);
-                break;
+        function getDateFromText(value, publication) {
+            const identifier = "@@@";
+            const identifiersStart = [
+                "verzonden naar aanvrager op: ",
+                "de gemeente heeft op ",
+                "de gemeente opmeer heeft op ",  // Opmeer https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-79622/1/xml/gmb-2023-79622.xml
+                "besluit verzonden: ",  // Zaandam https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-580371/1/xml/gmb-2022-580371.xml
+                "besluitdatum: ",  // Landsmeer https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-74508/1/xml/gmb-2023-74508.xml
+                "verzonden op: ",  // Dijk en Waard https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-85385/1/xml/gmb-2023-85385.xml
+                "(verzonden ",  // Waterland https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-67428/1/xml/gmb-2023-67428.xml
+                "verzonden ",  // Hoorn
+                "verleende omgevingsvergunning is verzonden op ",  // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-84721/1/xml/gmb-2023-84721.xml
+                "verleende omgevingsvergunning is verzonden ",  // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-29091/1/xml/gmb-2023-29091.xml
+                "verzenddatum besluit: ",  // Koggenland https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-68991/1/xml/gmb-2023-68991.xml
+                "verzenddatum: ",  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-2603/1/xml/gmb-2023-2603.xml
+                "verzendatum: ",  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-59281/1/xml/gmb-2023-59281.xml
+                "besluitdatum: ",  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-81009/1/xml/gmb-2023-81009.xml
+                "bekendmakingsdatum: ",  // Heemskerk https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-67866/1/xml/gmb-2023-67866.xml
+                "datum besluit: ",  // Edam-Volendam https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-74723/1/xml/gmb-2023-74723.xml
+                "de burgemeester van den helder maakt bekend, dat hij op "  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-20399/1/xml/gmb-2023-20399.xml
+            ];
+            const identifiersWithDeadline = [
+                "als u het niet eens bent met dit besluit dan kunt u binnen zes weken na de verzenddatum bezwaar maken. op onze website kunt u lezen hoe u online of per post uw bezwaar kunt indienen. uw bezwaarschrift moet vóór ",  // Alkmaar
+                "u kunt de gemeente tot "  // Dijk en Waard https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-76678/1/xml/gmb-2023-76678.xml
+            ];
+            const identifiersMiddle = [
+                " (verzonden ",  // Texel
+                ", verzenddatum ",  // Bergen NH https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-76348/1/xml/gmb-2023-76348.xml
+                " (verzenddatum ",  // Groningen https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-79536/1/xml/gmb-2023-79536.xml
+                ", verleend op ",  // Beverwijk https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-81123/1/xml/gmb-2023-81123.xml
+                " (datum besluit " // Rotterdam https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-92486/1/xml/gmb-2023-92486.xml
+            ];
+            const identifiersAfter = [
+                " is een omgevingsvergunning verleend"  // Noordoostpolder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-93843/1/xml/gmb-2023-93843.xml
+            ];
+            const identifierNextValueIsDate = "datum bekendmaking besluit:";  // Den Haag https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-79557/1/xml/gmb-2023-79557.xml
+            var i;
+            var pos;
+            var isDateOfDeadline = false;
+            var result;
+            if (value === identifierNextValueIsDate) {
+                isNextValueBekendmakingsDate = true;
+            } else {
+                value = convertMonthNames(value);
+                if (isNextValueBekendmakingsDate === true) {
+                    value = identifier + value;
+                }
+                isNextValueBekendmakingsDate = false;
             }
-        }
-        // If not found, try the Alkmaar way of publishing:
-        if (value.substring(0, identifier.length) !== identifier) {
-            for (i = 0; i < identifiersWithDeadline.length; i += 1) {
-                if (value.substring(0, identifiersWithDeadline[i].length) === identifiersWithDeadline[i]) {
-                    value = value.replace(identifiersWithDeadline[i], identifier);
-                    isDateOfDeadline = true;
-                    break;
+            // If not found, try the regular way of publishing:
+            if (value.substring(0, identifier.length) !== identifier) {
+                for (i = 0; i < identifiersStart.length; i += 1) {
+                    if (value.substring(0, identifiersStart[i].length) === identifiersStart[i]) {
+                        value = value.replace(identifiersStart[i], identifier);
+                        break;
+                    }
                 }
             }
-        }
-        // If not found, try the Texel way of publishing:
-        if (value.substring(0, identifier.length) !== identifier) {
-            // Velsen repeats part of title (Zeeweg 343, interne constructiewijziging (07/02/2022) 143528-2022):
-            identifiersMiddle.push(publication.title.substring(publication.title.length - 4).toLowerCase() + " (");  // Velsen https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-69953/1/xml/gmb-2023-69953.xml
-            for (i = 0; i < identifiersMiddle.length; i += 1) {
-                // Bergen, Castricum etc. have this in the title: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-76348/1/xml/gmb-2023-76348.xml
-                pos = publication.title.indexOf(identifiersMiddle[i]);
-                if (pos !== -1) {
-                    value = identifier + publication.title.substring(pos + identifiersMiddle[i].length);
-                    break;
-                }
-                pos = value.indexOf(identifiersMiddle[i]);
-                if (pos !== -1) {
-                    value = identifier + value.substring(pos + identifiersMiddle[i].length);
-                    break;
+            // If not found, try the Noordoostpolder way of publishing:
+            if (value.substring(0, identifier.length) !== identifier) {
+                for (i = 0; i < identifiersAfter.length; i += 1) {
+                    // Noordoostpolder has this in the title: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-93843/1/xml/gmb-2023-93843.xml
+                    pos = value.indexOf(identifiersAfter[i]);
+                    if (pos !== -1) {
+                        value = identifier + value.substring(pos - 10, pos);
+                        break;
+                    }
                 }
             }
-        }
-        if (value.substring(0, identifier.length) === identifier) {
-            value = value.substring(identifier.length);
-            if (value.substring(1, 2) === " " || value.substring(1, 2) === "-") {
-                value = "0" + value;
-            }
-            // Remove time from dates:
-            result = parseDate(convertMonthNames(value));
-            if (result !== false) {
-                if (isDateOfDeadline) {
-                    // This is the last date you can object to a decision. Extract 6 weeks.
-                    result.setDate(result.getDate() - (7 * 6));
+            // If not found, try the Alkmaar way of publishing:
+            if (value.substring(0, identifier.length) !== identifier) {
+                for (i = 0; i < identifiersWithDeadline.length; i += 1) {
+                    if (value.substring(0, identifiersWithDeadline[i].length) === identifiersWithDeadline[i]) {
+                        value = value.replace(identifiersWithDeadline[i], identifier);
+                        isDateOfDeadline = true;
+                        break;
+                    }
                 }
-                return result;
             }
+            // If not found, try the Texel way of publishing:
+            if (value.substring(0, identifier.length) !== identifier) {
+                // Velsen repeats part of title (Zeeweg 343, interne constructiewijziging (07/02/2022) 143528-2022):
+                identifiersMiddle.push(publication.title.substring(publication.title.length - 4).toLowerCase() + " (");  // Velsen https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-69953/1/xml/gmb-2023-69953.xml
+                for (i = 0; i < identifiersMiddle.length; i += 1) {
+                    // Bergen, Castricum etc. have this in the title: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-76348/1/xml/gmb-2023-76348.xml
+                    pos = publication.title.indexOf(identifiersMiddle[i]);
+                    if (pos !== -1) {
+                        value = identifier + publication.title.substring(pos + identifiersMiddle[i].length);
+                        break;
+                    }
+                    pos = value.indexOf(identifiersMiddle[i]);
+                    if (pos !== -1) {
+                        value = identifier + value.substring(pos + identifiersMiddle[i].length);
+                        break;
+                    }
+                }
+            }
+            if (value.substring(0, identifier.length) === identifier) {
+                value = value.substring(identifier.length);
+                if (value.substring(1, 2) === " " || value.substring(1, 2) === "-") {
+                    value = "0" + value;
+                }
+                // Remove time from dates:
+                result = parseDate(value);
+                if (result !== false) {
+                    if (isDateOfDeadline) {
+                        // This is the last date you can object to a decision. Extract 6 weeks.
+                        result.setDate(result.getDate() - (7 * 6));
+                    }
+                    return result;
+                }
+            }
+            return false;
         }
-        return false;
-    }
 
-    function parseBekendmaking(responseXml, publication, licenseId) {
         const alineas = getAlineas(responseXml);
         const maxLooptijd = (6 * 7) + 1;  // 6 weken de tijd om bezwaar te maken
         const dateFormatOptions = {"weekday": "long", "year": "numeric", "month": "long", "day": "numeric"};
@@ -238,6 +267,7 @@ function initMap() {
         var j;
         var alinea;
         var textToShow = "";
+        var isNextValueBekendmakingsDate = false;
         var isBezwaartermijnFound = false;
         for (i = 0; i < alineas.length; i += 1) {
             alinea = alineas[i];
@@ -251,8 +281,8 @@ function initMap() {
                             resterendAantalDagenBezwaartermijn = maxLooptijd - looptijd;
                             textToShow = "Gepubliceerd: " + publication.date.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />Bekendgemaakt aan belanghebbende: " + datumBekendgemaakt.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />" + (
                                 resterendAantalDagenBezwaartermijn > 0
-                                ? "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
-                                : "<b>Geen bezwaar meer mogelijk.</b>"
+                                    ? "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
+                                    : "<b>Geen bezwaar meer mogelijk.</b>"
                             ) + "<br /><br />";
                         }
                         break;
