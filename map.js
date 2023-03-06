@@ -454,7 +454,7 @@ function initMap() {
         ];
         title = title.toLowerCase();
         if (title.indexOf("aanvraag") !== -1 || title.indexOf("verlenging") !== -1) {
-            return "aanvraag";
+            return "aanvraag";  // Halfwitty, CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0, via Wikimedia Commons
         }
         if (exploitatievergunningen.indexOf(type) !== -1 || title.indexOf("exploitatievergunning") !== -1 || title.indexOf("alcoholwetvergunning") !== -1) {
             return "bar";
@@ -481,10 +481,10 @@ function initMap() {
             return "verkeer";
         }
         if (onttrekkingsvergunningen.indexOf(type) !== -1) {
-            return "kamerverhuur";  // EpicPupper, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
+            return "kamerverhuur";  // EpicPupper, CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0, via Wikimedia Commons
         }
         if (watervergunningen.indexOf(type) !== -1) {
-            return "boot";  // Barbetorte, CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0>, via Wikimedia Commons
+            return "boot";  // Barbetorte, CC BY-SA 3.0 https://creativecommons.org/licenses/by-sa/3.0, via Wikimedia Commons
         }
         if (type === "reclamevergunning") {
             return "reclame";  // Verdy_p (complete construction and vectorisation, based on mathematical properties of the symbol, and not drawn manually, and then manually edited without using any SVG editor)., Public domain, via Wikimedia Commons
