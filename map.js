@@ -161,7 +161,11 @@ function initMap() {
                 "besluitdatum: ",  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-81009/1/xml/gmb-2023-81009.xml
                 "bekendmakingsdatum: ",  // Heemskerk https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-67866/1/xml/gmb-2023-67866.xml
                 "datum besluit: ",  // Edam-Volendam https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-74723/1/xml/gmb-2023-74723.xml
+                "datum verzending besluit: ",  // Almere https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-31954/1/xml/gmb-2023-31954.xml
                 "de burgemeester van den helder maakt bekend, dat hij op "  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-20399/1/xml/gmb-2023-20399.xml
+            ];
+            const identifiersStartWithObjectionStart = [
+                "de termijn voor het indienen van een bezwaar start op "  // Gouda https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-37420/1/xml/gmb-2023-37420.xml
             ];
             const identifiersWithDeadline = [
                 "als u het niet eens bent met dit besluit dan kunt u binnen zes weken na de verzenddatum bezwaar maken. op onze website kunt u lezen hoe u online of per post uw bezwaar kunt indienen. uw bezwaarschrift moet vóór ",  // Alkmaar
@@ -169,10 +173,12 @@ function initMap() {
             ];
             const identifiersMiddle = [
                 " (verzonden ",  // Texel
+                ", verzonden ",  // Haarlem https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-31494/1/xml/gmb-2023-31494.xml
                 ", verzenddatum ",  // Bergen NH https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-76348/1/xml/gmb-2023-76348.xml
                 " (verzenddatum ",  // Groningen https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-79536/1/xml/gmb-2023-79536.xml
                 ", verleend op ",  // Beverwijk https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-81123/1/xml/gmb-2023-81123.xml
-                " (datum besluit " // Rotterdam https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-92486/1/xml/gmb-2023-92486.xml
+                " (datum besluit ", // Rotterdam https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-92486/1/xml/gmb-2023-92486.xml
+                "de termijn voor het indienen van een bezwaarschrift start op "  // Aalsmeer https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-63996/1/xml/gmb-2023-63996.xml
             ];
             const identifiersAfter = [
                 " is een omgevingsvergunning verleend"  // Noordoostpolder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-93843/1/xml/gmb-2023-93843.xml
@@ -181,6 +187,7 @@ function initMap() {
             var i;
             var pos;
             var isDateOfDeadline = false;
+            var isObjectionStartDate = false;
             var result;
             if (value === identifierNextValueIsDate) {
                 isNextValueBekendmakingsDate = true;
@@ -196,6 +203,17 @@ function initMap() {
                 for (i = 0; i < identifiersStart.length; i += 1) {
                     if (value.substring(0, identifiersStart[i].length) === identifiersStart[i]) {
                         value = value.replace(identifiersStart[i], identifier);
+                        break;
+                    }
+                }
+            }
+            // If not found, try the regular way of publishing objection start date:
+            if (value.substring(0, identifier.length) !== identifier) {
+                for (i = 0; i < identifiersStartWithObjectionStart.length; i += 1) {
+                    pos = value.indexOf(identifiersStartWithObjectionStart[i]);
+                    if (pos !== -1) {
+                        value = identifier + value.substring(pos + identifiersStartWithObjectionStart[i].length);
+                        isObjectionStartDate = true;
                         break;
                     }
                 }
@@ -229,7 +247,8 @@ function initMap() {
                     // Bergen, Castricum etc. have this in the title: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-76348/1/xml/gmb-2023-76348.xml
                     pos = publication.title.indexOf(identifiersMiddle[i]);
                     if (pos !== -1) {
-                        value = identifier + publication.title.substring(pos + identifiersMiddle[i].length);
+                        // Haarlem: ...activiteit handelen in strijd met regels ruimtelijke ordening, verzonden 16 januari 2023
+                        value = identifier + convertMonthNames(publication.title.substring(pos + identifiersMiddle[i].length));
                         break;
                     }
                     pos = value.indexOf(identifiersMiddle[i]);
@@ -250,6 +269,8 @@ function initMap() {
                     if (isDateOfDeadline) {
                         // This is the last date you can object to a decision. Extract 6 weeks.
                         result.setDate(result.getDate() - (7 * 6));
+                    } else if (isObjectionStartDate) {
+                        result.setDate(result.getDate() - 1);  // Objection period starts one day after date 'verzonden'
                     }
                     return result;
                 }
