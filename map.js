@@ -6,23 +6,39 @@
  * Bezoek https://basgroot.github.io/bekendmakingen/?in=Hoorn
  */
 
-// TODO option to list historical licenses
-
 // This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
 function initMap() {
-    const municipalityMarkers = [];
-    const initialZoomLevel = 16;
-    const loadingIndicator = document.createElement("img");
-    var publicationsArray = [];
-    var markersArray = [];
-    var delayedMarkersArray = [];
-    var zIndex = 2147483647;  // Some high number
-    var map;
-    var infoWindow;
-    var activeMunicipality = "Hoorn";
+    const appState = {
+        // The map itself:
+        "map": null,
+        // The selected (or initial) municipality:
+        "activeMunicipality": "Hoorn",
+        // The zoom level when starting the app:
+        "initialZoomLevel": 16,
+        // The marker objects of the municipalities:
+        "municipalityMarkers": [],
+        // Te list with markers on the map:
+        "markersArray": [],
+        // The markers outside the screen, to be shown after becoming visible (scroll):
+        "delayedMarkersArray": [],
+        // The publications to display:
+        "publicationsArray": [],
+        // Backup of the recent publications, because loading them again is slow:
+        "publicationsArrayBackup": [],
+        // Indicates the status of the time filter:
+        "isHistoryActive": false,
+        // Indicates if all parts are loaded:
+        "isFullyLoaded": false,
+        // Order of different license markers, newest on top. Set to some high number:
+        "zIndex": 2147483647,
+        // Wait custor when loading data:
+        "loadingIndicator": document.createElement("img"),
+        // The info window shown when clicking on a marker:
+        "infoWindow": null
+    };
 
     function getInitialMapSettings() {
-        var zoomLevel = initialZoomLevel;
+        var zoomLevel = appState.initialZoomLevel;
         var center;
         var urlParams;
         var zoomParam;
@@ -38,10 +54,10 @@ function initMap() {
             centerParam = urlParams.get("center");
             municipality = urlParams.get("in");
             if (municipality && municipalities[municipality] !== undefined) {
-                activeMunicipality = municipality;
+                appState.activeMunicipality = municipality;
                 console.log("Adjusted municipality from URL");
             }
-            center = Object.assign({}, municipalities[activeMunicipality].center);
+            center = Object.assign({}, municipalities[appState.activeMunicipality].center);
             if (zoomParam && centerParam) {
                 zoomParam = parseFloat(zoomParam);
                 if (zoomParam > 14 && zoomParam < 20) {
@@ -66,11 +82,11 @@ function initMap() {
     }
 
     function showInfoWindow(marker, iconName, header, body) {
-        infoWindow.setContent("<div><img src=\"img/" + iconName + ".svg\" width=\"105\" height=\"135\" class=\"info_window_image\"><h2 class=\"info_window_heading\">" + header + "</h2><div class=\"info_window_body\"><p>" + body + "</p></div></div>");
+        appState.infoWindow.setContent("<div><img src=\"img/" + iconName + ".svg\" width=\"105\" height=\"135\" class=\"info_window_image\"><h2 class=\"info_window_heading\">" + header + "</h2><div class=\"info_window_body\"><p>" + body + "</p></div></div>");
         // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.open
-        infoWindow.open({
+        appState.infoWindow.open({
             "anchor": marker,
-            "map": map,
+            "map": appState.map,
             "shouldFocus": true
         });
     }
@@ -304,8 +320,8 @@ function initMap() {
                             resterendAantalDagenBezwaartermijn = maxLooptijd - looptijd;
                             textToShow = "Gepubliceerd: " + publication.date.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />Bekendgemaakt aan belanghebbende: " + datumBekendgemaakt.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />" + (
                                 resterendAantalDagenBezwaartermijn > 0
-                                    ? "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
-                                    : "<b>Geen bezwaar meer mogelijk.</b>"
+                                ? "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
+                                : "<b>Geen bezwaar meer mogelijk.</b>"
                             ) + "<br /><br />";
                         }
                         break;
@@ -354,13 +370,13 @@ function initMap() {
     }
 
     function createOptionEx(value) {
-        return createOption(value, value, value === activeMunicipality);
+        return createOption(value, value, value === appState.activeMunicipality);
     }
 
     function createMapsControlLoadingIndicator() {
         const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
-        controlDiv.appendChild(loadingIndicator);
-        map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(controlDiv);
+        controlDiv.appendChild(appState.loadingIndicator);
+        appState.map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(controlDiv);
     }
 
     function createMapsControlMunicipalities() {
@@ -374,7 +390,7 @@ function initMap() {
         combobox.addEventListener("change", loadData);
         combobox.classList.add("controlStyle");
         controlDiv.appendChild(combobox);
-        map.controls[google.maps.ControlPosition.TOP_CENTER].push(controlDiv);
+        appState.map.controls[google.maps.ControlPosition.TOP_CENTER].push(controlDiv);
     }
 
     function createMapsControlPeriods() {
@@ -384,11 +400,14 @@ function initMap() {
         combobox.add(createOption("3d", "Publicaties van laatste drie dagen", false));
         combobox.add(createOption("7d", "Publicaties van laatste week", false));
         combobox.add(createOption("14d", "Publicaties van laatste twee weken", true));
-        combobox.add(createOption("all", "Alle recente publicaties", false));
-        combobox.addEventListener("change", updateDisplayLevel);
+        combobox.add(createOption("all", "Alle recente publicaties", false));  // This is also the value when an historical period is selected
+        combobox.add(createOption("2023-03", "Maart 2023", false));
+        combobox.add(createOption("2023-02", "Februari 2023", false));
+        combobox.add(createOption("2023-01", "Januari 2023", false));
+        combobox.addEventListener("change", updateTimeFilter);
         combobox.classList.add("controlStyle");
         controlDiv.appendChild(combobox);
-        map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(controlDiv);
+        appState.map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(controlDiv);
     }
 
     function createMapsControlSource() {
@@ -403,7 +422,7 @@ function initMap() {
         });
         button.classList.add("controlStyle");
         controlDiv.appendChild(button);
-        map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(controlDiv);
+        appState.map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(controlDiv);
     }
 
     function createMapsControls() {
@@ -539,9 +558,9 @@ function initMap() {
             var isAvailable = true;  // Be positive
             var i;
             var marker;
-            for (i = 0; i < markersArray.length; i += 1) {
+            for (i = 0; i < appState.markersArray.length; i += 1) {
                 // Don't use forEach, to gain some performance.
-                marker = markersArray[i];
+                marker = appState.markersArray[i];
                 if (marker.position.lat === coordinate.lat && marker.position.lng === coordinate.lng) {
                     isAvailable = false;
                     break;
@@ -581,7 +600,7 @@ function initMap() {
         const age = getDaysPassed(publication.date);
         const iconName = getIconName(publication.title, publication.type);
         const marker = new google.maps.Marker({
-            "map": map,
+            "map": appState.map,
             "position": position,
             "clickable": true,
             "optimized": true,
@@ -590,7 +609,7 @@ function initMap() {
                 "url": "img/" + iconName + ".png",
                 "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
             },
-            "zIndex": zIndex,
+            "zIndex": appState.zIndex,
             "title": publication.title
         });
         const markerObject = {
@@ -599,7 +618,7 @@ function initMap() {
             "isSvg": true,
             "marker": marker
         };
-        zIndex -= 1;  // Input is sorted by modification date - most recent first. Give them a higher zIndex, so Besluit is in front of Verlenging (which is in front of Aanvraag)
+        appState.zIndex -= 1;  // Input is sorted by modification date - most recent first. Give them a higher zIndex, so Besluit is in front of Verlenging (which is in front of Aanvraag)
         marker.addListener(
             "click",
             function () {
@@ -623,7 +642,7 @@ function initMap() {
                 }
             }
         );
-        markersArray.push(markerObject);
+        appState.markersArray.push(markerObject);
         return markerObject;
     }
 
@@ -631,20 +650,38 @@ function initMap() {
         if (bounds.contains(position)) {
             addMarker(publication, periodToShow, position);
         } else {
-            delayedMarkersArray.push({
+            appState.delayedMarkersArray.push({
                 "publication": publication,
                 "position": position
             });
         }
     }
 
-    function getPeriodToShow() {
-        const periodComboElm = document.getElementById("idCbxPeriod");
-        return (
-            periodComboElm === null
-            ? "14d"
-            : periodComboElm.value
-        );
+    function getTimeFilter() {
+
+        function isHistoricalPeriod(value) {
+            // Values of historical periods are notated like '2023-03'
+            return value.length === 7 && value.substring(4, 5) === "-";
+        }
+
+        const result = {
+            "elm": document.getElementById("idCbxPeriod"),
+            "period": "14d",
+            "periodToShow": "14d",
+            "isHistory": false
+        };
+        if (result.elm === null) {
+            return result;  // Default when loading
+        }
+        // If this is an historical period, default to 'all':
+        result.period = result.elm.value;
+        if (isHistoricalPeriod(result.elm.value)) {
+            result.periodToShow = "all";
+            result.isHistory = true;
+        } else {
+            result.periodToShow = result.elm.value;
+        }
+        return result;
     }
 
     function createCoordinate(locatiepunt) {
@@ -656,34 +693,37 @@ function initMap() {
     }
 
     function addMarkers(startRecord, isMoreDataAvailable) {
-        const periodToShow = getPeriodToShow();
-        const bounds = map.getBounds();
+        const timeFilter = getTimeFilter();
+        const bounds = appState.map.getBounds();
         var position;
         var i;
         var publication;
-        console.log("Adding markers " + startRecord + " to " + publicationsArray.length);
-        for (i = startRecord - 1; i < publicationsArray.length; i += 1) {
-            publication = publicationsArray[i];
+        console.log("Adding markers " + startRecord + " to " + appState.publicationsArray.length);
+        for (i = startRecord - 1; i < appState.publicationsArray.length; i += 1) {
+            publication = appState.publicationsArray[i];
             if (typeof publication.location === "string") {
                 position = findUniquePosition(createCoordinate(publication.location));
-                prepareToAddMarker(publication, periodToShow, position, bounds);
+                prepareToAddMarker(publication, timeFilter.periodToShow, position, bounds);
             } else if (Array.isArray(publication.location)) {
                 publication.location.forEach(function (locatiepunt) {
                     position = findUniquePosition(createCoordinate(locatiepunt));
-                    prepareToAddMarker(publication, periodToShow, position, bounds);
+                    prepareToAddMarker(publication, timeFilter.periodToShow, position, bounds);
                 });
             } else if (publication.location === undefined) {
                 console.error("Publication without position: " + JSON.stringify(publication, null, 4));
                 // Take the center of the municipality:
-                position = findUniquePosition(municipalities[activeMunicipality].center);
-                prepareToAddMarker(publication, periodToShow, position, bounds);
+                position = findUniquePosition(municipalities[appState.activeMunicipality].center);
+                prepareToAddMarker(publication, timeFilter.periodToShow, position, bounds);
             } else {
                 console.error("Unsupported publication location: " + JSON.stringify(publication, null, 4));
             }
         }
         if (!isMoreDataAvailable) {
             // Hide loading indicator - don't use style.visibility = "hidden", because then it keeps occupying space and prevents clicking on the map
-            loadingIndicator.style.display = "none";
+            appState.loadingIndicator.style.display = "none";
+            if (!appState.isHistoryActive) {
+                appState.isFullyLoaded = true;
+            }
         }
     }
 
@@ -692,20 +732,20 @@ function initMap() {
         municipalityNames.forEach(function (municipalityName) {
             const municipalityObject = municipalities[municipalityName];
             var marker = new google.maps.Marker({
-                "map": map,
+                "map": appState.map,
                 "position": municipalityObject.center,
                 "label": municipalityName,  // https://developers.google.com/maps/documentation/javascript/reference/marker#MarkerLabel
                 "clickable": true,
                 "optimized": true,
                 //"scaleControl": true,
-                "visible": municipalityName !== activeMunicipality,
+                "visible": municipalityName !== appState.activeMunicipality,
                 "icon": {
                     "url": "img/gemeente.png",
                     "size": new google.maps.Size(50, 61)  // Make sure image is already scaled
                 },
                 "title": municipalityName
             });
-            municipalityMarkers.push({
+            appState.municipalityMarkers.push({
                 "municipalityName": municipalityName,
                 "marker": marker
             });
@@ -716,41 +756,59 @@ function initMap() {
                     if (municipalityComboElm !== null) {
                         municipalityComboElm.value = municipalityName;
                     }
-                    activeMunicipality = municipalityName;
+                    appState.activeMunicipality = municipalityName;
                     loadData();
                 }
             );
         });
     }
 
-    function updateDisplayLevel() {
-        const periodToShow = getPeriodToShow();
-        markersArray.forEach(function (markerObject) {
-            markerObject.marker.setVisible(isMarkerVisible(markerObject.age, periodToShow));
-        });
+    function updateTimeFilter() {
+        const timeFilter = getTimeFilter();
+        if (timeFilter.isHistory) {
+            console.log("Loading historical data");
+            loadHistory(timeFilter.period);
+        } else {
+            console.log("Filtering time");
+            if (appState.isHistoryActive) {
+                appState.isHistoryActive = false;
+                if (appState.isFullyLoaded) {
+                    clearMarkers(appState.activeMunicipality);
+                    // Restore the backup
+                    appState.publicationsArray = [].concat(appState.publicationsArrayBackup);
+                    console.log("Backup restored");
+                    addMarkers(1, false);
+                } else {
+                    loadData();
+                }
+            }
+            appState.markersArray.forEach(function (markerObject) {
+                markerObject.marker.setVisible(isMarkerVisible(markerObject.age, timeFilter.periodToShow));
+            });
+        }
     }
 
     function updateUrl(zoom, center) {
         // Add to URL: /?in=Alkmaar&zoom=15&center=52.43660651356703,4.84418395002761
         if (window.URLSearchParams) {
             const searchParams = new URLSearchParams(window.location.search);
-            searchParams.set("in", activeMunicipality);
+            searchParams.set("in", appState.activeMunicipality);
             searchParams.set("zoom", zoom);
             searchParams.set("center", center.toUrlValue(10));
             window.history.replaceState(null, "", window.location.pathname + "?" + searchParams.toString());
         }
-        document.title = "Bekendmakingen " + activeMunicipality;
+        document.title = "Bekendmakingen " + appState.activeMunicipality;
     }
 
     function internalInitMap() {
         var containerElm = document.getElementById("map");
         var mapSettings = getInitialMapSettings();
-        loadingIndicator.id = "idLoadingIndicator";
-        loadingIndicator.src = "img/ajax-loader.gif";  // ConnectedWizard, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
+        appState.loadingIndicator.id = "idLoadingIndicator";
+        appState.loadingIndicator.src = "img/ajax-loader.gif";  // ConnectedWizard, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
         // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindowOptions
-        infoWindow = new google.maps.InfoWindow();
+        appState.infoWindow = new google.maps.InfoWindow();
         // https://developers.google.com/maps/documentation/javascript/overview#MapOptions
-        map = new google.maps.Map(
+        appState.map = new google.maps.Map(
             containerElm,
             {
                 "backgroundColor": "#9CC0F9",  // https://developers.google.com/maps/documentation/javascript/reference/map#MapOptions.backgroundColor
@@ -764,49 +822,51 @@ function initMap() {
         );
         createMapsControls();
         addMunicipalitiyMarkers();
-        map.addListener("zoom_changed", function () {
+        appState.map.addListener("zoom_changed", function () {
             // Add to URL: /?zoom=15&center=52.43660651356703,4.84418395002761
-            var periodElm = document.getElementById("idCbxPeriod");
-            var zoom = map.getZoom();
-            // Iterate over markers and call setVisible
-            if (zoom <= 13 && (periodElm.value === "7d" || periodElm.value === "14d" || periodElm.value === "all")) {
-                // Set to 3 days
-                periodElm.value = "3d";
-                updateDisplayLevel();
-            } else if (zoom <= 14 && (periodElm.value === "14d" || periodElm.value === "all")) {
-                // Set to 7 days
-                periodElm.value = "7d";
-                updateDisplayLevel();
-            } else if (zoom <= 15 && (periodElm.value === "all")) {
-                // Set to 14 days
-                periodElm.value = "14d";
-                updateDisplayLevel();
-            }
-            infoWindow.close();  // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.close
-            console.log("Zoom changed to " + zoom);
-        });
-        map.addListener("idle", function () {
-            // Time to display other markers..
-            const bounds = map.getBounds();
-            const periodToShow = getPeriodToShow();
-            var delayedMarker;
-            var i = delayedMarkersArray.length;
-            while (i > 0) {
-                i = i - 1;
-                delayedMarker = delayedMarkersArray[i];
-                if (bounds.contains(delayedMarker.position)) {
-                    addMarker(delayedMarker.publication, periodToShow, delayedMarker.position);
-                    delayedMarkersArray.splice(i, 1);
+            const timeFilter = getTimeFilter();
+            const zoom = appState.map.getZoom();
+            if (!timeFilter.isHistory) {
+                // Iterate over markers and call setVisible
+                if (zoom <= 13 && (timeFilter.period === "7d" || timeFilter.period === "14d" || timeFilter.period === "all")) {
+                    // Set to 3 days
+                    timeFilter.elm.value = "3d";
+                    updateTimeFilter();
+                } else if (zoom <= 14 && (timeFilter.period === "14d" || timeFilter.period === "all")) {
+                    // Set to 7 days
+                    timeFilter.elm.value = "7d";
+                    updateTimeFilter();
+                } else if (zoom <= 15 && (timeFilter.period === "all")) {
+                    // Set to 14 days
+                    timeFilter.elm.value = "14d";
+                    updateTimeFilter();
                 }
             }
-            updateUrl(map.getZoom(), map.getCenter());
-            console.log("Remaining items to add to the map: " + delayedMarkersArray.length);
+            appState.infoWindow.close();  // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.close
+            console.log("Zoom changed to " + zoom);
+        });
+        appState.map.addListener("idle", function () {
+            // Time to display other markers..
+            const bounds = appState.map.getBounds();
+            const timeFilter = getTimeFilter();
+            var delayedMarker;
+            var i = appState.delayedMarkersArray.length;
+            while (i > 0) {
+                i = i - 1;
+                delayedMarker = appState.delayedMarkersArray[i];
+                if (bounds.contains(delayedMarker.position)) {
+                    addMarker(delayedMarker.publication, timeFilter.periodToShow, delayedMarker.position);
+                    appState.delayedMarkersArray.splice(i, 1);
+                }
+            }
+            updateUrl(appState.map.getZoom(), appState.map.getCenter());
+            console.log("Remaining items to add to the map: " + appState.delayedMarkersArray.length);
         });
     }
 
     function navigateTo(municipality) {
         const center = municipalities[municipality].center;
-        map.setCenter(new google.maps.LatLng(center.lat, center.lng), initialZoomLevel);
+        appState.map.setCenter(new google.maps.LatLng(center.lat, center.lng), appState.initialZoomLevel);
     }
 
     function getUrlApi(urlDoc) {
@@ -855,7 +915,57 @@ function initMap() {
                 // Example: "52.36374 4.877971"
                 publication.location = inputRecord.recordData.gzd.originalData.meta.tpmeta.locatiepunt;
             }
-            publicationsArray.push(publication);
+            appState.publicationsArray.push(publication);
+        });
+    }
+
+    function hideActiveMunicipalityMarker() {
+        appState.municipalityMarkers.forEach(function (markerObject) {
+            if (markerObject.municipalityName === appState.activeMunicipality) {
+                markerObject.marker.setVisible(false);
+            }
+        });
+    }
+
+    function loadHistory(period) {
+        const lookupMunicipality = (
+            municipalities[appState.activeMunicipality].hasOwnProperty("lookupName")
+            ? municipalities[appState.activeMunicipality].lookupName
+            : appState.activeMunicipality
+        );
+        const fileName = "https://basgroot.github.io/bekendmakingen/history/" + encodeURIComponent(lookupMunicipality.toLowerCase().replace(/\s/g, "-")) + "-" + period + ".json";
+        // Show loading indicator
+        appState.loadingIndicator.style.display = "block";
+        clearMarkers(appState.activeMunicipality);
+        console.log("Loading historical data of " + appState.activeMunicipality);
+        fetch(
+            fileName,
+            {
+                "method": "GET"
+            }
+        ).then(function (response) {
+            if (response.ok) {
+                response.json().then(function (responseJson) {
+                    if (!appState.isHistoryActive) {
+                        if (appState.isFullyLoaded) {
+                            // Make a backup, for when the time filter is reset
+                            appState.publicationsArrayBackup = [].concat(appState.publicationsArray);
+                            console.log("Backup created");
+                        }
+                        appState.isHistoryActive = true;
+                    }
+                    appState.publicationsArray = responseJson.publications;
+                    // Preprocess data:
+                    appState.publicationsArray.forEach(function (publication) {
+                        publication.date = new Date(publication.date);
+                    });
+                    addMarkers(1, false);
+                });
+            } else {
+                console.error(response);
+            }
+        }).catch(function (error) {
+            console.error(error);
         });
     }
 
@@ -866,7 +976,7 @@ function initMap() {
             : municipality
         );
         // Show loading indicator
-        loadingIndicator.style.display = "block";
+        appState.loadingIndicator.style.display = "block";
         fetch(
             "https://repository.overheid.nl/sru?query=(c.product-area=lokalebekendmakingen%20AND%20cd.afgeleideGemeente=\"" + encodeURIComponent(lookupMunicipality) + "\")%20sortBy%20cd.datumTijdstipWijzigingWork%20/sort.descending&maximumRecords=1000&startRecord=" + startRecord + "&httpAccept=application/json",
             {
@@ -876,18 +986,14 @@ function initMap() {
             if (response.ok) {
                 response.json().then(function (responseJson) {
                     var isMoreDataAvailable;
-                    if (municipality !== activeMunicipality) {
+                    if (municipality !== appState.activeMunicipality || appState.isHistoryActive) {
                         // We are loading a different municipality, but user selected another one.
                         return;
                     }
                     if (startRecord === 1) {
-                        publicationsArray = [];
+                        appState.publicationsArray = [];
                         // Hide active municipality:
-                        municipalityMarkers.forEach(function (markerObject) {
-                            if (markerObject.municipalityName === activeMunicipality) {
-                                markerObject.marker.setVisible(false);
-                            }
-                        });
+                        hideActiveMunicipalityMarker();
                     }
                     addPublications(responseJson);
                     console.log("Found " + responseJson.searchRetrieveResponse.records.record.length + " bekendmakingen of " + responseJson.searchRetrieveResponse.numberOfRecords + " in " + municipality);
@@ -895,6 +1001,8 @@ function initMap() {
                     if (isMoreDataAvailable) {
                         // Add next page:
                         loadDataForMunicipality(municipality, responseJson.searchRetrieveResponse.nextRecordPosition);
+                    } else {
+                        appState.isFullyLoaded = true;
                     }
                     addMarkers(startRecord, isMoreDataAvailable);
                 });
@@ -906,27 +1014,33 @@ function initMap() {
         });
     }
 
-    function clearMarkers() {
+    function clearMarkers(municipalityToHide) {
         // https://developers.google.com/maps/documentation/javascript/markers#remove
-        markersArray.forEach(function (markerObject) {
+        appState.markersArray.forEach(function (markerObject) {
             markerObject.marker.setMap(null);
         });
-        municipalityMarkers.forEach(function (markerObject) {
-            markerObject.marker.setVisible(true);
+        appState.municipalityMarkers.forEach(function (markerObject) {
+            markerObject.marker.setVisible(markerObject.municipalityName !== municipalityToHide);
         });
-        markersArray = [];
-        delayedMarkersArray = [];
+        appState.markersArray = [];
+        appState.delayedMarkersArray = [];
     }
 
     function loadData() {
         const municipalityComboElm = document.getElementById("idCbxMunicipality");
+        const timeFilter = getTimeFilter();
         if (municipalityComboElm !== null) {
-            activeMunicipality = municipalityComboElm.value;
-            clearMarkers();
-            console.log("Navigating to " + activeMunicipality);
-            navigateTo(activeMunicipality);
+            appState.activeMunicipality = municipalityComboElm.value;
+            clearMarkers("");
+            console.log("Navigating to " + appState.activeMunicipality);
+            navigateTo(appState.activeMunicipality);
+            if (appState.isHistoryActive) {
+                appState.isHistoryActive = false;
+                timeFilter.elm.value = "14d";
+            }
         }
-        loadDataForMunicipality(activeMunicipality, 1);
+        appState.isFullyLoaded = false;
+        loadDataForMunicipality(appState.activeMunicipality, 1);
     }
 
     internalInitMap();
