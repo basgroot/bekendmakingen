@@ -1,8 +1,6 @@
-# Recent verleende vergunningen op de kaart
+# Bouwmelding.nl: vergunningen op de kaart
 
-Bekijk vergunningen aangevraagd en verleend in uw omgeving.
-
-<https://basgroot.github.io/bekendmakingen/>
+Bekijk vergunningen aangevraagd en verleend in uw omgeving. Demo op <https://bouwmelding.nl/>.
 
 ## Legenda
 
@@ -20,7 +18,3 @@ Bekijk vergunningen aangevraagd en verleend in uw omgeving.
 - <img src="img/verkeer.svg" alt="Verkeersbesluit" width="40"/> Verkeersbesluit.
 - <img src="img/constructie.svg" alt="Bouwvergunning" width="40"/> Bouwvergunning.
 - <img src="img/wetboek.svg" alt="Wetboek" width="40"/> De rest. Meldingen, verordeningen en overige besluiten.
-
-Deze website maakt gebruik van de [Open Overheid](https://data.overheid.nl/dataset/officiele-bekendmakingen).
-
-Zie verder de [SRU-standaard](https://www.loc.gov/standards/sru/sru-2-0.html).
