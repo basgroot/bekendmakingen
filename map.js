@@ -788,6 +788,9 @@ function initMap() {
         }
     }
 
+    /*
+     *  Add municipalyty and other parameters to the URL, so your view can be shared.
+     */
     function updateUrl(zoom, center) {
         // Add to URL: /?in=Alkmaar&zoom=15&center=52.43660651356703,4.84418395002761
         if (window.URLSearchParams) {
@@ -798,6 +801,94 @@ function initMap() {
             window.history.replaceState(null, "", window.location.pathname + "?" + searchParams.toString());
         }
         document.title = "Bekendmakingen " + appState.activeMunicipality;
+    }
+
+    /*
+     *  Calculate the distance between two points, using the haversine formula.
+     */
+    function computeDistanceBetween(from, to) {
+        // Source: http://www.movable-type.co.uk/scripts/latlong.html
+        // Maps API covers this function as well:
+        // https://developers.google.com/maps/documentation/javascript/reference/geometry#spherical.computeDistanceBetween
+        const radius = 6371e3;  // metres
+        const a1 = from.lat * Math.PI / 180;  // φ1: φ, λ in radians
+        const a2 = to.lat * Math.PI / 180;  // φ2
+        const latDelta = (to.lat - from.lat) * Math.PI / 180;  // Δφ
+        const lngDelta = (to.lng - from.lng) * Math.PI / 180;  // Δλ
+        const a = Math.sin(latDelta / 2) * Math.sin(latDelta / 2) + Math.cos(a1) * Math.cos(a2) * Math.sin(lngDelta / 2) * Math.sin(lngDelta / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return radius * c;  // Distance in metres
+    }
+
+    /*
+     *  Not accurate, but try to find the closest municipality center.
+     */
+    function setClosestMunicipality(position) {
+        const municipalityNames = Object.keys(municipalities);
+        var distance = 1000000;
+        municipalityNames.forEach(function (municipalityName) {
+            const municipalityObject = municipalities[municipalityName];
+            const distanceBetweenMunicipalityAndViewer = computeDistanceBetween(position, municipalityObject.center) / 1000;
+            if (distanceBetweenMunicipalityAndViewer < distance) {
+                console.log("Found closer municipality: " + municipalityName);
+                distance = distanceBetweenMunicipalityAndViewer;
+                appState.activeMunicipality = municipalityName;
+            }
+        });
+    }
+
+    /*
+     *  Determine if the municipality is part of the URL.
+     */
+    function isLocationInUrl() {
+        var municipality;
+        if (window.URLSearchParams) {
+            urlParams = new window.URLSearchParams(window.location.search);
+            municipality = urlParams.get("in");
+            if (municipality && municipalities[municipality] !== undefined) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*
+     *  Try to find the municipality of the visitor, by using an IP geolocation API.
+     */
+    function getLocationAndLoadData() {
+        if (isLocationInUrl()) {
+            internalInitMap();
+            return;  // The location is explicitly requested. Don't adapt location based on visitors IP address.
+        }
+        fetch(
+            "https://basement.nl/proxy-server/location.php",
+            {
+                "method": "GET"
+            }
+        ).then(function (response) {
+            if (response.ok) {
+                response.json().then(function (responseJson) {
+                    if (municipalities[responseJson.city] !== undefined) {
+                        // Name of the city is the same as the municipality.
+                        console.log("Client location in municipality " + responseJson.city);
+                        appState.activeMunicipality = responseJson.city;
+                    } else {
+                        // Try to locate the closest municipality:
+                        setClosestMunicipality({
+                            "lat": responseJson.lat,
+                            "lng": responseJson.lng
+                        });
+                    }
+                    internalInitMap();
+                });
+            } else {
+                console.error(response);
+                internalInitMap();
+            }
+        }).catch(function (error) {
+            console.error(error);
+            internalInitMap();
+        });
     }
 
     function internalInitMap() {
@@ -862,6 +953,7 @@ function initMap() {
             updateUrl(appState.map.getZoom(), appState.map.getCenter());
             console.log("Remaining items to add to the map: " + appState.delayedMarkersArray.length);
         });
+        loadData();
     }
 
     function navigateTo(municipality) {
@@ -1043,6 +1135,5 @@ function initMap() {
         loadDataForMunicipality(appState.activeMunicipality, 1);
     }
 
-    internalInitMap();
-    loadData();
+    getLocationAndLoadData();
 }
