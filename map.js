@@ -893,9 +893,11 @@ function initMap() {
     }
 
     function internalInitMap() {
-        var containerElm = document.getElementById("map");
-        var mapSettings = getInitialMapSettings();
+        const containerElm = document.getElementById("map");
+        const mapSettings = getInitialMapSettings();
+        const screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
         appState.loadingIndicator.id = "idLoadingIndicator";
+        appState.loadingIndicator.style.width = Math.max((screenWidth / 100) * 20, 120) + "px";
         appState.loadingIndicator.src = "img/ajax-loader.gif";  // ConnectedWizard, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
         // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindowOptions
         appState.infoWindow = new google.maps.InfoWindow();
