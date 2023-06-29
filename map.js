@@ -387,7 +387,9 @@ function initMap() {
         municipalityNames.forEach(function (municipalityName) {
             combobox.add(createOptionEx(municipalityName));
         });
-        combobox.addEventListener("change", loadData);
+        combobox.addEventListener("change", function () {
+            loadData(true);
+        });
         combobox.classList.add("controlStyle");
         controlDiv.appendChild(combobox);
         appState.map.controls[google.maps.ControlPosition.TOP_CENTER].push(controlDiv);
@@ -759,7 +761,7 @@ function initMap() {
                         municipalityComboElm.value = municipalityName;
                     }
                     appState.activeMunicipality = municipalityName;
-                    loadData();
+                    loadData(true);
                 }
             );
         });
@@ -781,7 +783,7 @@ function initMap() {
                     console.log("Backup restored");
                     addMarkers(1, false);
                 } else {
-                    loadData();
+                    loadData(false);
                 }
             }
             appState.markersArray.forEach(function (markerObject) {
@@ -843,6 +845,7 @@ function initMap() {
      *  Determine if the municipality is part of the URL.
      */
     function isLocationInUrl() {
+        var urlParams;
         var municipality;
         if (window.URLSearchParams) {
             urlParams = new window.URLSearchParams(window.location.search);
@@ -957,7 +960,7 @@ function initMap() {
             updateUrl(appState.map.getZoom(), appState.map.getCenter());
             console.log("Remaining items to add to the map: " + appState.delayedMarkersArray.length);
         });
-        loadData();
+        loadData(true);
     }
 
     function navigateTo(municipality) {
@@ -1122,14 +1125,16 @@ function initMap() {
         appState.delayedMarkersArray = [];
     }
 
-    function loadData() {
+    function loadData(isNavigationNeeded) {
         const municipalityComboElm = document.getElementById("idCbxMunicipality");
         const timeFilter = getTimeFilter();
         if (municipalityComboElm !== null) {
             appState.activeMunicipality = municipalityComboElm.value;
             clearMarkers("");
-            console.log("Navigating to " + appState.activeMunicipality);
-            navigateTo(appState.activeMunicipality);
+            if (isNavigationNeeded) {
+                console.log("Navigating to " + appState.activeMunicipality);
+                navigateTo(appState.activeMunicipality);
+            }
             if (appState.isHistoryActive) {
                 appState.isHistoryActive = false;
                 timeFilter.elm.value = "14d";
