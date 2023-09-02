@@ -403,6 +403,7 @@ function initMap() {
         combobox.add(createOption("7d", "Publicaties van laatste week", false));
         combobox.add(createOption("14d", "Publicaties van laatste twee weken", true));
         combobox.add(createOption("all", "Alle recente publicaties", false));  // This is also the value when an historical period is selected
+        combobox.add(createOption("2023-08", "August 2023", false));
         combobox.add(createOption("2023-07", "Juli 2023", false));
         combobox.add(createOption("2023-06", "Juni 2023", false));
         combobox.add(createOption("2023-05", "Mei 2023", false));
