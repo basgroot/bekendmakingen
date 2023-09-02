@@ -1006,7 +1006,11 @@ function initMap() {
                 // Example: "Besluit apv vergunning Verleend Overtoom 10-H"
                 "title": inputRecord.recordData.gzd.originalData.meta.owmskern.title.trim(),
                 // Example: "TVM 2 vakken - Overtoom 10-12 13 februari 2023, Overtoom 10-H"
-                "description": inputRecord.recordData.gzd.originalData.meta.owmsmantel.description.trim()
+                "description": (
+                    typeof inputRecord.recordData.gzd.originalData.meta.owmsmantel.description === "string"
+                    ? inputRecord.recordData.gzd.originalData.meta.owmsmantel.description.trim()
+                    : inputRecord.recordData.gzd.originalData.meta.owmsmantel.description.toString()  // Example: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-366976/1/xml/gmb-2023-366976.xml
+                )
             };
             if (Array.isArray(inputRecord.recordData.gzd.originalData.meta.tpmeta.locatiepunt)) {
                 // Example: ["52.36374 4.877971"]
