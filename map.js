@@ -830,7 +830,7 @@ function initMap() {
     /*
      *  Not accurate, but try to find the closest municipality center.
      */
-    function setClosestMunicipality(position) {
+    function activateClosestMunicipality(position) {
         const municipalityNames = Object.keys(municipalities);
         var distance = 1000000;
         municipalityNames.forEach(function (municipalityName) {
@@ -863,11 +863,7 @@ function initMap() {
     /*
      *  Try to find the municipality of the visitor, by using an IP geolocation API.
      */
-    function getLocationAndLoadData() {
-        if (isLocationInUrl()) {
-            internalInitMap();
-            return;  // The location is explicitly requested. Don't adapt location based on visitors IP address.
-        }
+    function getLocationByIp() {
         fetch(
             "https://basement.nl/proxy-server/location.php",
             {
@@ -882,7 +878,7 @@ function initMap() {
                         appState.activeMunicipality = responseJson.city;
                     } else {
                         // Try to locate the closest municipality:
-                        setClosestMunicipality({
+                        activateClosestMunicipality({
                             "lat": responseJson.lat,
                             "lng": responseJson.lng
                         });
@@ -897,6 +893,39 @@ function initMap() {
             console.error(error);
             internalInitMap();
         });
+    }
+
+    /*
+     *  Try to find the municipality of the visitor, by using the device position, or IP geolocation API.
+     */
+    function getLocationAndLoadData() {
+
+        function deviceLocationFound(position) {
+            activateClosestMunicipality({
+                "lat": position.coords.latitude,
+                "lng": position.coords.longitude
+            });
+            internalInitMap();
+        }
+
+        function deviceLocationRequestRejected() {
+            console.log("Unable to retrieve device location.");
+            // Fallback:
+            getLocationByIp();
+        }
+
+        if (isLocationInUrl()) {
+            internalInitMap();
+            return;  // The location is explicitly requested. Don't adapt location based on visitors IP address.
+        }
+        // Try to get the location of the device:
+        if (!navigator.geolocation) {
+            // GPS is not available for this browser. Determine the location by IP Address:
+            getLocationByIp();
+            return;
+        }
+        // https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API
+        navigator.geolocation.getCurrentPosition(deviceLocationFound, deviceLocationRequestRejected);
     }
 
     function internalInitMap() {
