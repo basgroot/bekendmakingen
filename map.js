@@ -597,6 +597,39 @@ function initMap() {
     }
 
     function addMarker(publication, periodToShow, position) {
+
+        function onClick() {
+            const description = publication.description + "<br /><br />Meer info: <a href=\"" + publication.urlDoc + "\" target=\"blank\">" + publication.urlDoc + "</a>.";
+            var licenseId = getLicenseIdFromUrl(publication.urlDoc);
+            // Supported is "Gemeentelijk blad (gmb)", "Provinciaal blad (prb)", "Waterschapsblad (wsb) and Staatscourant (stcrt)"
+            // Options: https://zoek.officielebekendmakingen.nl/prb-2023-962.html
+            //          https://zoek.officielebekendmakingen.nl/gmb-2023-56454.html
+            //          https://zoek.officielebekendmakingen.nl/wsb-2023-801.html
+            //          https://zoek.officielebekendmakingen.nl/stcrt-2023-128.html
+            // Not supported:
+            //          https://www.zaanstad.nl/mozard/!suite42.scherm1260?mObj=211278
+            //          https://bekendmakingen.amsterdam.nl/bekendmakingen/overige/decos/C174AC3CD0754F9089D1553C31CD5B7A
+            if (licenseId) {
+                showInfoWindow(marker, iconName, publication.title, "<div id=\"" + licenseId + "\"><br /><br /><br /></div>" + description);
+                collectBezwaartermijn(licenseId, publication);
+            } else {
+                // Errors:  https://www.zaanstad.nl/mozard/!suite42.scherm1260?mObj=211278
+                //          https://bekendmakingen.amsterdam.nl/bekendmakingen/overige/decos/C174AC3CD0754F9089D1553C31CD5B7A
+                showInfoWindow(marker, iconName, publication.title, description);
+            }
+        }
+
+        function onMouseOver() {
+            marker.setIcon({
+                "url": "img/" + iconName + "-highlight.png",
+                "size": iconSize
+            });
+        }
+
+        function onMouseOut() {
+            marker.setIcon(icon);
+        }
+
         // 2022-09-05T09:04:57.175Z;
         // https://zoek.officielebekendmakingen.nl/gmb-2022-396401.html;
         // "Besluit apv vergunning Verleend Monnikendammerweg 27";
@@ -606,16 +639,18 @@ function initMap() {
         // https://developers.google.com/maps/documentation/javascript/reference#MarkerOptions
         const age = getDaysPassed(publication.date);
         const iconName = getIconName(publication.title, publication.type);
+        const iconSize = new google.maps.Size(35, 45);  // Make sure image is already scaled
+        const icon = {
+            "url": "img/" + iconName + ".png",
+            "size": iconSize
+        };
         const marker = new google.maps.Marker({
             "map": appState.map,
             "position": position,
             "clickable": true,
             "optimized": true,
             "visible": isMarkerVisible(age, periodToShow),
-            "icon": {
-                "url": "img/" + iconName + ".png",
-                "size": new google.maps.Size(35, 45)  // Make sure image is already scaled
-            },
+            "icon": icon,
             "zIndex": appState.zIndex,
             "title": publication.title
         });
@@ -626,29 +661,10 @@ function initMap() {
             "marker": marker
         };
         appState.zIndex -= 1;  // Input is sorted by modification date - most recent first. Give them a higher zIndex, so Besluit is in front of Verlenging (which is in front of Aanvraag)
-        marker.addListener(
-            "click",
-            function () {
-                const description = publication.description + "<br /><br />Meer info: <a href=\"" + publication.urlDoc + "\" target=\"blank\">" + publication.urlDoc + "</a>.";
-                var licenseId = getLicenseIdFromUrl(publication.urlDoc);
-                // Supported is "Gemeentelijk blad (gmb)", "Provinciaal blad (prb)", "Waterschapsblad (wsb) and Staatscourant (stcrt)"
-                // Options: https://zoek.officielebekendmakingen.nl/prb-2023-962.html
-                //          https://zoek.officielebekendmakingen.nl/gmb-2023-56454.html
-                //          https://zoek.officielebekendmakingen.nl/wsb-2023-801.html
-                //          https://zoek.officielebekendmakingen.nl/stcrt-2023-128.html
-                // Not supported:
-                //          https://www.zaanstad.nl/mozard/!suite42.scherm1260?mObj=211278
-                //          https://bekendmakingen.amsterdam.nl/bekendmakingen/overige/decos/C174AC3CD0754F9089D1553C31CD5B7A
-                if (licenseId) {
-                    showInfoWindow(marker, iconName, publication.title, "<div id=\"" + licenseId + "\"><br /><br /><br /></div>" + description);
-                    collectBezwaartermijn(licenseId, publication);
-                } else {
-                    // Errors:  https://www.zaanstad.nl/mozard/!suite42.scherm1260?mObj=211278
-                    //          https://bekendmakingen.amsterdam.nl/bekendmakingen/overige/decos/C174AC3CD0754F9089D1553C31CD5B7A
-                    showInfoWindow(marker, iconName, publication.title, description);
-                }
-            }
-        );
+        marker.addListener("click", onClick);
+        // Hightlight the icon on hover - TODO: highlight also the other markers from the same publication
+        marker.addListener("mouseover", onMouseOver);
+        marker.addListener("mouseout", onMouseOut);
         appState.markersArray.push(markerObject);
         return markerObject;
     }
