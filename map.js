@@ -1,6 +1,8 @@
 /*jslint browser: true, for: true, long: true, unordered: true */
 /*global window console google municipalities */
 
+// TODO: remember selected period, if historical
+
 /*
  * Op zoek naar de website?
  * Bezoek https://basgroot.github.io/bekendmakingen/?in=Hoorn
@@ -620,14 +622,22 @@ function initMap() {
         }
 
         function onMouseOver() {
-            marker.setIcon({
-                "url": "img/" + iconName + "-highlight.png",
-                "size": iconSize
+            appState.markersArray.forEach(function (markerObject) {
+                if (markerObject.url === publication.urlDoc) {
+                    markerObject.marker.setIcon({
+                        "url": "img/" + iconName + "-highlight.png",
+                        "size": iconSize
+                    });
+                }
             });
         }
 
         function onMouseOut() {
-            marker.setIcon(icon);
+            appState.markersArray.forEach(function (markerObject) {
+                if (markerObject.url === publication.urlDoc) {
+                    markerObject.marker.setIcon(icon);
+                }
+            });
         }
 
         // 2022-09-05T09:04:57.175Z;
@@ -655,17 +665,18 @@ function initMap() {
             "title": publication.title
         });
         const markerObject = {
+            "url": publication.urlDoc,
             "age": age,
             "position": position,
             "isSvg": true,
             "marker": marker
         };
         appState.zIndex -= 1;  // Input is sorted by modification date - most recent first. Give them a higher zIndex, so Besluit is in front of Verlenging (which is in front of Aanvraag)
+        appState.markersArray.push(markerObject);
         marker.addListener("click", onClick);
-        // Hightlight the icon on hover - TODO: highlight also the other markers from the same publication
+        // Highlight the icon (and related icons) on hover
         marker.addListener("mouseover", onMouseOver);
         marker.addListener("mouseout", onMouseOut);
-        appState.markersArray.push(markerObject);
         return markerObject;
     }
 
