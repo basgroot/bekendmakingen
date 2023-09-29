@@ -737,7 +737,7 @@ function initMap() {
             } else if (publication.location === undefined) {
                 console.error("Publication without position: " + JSON.stringify(publication, null, 4));
                 // Take the center of the municipality:
-                position = findUniquePosition(municipalities[appState.activeMunicipality].center);
+                position = findUniquePosition(Object.assign({}, municipalities[appState.activeMunicipality].center));
                 prepareToAddMarker(publication, periodFilter.periodToShow, position, bounds);
             } else {
                 console.error("Unsupported publication location: " + JSON.stringify(publication, null, 4));
