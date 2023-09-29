@@ -1,7 +1,5 @@
 /*jslint browser: true, for: true, long: true, unordered: true */
-/*global window console google municipalities */
-
-// TODO: remember selected period, if historical
+/*global window console google municipalities periods */
 
 /*
  * Op zoek naar de website?
@@ -52,11 +50,10 @@ function initMap() {
             const urlSearchParams = new window.URLSearchParams(window.location.search);
             var zoomParam = urlSearchParams.get("zoom");
             var centerParam = urlSearchParams.get("center");
-            var municipalityParam = urlSearchParams.get("in");
-            var periodParam = urlSearchParams.get("period");
+            const municipalityParam = urlSearchParams.get("in");
             if (municipalityParam && municipalities[municipalityParam] !== undefined) {
                 appState.activeMunicipality = municipalityParam;
-                console.log("Adjusted municipality from URL");
+                console.log("Adjusted municipality from URL: " + municipalityParam);
             }
             center = Object.assign({}, municipalities[appState.activeMunicipality].center);
             if (periodParam) {
@@ -72,7 +69,7 @@ function initMap() {
                 zoomParam = parseFloat(zoomParam);
                 if (zoomParam > 14 && zoomParam < 20) {
                     zoomLevel = zoomParam;
-                    console.log("Adjusted zoom level from URL");
+                    console.log("Adjusted zoom level from URL: " + zoomParam);
                 }
                 centerParam = centerParam.split(",");
                 lat = parseFloat(centerParam[0]);
@@ -418,10 +415,7 @@ function initMap() {
         periods.forEach(function (period) {
             combobox.add(createOptionEx(period.key, period.val));
         });
-        combobox.addEventListener("change", function () {
-            appState.period = document.getElementById("idCbxPeriod").value;
-            updatePeriodFilter();
-        });
+        combobox.addEventListener("change", updatePeriodFilter);
         combobox.classList.add("controlStyle");
         controlDiv.appendChild(combobox);
         appState.map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(controlDiv);
@@ -802,10 +796,10 @@ function initMap() {
     function updatePeriodFilter() {
         const periodFilter = getPeriodFilter();
         if (periodFilter.isHistory) {
-            console.log("Loading historical data: " + periodFilter.period);
+            console.log("Loading historical data of: " + periodFilter.periodToShow);
             loadHistory(periodFilter.period);
         } else {
-            console.log("Filtering time: " + periodFilter.period);
+            console.log("Filtering period to: " + periodFilter.periodToShow);
             if (appState.isHistoryActive) {
                 appState.isHistoryActive = false;
                 if (appState.isFullyLoaded) {
@@ -826,14 +820,13 @@ function initMap() {
     }
 
     /*
-     *  Add municipality and other parameters to the URL, so a view can be shared.
+     *  Add municipality and other parameters to the URL, so the view can be shared.
      */
     function updateUrl(zoom, center) {
         // Add to URL: /?in=Alkmaar&zoom=15&center=52.43660651356703,4.84418395002761
         if (window.URLSearchParams) {
             const urlSearchParams = new window.URLSearchParams(window.location.search);
             urlSearchParams.set("in", appState.activeMunicipality);
-            urlSearchParams.set("period", appState.period);
             urlSearchParams.set("zoom", zoom);
             urlSearchParams.set("center", center.toUrlValue(10));
             window.history.replaceState(null, "", window.location.pathname + "?" + urlSearchParams.toString());
@@ -879,11 +872,10 @@ function initMap() {
      *  Determine if the municipality is part of the URL.
      */
     function isLocationInUrl() {
-        var municipality;
         if (window.URLSearchParams) {
             const urlSearchParams = new window.URLSearchParams(window.location.search);
-            municipality = urlSearchParams.get("in");
-            if (municipality && municipalities[municipality] !== undefined) {
+            const municipalityParam = urlSearchParams.get("in");
+            if (municipalityParam && municipalities[municipalityParam] !== undefined) {
                 return true;
             }
         }
@@ -1193,6 +1185,7 @@ function initMap() {
 
     function loadData(isNavigationNeeded) {
         const municipalityComboElm = document.getElementById("idCbxMunicipality");
+        const periodFilter = getPeriodFilter();
         if (municipalityComboElm !== null) {
             appState.activeMunicipality = municipalityComboElm.value;
             clearMarkers("");
@@ -1202,7 +1195,7 @@ function initMap() {
             }
             if (appState.isHistoryActive) {
                 appState.isHistoryActive = false;
-                getPeriodFilter().elm.value = "14d";
+                periodFilter.elm.value = "14d";
             }
         }
         appState.isFullyLoaded = false;
