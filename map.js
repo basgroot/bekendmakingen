@@ -48,17 +48,17 @@ function initMap() {
             const urlSearchParams = new window.URLSearchParams(window.location.search);
             var zoomParam = urlSearchParams.get("zoom");
             var centerParam = urlSearchParams.get("center");
-            const municipality = urlSearchParams.get("in");
-            if (municipality && municipalities[municipality] !== undefined) {
-                appState.activeMunicipality = municipality;
-                console.log("Adjusted municipality from URL");
+            const municipalityParam = urlSearchParams.get("in");
+            if (municipalityParam && municipalities[municipalityParam] !== undefined) {
+                appState.activeMunicipality = municipalityParam;
+                console.log("Adjusted municipality from URL: " + municipalityParam);
             }
             center = Object.assign({}, municipalities[appState.activeMunicipality].center);
             if (zoomParam && centerParam) {
                 zoomParam = parseFloat(zoomParam);
                 if (zoomParam > 14 && zoomParam < 20) {
                     zoomLevel = zoomParam;
-                    console.log("Adjusted zoom level from URL");
+                    console.log("Adjusted zoom level from URL: " + zoomParam);
                 }
                 centerParam = centerParam.split(",");
                 lat = parseFloat(centerParam[0]);
@@ -868,8 +868,8 @@ function initMap() {
     function isLocationInUrl() {
         if (window.URLSearchParams) {
             const urlSearchParams = new window.URLSearchParams(window.location.search);
-            const municipality = urlSearchParams.get("in");
-            if (municipality && municipalities[municipality] !== undefined) {
+            const municipalityParam = urlSearchParams.get("in");
+            if (municipalityParam && municipalities[municipalityParam] !== undefined) {
                 return true;
             }
         }
