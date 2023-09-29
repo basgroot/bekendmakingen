@@ -15,6 +15,10 @@ function initMap() {
         "map": null,
         // The selected (or initial) municipality:
         "activeMunicipality": "Hoorn",
+        // The selected (or initial) period:
+        "period": "14d",
+        // Indicates the status of the period filter:
+        "isHistoryActive": false,
         // The zoom level when starting the app:
         "initialZoomLevel": 16,
         // The marker objects of the municipalities:
@@ -27,8 +31,6 @@ function initMap() {
         "publicationsArray": [],
         // Backup of the recent publications, because loading them again is slow:
         "publicationsArrayBackup": [],
-        // Indicates the status of the time filter:
-        "isHistoryActive": false,
         // Indicates if all parts are loaded:
         "isFullyLoaded": false,
         // Order of different license markers, newest on top. Set to some high number:
@@ -41,25 +43,31 @@ function initMap() {
 
     function getInitialMapSettings() {
         var zoomLevel = appState.initialZoomLevel;
-        var center;
-        var urlParams;
-        var zoomParam;
-        var centerParam;
-        var municipality;
+        var center = Object.assign({}, municipalities[appState.activeMunicipality].center);
         var lat;
         var lng;
         // ?in=Hoorn&zoom=15&center=52.6603118963%2C5.0608995325
         // ?in=Oostzaan
         if (window.URLSearchParams) {
-            urlParams = new window.URLSearchParams(window.location.search);
-            zoomParam = urlParams.get("zoom");
-            centerParam = urlParams.get("center");
-            municipality = urlParams.get("in");
-            if (municipality && municipalities[municipality] !== undefined) {
-                appState.activeMunicipality = municipality;
+            const urlSearchParams = new window.URLSearchParams(window.location.search);
+            var zoomParam = urlSearchParams.get("zoom");
+            var centerParam = urlSearchParams.get("center");
+            var municipalityParam = urlSearchParams.get("in");
+            var periodParam = urlSearchParams.get("period");
+            if (municipalityParam && municipalities[municipalityParam] !== undefined) {
+                appState.activeMunicipality = municipalityParam;
                 console.log("Adjusted municipality from URL");
             }
             center = Object.assign({}, municipalities[appState.activeMunicipality].center);
+            if (periodParam) {
+                const period = periods.find(function (p) {
+                     return p.key === periodParam;
+                });
+                if (period !== undefined) {
+                    appState.period = period.key;
+                    console.log("Adjusted period " + period.key + " from URL");
+                }
+            }
             if (zoomParam && centerParam) {
                 zoomParam = parseFloat(zoomParam);
                 if (zoomParam > 14 && zoomParam < 20) {
@@ -371,10 +379,6 @@ function initMap() {
         return option;
     }
 
-    function createOptionEx(value) {
-        return createOption(value, value, value === appState.activeMunicipality);
-    }
-
     function createMapsControlLoadingIndicator() {
         const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
         controlDiv.appendChild(appState.loadingIndicator);
@@ -382,6 +386,11 @@ function initMap() {
     }
 
     function createMapsControlMunicipalities() {
+
+        function createOptionEx(value) {
+            return createOption(value, value, value === appState.activeMunicipality);
+        }
+
         const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
         const combobox = document.createElement("select");
         const municipalityNames = Object.keys(municipalities);
@@ -398,22 +407,21 @@ function initMap() {
     }
 
     function createMapsControlPeriods() {
+
+        function createOptionEx(value, displayValue) {
+            return createOption(value, displayValue, value === appState.period);
+        }
+
         const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
         const combobox = document.createElement("select");
         combobox.id = "idCbxPeriod";
-        combobox.add(createOption("3d", "Publicaties van laatste drie dagen", false));
-        combobox.add(createOption("7d", "Publicaties van laatste week", false));
-        combobox.add(createOption("14d", "Publicaties van laatste twee weken", true));
-        combobox.add(createOption("all", "Alle recente publicaties", false));  // This is also the value when an historical period is selected
-        combobox.add(createOption("2023-08", "August 2023", false));
-        combobox.add(createOption("2023-07", "Juli 2023", false));
-        combobox.add(createOption("2023-06", "Juni 2023", false));
-        combobox.add(createOption("2023-05", "Mei 2023", false));
-        combobox.add(createOption("2023-04", "April 2023", false));
-        combobox.add(createOption("2023-03", "Maart 2023", false));
-        combobox.add(createOption("2023-02", "Februari 2023", false));
-        combobox.add(createOption("2023-01", "Januari 2023", false));
-        combobox.addEventListener("change", updateTimeFilter);
+        periods.forEach(function (period) {
+            combobox.add(createOptionEx(period.key, period.val));
+        });
+        combobox.addEventListener("change", function () {
+            appState.period = document.getElementById("idCbxPeriod").value;
+            updatePeriodFilter();
+        });
         combobox.classList.add("controlStyle");
         controlDiv.appendChild(combobox);
         appState.map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(controlDiv);
@@ -691,7 +699,7 @@ function initMap() {
         }
     }
 
-    function getTimeFilter() {
+    function getPeriodFilter() {
 
         function isHistoricalPeriod(value) {
             // Values of historical periods are notated like '2023-03'
@@ -700,20 +708,14 @@ function initMap() {
 
         const result = {
             "elm": document.getElementById("idCbxPeriod"),
-            "period": "14d",
-            "periodToShow": "14d",
-            "isHistory": false
+            "period": appState.period,
+            "isHistory": isHistoricalPeriod(appState.period)
         };
-        if (result.elm === null) {
-            return result;  // Default when loading
-        }
         // If this is an historical period, default to 'all':
-        result.period = result.elm.value;
-        if (isHistoricalPeriod(result.elm.value)) {
+        if (result.isHistory) {
             result.periodToShow = "all";
-            result.isHistory = true;
         } else {
-            result.periodToShow = result.elm.value;
+            result.periodToShow = appState.period;
         }
         return result;
     }
@@ -727,7 +729,7 @@ function initMap() {
     }
 
     function addMarkers(startRecord, isMoreDataAvailable) {
-        const timeFilter = getTimeFilter();
+        const periodFilter = getPeriodFilter();
         const bounds = appState.map.getBounds();
         var position;
         var i;
@@ -737,17 +739,17 @@ function initMap() {
             publication = appState.publicationsArray[i];
             if (typeof publication.location === "string") {
                 position = findUniquePosition(createCoordinate(publication.location));
-                prepareToAddMarker(publication, timeFilter.periodToShow, position, bounds);
+                prepareToAddMarker(publication, periodFilter.periodToShow, position, bounds);
             } else if (Array.isArray(publication.location)) {
                 publication.location.forEach(function (locatiepunt) {
                     position = findUniquePosition(createCoordinate(locatiepunt));
-                    prepareToAddMarker(publication, timeFilter.periodToShow, position, bounds);
+                    prepareToAddMarker(publication, periodFilter.periodToShow, position, bounds);
                 });
             } else if (publication.location === undefined) {
                 console.error("Publication without position: " + JSON.stringify(publication, null, 4));
                 // Take the center of the municipality:
                 position = findUniquePosition(municipalities[appState.activeMunicipality].center);
-                prepareToAddMarker(publication, timeFilter.periodToShow, position, bounds);
+                prepareToAddMarker(publication, periodFilter.periodToShow, position, bounds);
             } else {
                 console.error("Unsupported publication location: " + JSON.stringify(publication, null, 4));
             }
@@ -797,13 +799,13 @@ function initMap() {
         });
     }
 
-    function updateTimeFilter() {
-        const timeFilter = getTimeFilter();
-        if (timeFilter.isHistory) {
-            console.log("Loading historical data");
-            loadHistory(timeFilter.period);
+    function updatePeriodFilter() {
+        const periodFilter = getPeriodFilter();
+        if (periodFilter.isHistory) {
+            console.log("Loading historical data: " + periodFilter.period);
+            loadHistory(periodFilter.period);
         } else {
-            console.log("Filtering time");
+            console.log("Filtering time: " + periodFilter.period);
             if (appState.isHistoryActive) {
                 appState.isHistoryActive = false;
                 if (appState.isFullyLoaded) {
@@ -817,22 +819,24 @@ function initMap() {
                 }
             }
             appState.markersArray.forEach(function (markerObject) {
-                markerObject.marker.setVisible(isMarkerVisible(markerObject.age, timeFilter.periodToShow));
+                markerObject.marker.setVisible(isMarkerVisible(markerObject.age, periodFilter.periodToShow));
             });
         }
+        updateUrl(appState.map.getZoom(), appState.map.getCenter());
     }
 
     /*
-     *  Add municipalyty and other parameters to the URL, so your view can be shared.
+     *  Add municipality and other parameters to the URL, so a view can be shared.
      */
     function updateUrl(zoom, center) {
         // Add to URL: /?in=Alkmaar&zoom=15&center=52.43660651356703,4.84418395002761
         if (window.URLSearchParams) {
-            const searchParams = new URLSearchParams(window.location.search);
-            searchParams.set("in", appState.activeMunicipality);
-            searchParams.set("zoom", zoom);
-            searchParams.set("center", center.toUrlValue(10));
-            window.history.replaceState(null, "", window.location.pathname + "?" + searchParams.toString());
+            const urlSearchParams = new window.URLSearchParams(window.location.search);
+            urlSearchParams.set("in", appState.activeMunicipality);
+            urlSearchParams.set("period", appState.period);
+            urlSearchParams.set("zoom", zoom);
+            urlSearchParams.set("center", center.toUrlValue(10));
+            window.history.replaceState(null, "", window.location.pathname + "?" + urlSearchParams.toString());
         }
         document.title = "Bekendmakingen " + appState.activeMunicipality;
     }
@@ -875,11 +879,10 @@ function initMap() {
      *  Determine if the municipality is part of the URL.
      */
     function isLocationInUrl() {
-        var urlParams;
         var municipality;
         if (window.URLSearchParams) {
-            urlParams = new window.URLSearchParams(window.location.search);
-            municipality = urlParams.get("in");
+            const urlSearchParams = new window.URLSearchParams(window.location.search);
+            municipality = urlSearchParams.get("in");
             if (municipality && municipalities[municipality] !== undefined) {
                 return true;
             }
@@ -981,22 +984,22 @@ function initMap() {
         addMunicipalitiyMarkers();
         appState.map.addListener("zoom_changed", function () {
             // Add to URL: /?zoom=15&center=52.43660651356703,4.84418395002761
-            const timeFilter = getTimeFilter();
+            const periodFilter = getPeriodFilter();
             const zoom = appState.map.getZoom();
-            if (!timeFilter.isHistory) {
+            if (!periodFilter.isHistory) {
                 // Iterate over markers and call setVisible
-                if (zoom <= 13 && (timeFilter.period === "7d" || timeFilter.period === "14d" || timeFilter.period === "all")) {
+                if (zoom <= 13 && (periodFilter.period === "7d" || periodFilter.period === "14d" || periodFilter.period === "all")) {
                     // Set to 3 days
-                    timeFilter.elm.value = "3d";
-                    updateTimeFilter();
-                } else if (zoom <= 14 && (timeFilter.period === "14d" || timeFilter.period === "all")) {
+                    periodFilter.elm.value = "3d";
+                    updatePeriodFilter();
+                } else if (zoom <= 14 && (periodFilter.period === "14d" || periodFilter.period === "all")) {
                     // Set to 7 days
-                    timeFilter.elm.value = "7d";
-                    updateTimeFilter();
-                } else if (zoom <= 15 && (timeFilter.period === "all")) {
+                    periodFilter.elm.value = "7d";
+                    updatePeriodFilter();
+                } else if (zoom <= 15 && (periodFilter.period === "all")) {
                     // Set to 14 days
-                    timeFilter.elm.value = "14d";
-                    updateTimeFilter();
+                    periodFilter.elm.value = "14d";
+                    updatePeriodFilter();
                 }
             }
             appState.infoWindow.close();  // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.close
@@ -1005,14 +1008,14 @@ function initMap() {
         appState.map.addListener("idle", function () {
             // Time to display other markers..
             const bounds = appState.map.getBounds();
-            const timeFilter = getTimeFilter();
+            const periodFilter = getPeriodFilter();
             var delayedMarker;
             var i = appState.delayedMarkersArray.length;
             while (i > 0) {
                 i = i - 1;
                 delayedMarker = appState.delayedMarkersArray[i];
                 if (bounds.contains(delayedMarker.position)) {
-                    addMarker(delayedMarker.publication, timeFilter.periodToShow, delayedMarker.position);
+                    addMarker(delayedMarker.publication, periodFilter.periodToShow, delayedMarker.position);
                     appState.delayedMarkersArray.splice(i, 1);
                 }
             }
@@ -1190,7 +1193,6 @@ function initMap() {
 
     function loadData(isNavigationNeeded) {
         const municipalityComboElm = document.getElementById("idCbxMunicipality");
-        const timeFilter = getTimeFilter();
         if (municipalityComboElm !== null) {
             appState.activeMunicipality = municipalityComboElm.value;
             clearMarkers("");
@@ -1200,7 +1202,7 @@ function initMap() {
             }
             if (appState.isHistoryActive) {
                 appState.isHistoryActive = false;
-                timeFilter.elm.value = "14d";
+                getPeriodFilter().elm.value = "14d";
             }
         }
         appState.isFullyLoaded = false;
