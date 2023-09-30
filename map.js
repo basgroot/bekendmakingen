@@ -1,12 +1,13 @@
 /*jslint browser: true, for: true, long: true, unordered: true */
 /*global window console google municipalities periods */
 
-/*
+/**
  * Op zoek naar de website?
  * Bezoek https://basgroot.github.io/bekendmakingen/?in=Hoorn
+ *
+ * This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
+ * @return {void}
  */
-
-// This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
 function initMap() {
     const appState = {
         // The map itself:
@@ -37,17 +38,22 @@ function initMap() {
         "infoWindow": null
     };
 
+    /**
+     * Customize the map based on query parameters.
+     * Examples:
+     *   ?in=Hoorn&zoom=15&center=52.6603118963%2C5.0608995325
+     *   ?in=Oostzaan
+     * @return {!Object}
+     */
     function getInitialMapSettings() {
-        var zoomLevel = appState.initialZoomLevel;
-        var center = Object.assign({}, municipalities[appState.activeMunicipality].center);
-        var lat;
-        var lng;
-        // ?in=Hoorn&zoom=15&center=52.6603118963%2C5.0608995325
-        // ?in=Oostzaan
+        let zoomLevel = appState.initialZoomLevel;
+        let center = Object.assign({}, municipalities[appState.activeMunicipality].center);
+        let lat;
+        let lng;
         if (window.URLSearchParams) {
             const urlSearchParams = new window.URLSearchParams(window.location.search);
-            var zoomParam = urlSearchParams.get("zoom");
-            var centerParam = urlSearchParams.get("center");
+            let zoomParam = urlSearchParams.get("zoom");
+            let centerParam = urlSearchParams.get("center");
             const municipalityParam = urlSearchParams.get("in");
             if (municipalityParam && municipalities[municipalityParam] !== undefined) {
                 appState.activeMunicipality = municipalityParam;
@@ -77,9 +83,17 @@ function initMap() {
         };
     }
 
+    /**
+     * Display the popup window.
+     * https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.open
+     * @param {!Object} marker Marker showing the popup.
+     * @param {string} iconName Icon file name.
+     * @param {string} header Title.
+     * @param {string} body Contents.
+     * @return {void}
+     */
     function showInfoWindow(marker, iconName, header, body) {
         appState.infoWindow.setContent("<div><img src=\"img/" + iconName + ".svg\" width=\"105\" height=\"135\" class=\"info_window_image\"><h2 class=\"info_window_heading\">" + header + "</h2><div class=\"info_window_body\"><p>" + body + "</p></div></div>");
-        // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.open
         appState.infoWindow.open({
             "anchor": marker,
             "map": appState.map,
@@ -87,6 +101,11 @@ function initMap() {
         });
     }
 
+    /**
+     * Parse the response of the license document to find the date the license is granted.
+     * @param {string} responseXml XML.
+     * @return {!Array<?>|NodeList<Element>}
+     */
     function getAlineas(responseXml) {
 
         function replaceTags(value) {
@@ -100,7 +119,7 @@ function initMap() {
                 ["</nadruk>", ""],  // Hoorn
                 [" :", ":"]  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-81009/1/xml/gmb-2023-81009.xml
             ];
-            var result = value;
+            let result = value;
             // Remove all double spaces in all forms: Landsmeer https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-74508/1/xml/gmb-2023-74508.xml
             result = result.replace(/\s\s+/g, " ");
             tags.forEach(function (tag) {
@@ -110,8 +129,8 @@ function initMap() {
         }
 
         const parser = new window.DOMParser();
-        var xmlDoc;
-        var zakelijkeMededeling;
+        let xmlDoc;
+        let zakelijkeMededeling;
         try {
             xmlDoc = parser.parseFromString(replaceTags(responseXml).toLowerCase(), "text/xml");
         } catch (e) {
@@ -128,12 +147,24 @@ function initMap() {
         );
     }
 
+    /**
+     * Calculate the period since the license was granted, to see if it is applicable for formal objection.
+     * @param {!Date} date Decision date.
+     * @return {number}
+     */
     function getDaysPassed(date) {
         const today = new Date(new Date().toDateString());  // Rounded date
         const dateFrom = new Date(date.toDateString());
         return Math.round((today.getTime() - dateFrom.getTime()) / (1000 * 60 * 60 * 24));
     }
 
+    /**
+     * Parse the response of the license document to find the date the license is granted.
+     * @param {string} responseXml XML response.
+     * @param {!Object} publication Publication object.
+     * @param {string} licenseId License ID.
+     * @return {void}
+     */
     function parseBekendmaking(responseXml, publication, licenseId) {
 
         function convertMonthNames(value) {
@@ -141,10 +172,10 @@ function initMap() {
         }
 
         function parseDate(value) {
-            var year = value.substring(6, 10);
-            var month = value.substring(3, 5);
-            var day = value.substring(0, 2);
-            var datumBekendgemaakt;
+            const year = value.substring(6, 10);
+            const month = value.substring(3, 5);
+            const day = value.substring(0, 2);
+            let datumBekendgemaakt;
             if (Number.isNaN(parseInt(year, 10)) || Number.isNaN(parseInt(month, 10)) || Number.isNaN(parseInt(day, 10))) {
                 console.error("Error parsing date (" + value + ") of license " + publication.urlApi);
                 return false;
@@ -198,11 +229,11 @@ function initMap() {
                 " is een omgevingsvergunning verleend"  // Noordoostpolder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-93843/1/xml/gmb-2023-93843.xml
             ];
             const identifierNextValueIsDate = "datum bekendmaking besluit:";  // Den Haag https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-79557/1/xml/gmb-2023-79557.xml
-            var i;
-            var pos;
-            var isDateOfDeadline = false;
-            var isObjectionStartDate = false;
-            var result;
+            let i;
+            let pos;
+            let isDateOfDeadline = false;
+            let isObjectionStartDate = false;
+            let result;
             if (value === identifierNextValueIsDate) {
                 isNextValueBekendmakingsDate = true;
             } else {
@@ -295,15 +326,15 @@ function initMap() {
         const alineas = getAlineas(responseXml);
         const maxLooptijd = (6 * 7) + 1;  // 6 weken de tijd om bezwaar te maken
         const dateFormatOptions = {"weekday": "long", "year": "numeric", "month": "long", "day": "numeric"};
-        var datumBekendgemaakt;  // Datum verzonden aan belanghebbende(n)
-        var looptijd;
-        var resterendAantalDagenBezwaartermijn;
-        var i;
-        var j;
-        var alinea;
-        var textToShow = "";
-        var isNextValueBekendmakingsDate = false;
-        var isBezwaartermijnFound = false;
+        let datumBekendgemaakt;  // Datum verzonden aan belanghebbende(n)
+        let looptijd;
+        let resterendAantalDagenBezwaartermijn;
+        let i;
+        let j;
+        let alinea;
+        let textToShow = "";
+        let isNextValueBekendmakingsDate = false;
+        let isBezwaartermijnFound = false;
         for (i = 0; i < alineas.length; i += 1) {
             alinea = alineas[i];
             if (alinea.childNodes.length > 0) {
@@ -331,6 +362,12 @@ function initMap() {
         document.getElementById(licenseId).innerHTML = textToShow;
     }
 
+    /**
+     * Call the government API for a specific license, to get more details.
+     * @param {string} licenseId License ID.
+     * @param {!Object} publication Publication object.
+     * @return {void}
+     */
     function collectBezwaartermijn(licenseId, publication) {
         if (publication.urlApi === "UNAVAILABLE") {
             console.error("Unable to get data for license " + publication.urlDoc);
@@ -355,6 +392,13 @@ function initMap() {
         });
     }
 
+    /**
+     * Create the option of a drop down element.
+     * @param {string} value Key.
+     * @param {string} displayValue Value.
+     * @param {boolean} isSelected Selected or not?
+     * @return {!HTMLOptionElement}
+     */
     function createOption(value, displayValue, isSelected) {
         const option = document.createElement("option");
         option.text = displayValue;
@@ -365,12 +409,20 @@ function initMap() {
         return option;
     }
 
+    /**
+     * Create the spinner shown when retrieving all licenses.
+     * @return {void}
+     */
     function createMapsControlLoadingIndicator() {
         const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
         controlDiv.appendChild(appState.loadingIndicator);
         appState.map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(controlDiv);
     }
 
+    /**
+     * Create the drop down with all municipalities of The Netherlands.
+     * @return {void}
+     */
     function createMapsControlMunicipalities() {
 
         function createOptionEx(value) {
@@ -392,10 +444,14 @@ function initMap() {
         appState.map.controls[google.maps.ControlPosition.TOP_CENTER].push(controlDiv);
     }
 
+    /**
+     * Create the drop down with time filter.
+     * @return {void}
+     */
     function createMapsControlPeriods() {
 
         function createOptionEx(value, displayValue) {
-            return createOption(value, displayValue, value === appState.period);
+            return createOption(value, displayValue, value === "14d");
         }
 
         const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
@@ -410,6 +466,10 @@ function initMap() {
         appState.map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(controlDiv);
     }
 
+    /**
+     * Create the button linking to this source code.
+     * @return {void}
+     */
     function createMapsControlSource() {
         const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
         const button = document.createElement("button");
@@ -425,19 +485,28 @@ function initMap() {
         appState.map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(controlDiv);
     }
 
+    /**
+     * Create the elements on the map.
+     * https://developers.google.com/maps/documentation/javascript/examples/control-custom
+     * @return {void}
+     */
     function createMapsControls() {
-        // https://developers.google.com/maps/documentation/javascript/examples/control-custom
         createMapsControlLoadingIndicator();
         createMapsControlMunicipalities();
         createMapsControlPeriods();
         createMapsControlSource();
     }
 
+    /**
+     * Parse the license ID.
+     * Options: https://zoek.officielebekendmakingen.nl/prb-2023-962.html
+     *          https://zoek.officielebekendmakingen.nl/gmb-2023-56454.html
+     *          https://zoek.officielebekendmakingen.nl/wsb-2023-801.html
+     *          https://zoek.officielebekendmakingen.nl/stcrt-2023-128.html
+     * @param {string} websiteUrl Link to document.
+     * @return {string|boolean}
+     */
     function getLicenseIdFromUrl(websiteUrl) {
-        // Options: https://zoek.officielebekendmakingen.nl/prb-2023-962.html
-        //          https://zoek.officielebekendmakingen.nl/gmb-2023-56454.html
-        //          https://zoek.officielebekendmakingen.nl/wsb-2023-801.html
-        //          https://zoek.officielebekendmakingen.nl/stcrt-2023-128.html
         const startOfUrl = "https://zoek.officielebekendmakingen.nl/";
         const endOfUrl = ".html";
         if (websiteUrl.substring(0, startOfUrl.length) === startOfUrl) {
@@ -446,11 +515,17 @@ function initMap() {
         return false;
     }
 
+    /**
+     * Choose what image to use for a license type.
+     * Text mining to get distinguish the different license states and types
+     * Images are converted to SVG using https://png2svg.com/
+     * Resized to 35x45 using https://www.iloveimg.com/resize-image/resize-svg#resize-options,pixels
+     * Optmized using https://svgoptimizer.com/
+     * @param {string} title Name of permit.
+     * @param {string} type Permit type.
+     * @return {string}
+     */
     function getIconName(title, type) {
-        // Text mining to get distinguish the different license states and types
-        // Images are converted to SVG using https://png2svg.com/
-        // Resized to 35x45 using https://www.iloveimg.com/resize-image/resize-svg#resize-options,pixels
-        // Optmized using https://svgoptimizer.com/
         const exploitatievergunningen = [
             "drank- en horecavergunning",
             "exploitatievergunning",
@@ -552,12 +627,17 @@ function initMap() {
         // "verordeningen en reglementen",
     }
 
+    /**
+     * When two licenses are on the same location, move the second, to see them both.
+     * @param {!Object} proposedCoordinate Coordinate to place marker.
+     * @return {!Object}
+     */
     function findUniquePosition(proposedCoordinate) {
 
         function isCoordinateAvailable(coordinate) {
-            var isAvailable = true;  // Be positive
-            var i;
-            var marker;
+            let isAvailable = true;  // Be positive
+            let i;
+            let marker;
             for (i = 0; i < appState.markersArray.length; i += 1) {
                 // Don't use forEach, to gain some performance.
                 marker = appState.markersArray[i];
@@ -576,6 +656,12 @@ function initMap() {
         return proposedCoordinate;
     }
 
+    /**
+     * Set visibility of the markers, based on time filter.
+     * @param {number} age Days in the past.
+     * @param {string} periodToShow Selected period.
+     * @return {boolean}
+     */
     function isMarkerVisible(age, periodToShow) {
         switch (periodToShow) {
         case "3d":
@@ -589,11 +675,18 @@ function initMap() {
         }
     }
 
+    /**
+     * Add a marker to the map.
+     * @param {!Object} publication Publication object.
+     * @param {string} periodToShow Selected period.
+     * @param {!Object} position Coordinate.
+     * @return {void}
+     */
     function addMarker(publication, periodToShow, position) {
 
         function onClick() {
             const description = publication.description + "<br /><br />Meer info: <a href=\"" + publication.urlDoc + "\" target=\"blank\">" + publication.urlDoc + "</a>.";
-            var licenseId = getLicenseIdFromUrl(publication.urlDoc);
+            const licenseId = getLicenseIdFromUrl(publication.urlDoc);
             // Supported is "Gemeentelijk blad (gmb)", "Provinciaal blad (prb)", "Waterschapsblad (wsb) and Staatscourant (stcrt)"
             // Options: https://zoek.officielebekendmakingen.nl/prb-2023-962.html
             //          https://zoek.officielebekendmakingen.nl/gmb-2023-56454.html
@@ -671,6 +764,15 @@ function initMap() {
         return markerObject;
     }
 
+    /**
+     * If visible, create the marker. Otherwise move it to a list and show it when the map is scrolled.
+     * This reduces load in the browser.
+     * @param {!Object} publication Publication object.
+     * @param {string} periodToShow Selected period.
+     * @param {!Object} position Coordinate.
+     * @param {!Object} bounds Visible map.
+     * @return {void}
+     */
     function prepareToAddMarker(publication, periodToShow, position, bounds) {
         if (bounds.contains(position)) {
             addMarker(publication, periodToShow, position);
@@ -682,6 +784,10 @@ function initMap() {
         }
     }
 
+    /**
+     * Determine what time filter must be used.
+     * @return {!Object}
+     */
     function getPeriodFilter() {
 
         function isHistoricalPeriod(value) {
@@ -709,20 +815,31 @@ function initMap() {
         return result;
     }
 
+    /**
+     * Create (new) latitude/longitude object.
+     * Input example: "52.35933 4.893097"
+     * @return {!Object}
+     */
     function createCoordinate(locatiepunt) {
-        const coordinate = locatiepunt.split(" ");  // Example: "52.35933 4.893097"
+        const coordinate = locatiepunt.split(" ");
         return {
             "lat": parseFloat(coordinate[0]),
             "lng": parseFloat(coordinate[1])
         };
     }
 
+    /**
+     * Add markers to the map.
+     * @param {number} startRecord Number of record of current batch.
+     * @param {boolean} isMoreDataAvailable More to load?
+     * @return {void}
+     */
     function addMarkers(startRecord, isMoreDataAvailable) {
         const periodFilter = getPeriodFilter();
         const bounds = appState.map.getBounds();
-        var position;
-        var i;
-        var publication;
+        let position;
+        let i;
+        let publication;
         console.log("Adding markers " + startRecord + " to " + appState.publicationsArray.length);
         for (i = startRecord - 1; i < appState.publicationsArray.length; i += 1) {
             publication = appState.publicationsArray[i];
@@ -752,11 +869,15 @@ function initMap() {
         }
     }
 
+    /**
+     * Add municipality markers to the map.
+     * @return {void}
+     */
     function addMunicipalitiyMarkers() {
         const municipalityNames = Object.keys(municipalities);
         municipalityNames.forEach(function (municipalityName) {
             const municipalityObject = municipalities[municipalityName];
-            var marker = new google.maps.Marker({
+            let marker = new google.maps.Marker({
                 "map": appState.map,
                 "position": municipalityObject.center,
                 "label": municipalityName,  // https://developers.google.com/maps/documentation/javascript/reference/marker#MarkerLabel
@@ -788,6 +909,10 @@ function initMap() {
         });
     }
 
+    /**
+     * Reset time filter.
+     * @return {void}
+     */
     function updatePeriodFilter() {
         const periodFilter = getPeriodFilter();
         if (periodFilter.isHistory) {
@@ -813,8 +938,11 @@ function initMap() {
         }
     }
 
-    /*
-     *  Add municipality and other parameters to the URL, so the view can be shared.
+    /**
+     * Add municipality and other parameters to the URL, so the view can be shared.
+     * @param {number|string} zoom Zoom level.
+     * @param {!Object} center Coordinate of center of map.
+     * @return {void}
      */
     function updateUrl(zoom, center) {
         // Add to URL: /?in=Alkmaar&zoom=15&center=52.43660651356703,4.84418395002761
@@ -828,8 +956,11 @@ function initMap() {
         document.title = "Bekendmakingen " + appState.activeMunicipality;
     }
 
-    /*
-     *  Calculate the distance between two points, using the haversine formula.
+    /**
+     * Calculate the distance between two points, using the haversine formula.
+     * @param {!Object} from Coordinate 1.
+     * @param {!Object} to Coordinate 2.
+     * @return {number}
      */
     function computeDistanceBetween(from, to) {
         // Source: http://www.movable-type.co.uk/scripts/latlong.html
@@ -845,12 +976,14 @@ function initMap() {
         return radius * c;  // Distance in metres
     }
 
-    /*
-     *  Not accurate, but try to find the closest municipality center.
+    /**
+     * Not accurate, but try to find the closest municipality center.
+     * @param {!Object} position Coordinate to start.
+     * @return {void}
      */
     function activateClosestMunicipality(position) {
         const municipalityNames = Object.keys(municipalities);
-        var distance = 1000000;
+        let distance = 1000000;
         municipalityNames.forEach(function (municipalityName) {
             const municipalityObject = municipalities[municipalityName];
             const distanceBetweenMunicipalityAndViewer = computeDistanceBetween(position, municipalityObject.center) / 1000;
@@ -862,8 +995,9 @@ function initMap() {
         });
     }
 
-    /*
-     *  Determine if the municipality is part of the URL.
+    /**
+     * Determine if the municipality is part of the URL.
+     * @return {boolean}
      */
     function isLocationInUrl() {
         if (window.URLSearchParams) {
@@ -876,8 +1010,9 @@ function initMap() {
         return false;
     }
 
-    /*
-     *  Try to find the municipality of the visitor, by using an IP geolocation API.
+    /**
+     * Try to find the municipality of the visitor, by using an IP geolocation API.
+     * @return {void}
      */
     function getLocationByIp() {
         fetch(
@@ -911,8 +1046,9 @@ function initMap() {
         });
     }
 
-    /*
-     *  Try to find the municipality of the visitor, by using the device position, or IP geolocation API.
+    /**
+     * Try to find the municipality of the visitor, by using the device position, or IP geolocation API.
+     * @return {void}
      */
     function getLocationAndLoadData() {
 
@@ -944,6 +1080,10 @@ function initMap() {
         navigator.geolocation.getCurrentPosition(deviceLocationFound, deviceLocationRequestRejected);
     }
 
+    /**
+     * Setup map.
+     * @return {void}
+     */
     function internalInitMap() {
         const containerElm = document.getElementById("map");
         const mapSettings = getInitialMapSettings();
@@ -995,8 +1135,8 @@ function initMap() {
             // Time to display other markers..
             const bounds = appState.map.getBounds();
             const periodFilter = getPeriodFilter();
-            var delayedMarker;
-            var i = appState.delayedMarkersArray.length;
+            let delayedMarker;
+            let i = appState.delayedMarkersArray.length;
             while (i > 0) {
                 i = i - 1;
                 delayedMarker = appState.delayedMarkersArray[i];
@@ -1011,14 +1151,24 @@ function initMap() {
         loadData(true);
     }
 
+    /**
+     * Scroll map to a certain coordinate (center of municipality).
+     * @param {string} municipality Municipality to center.
+     * @return {void}
+     */
     function navigateTo(municipality) {
         const center = municipalities[municipality].center;
         appState.map.setCenter(new google.maps.LatLng(center.lat, center.lng), appState.initialZoomLevel);
     }
 
+    /**
+     * Convert license URL to API endpoint.
+     * URL: https://zoek.officielebekendmakingen.nl/gmb-2022-425209.html
+     * Endpoint: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-425209/1/xml/gmb-2022-425209.xml
+     * @param {string} urlDoc URL of publication.
+     * @return {string}
+     */
     function getUrlApi(urlDoc) {
-        // URL: https://zoek.officielebekendmakingen.nl/gmb-2022-425209.html
-        // Endpoint: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-425209/1/xml/gmb-2022-425209.xml
         const licenseId = getLicenseIdFromUrl(urlDoc);
         if (!licenseId) {
             return "UNAVAILABLE";
@@ -1031,6 +1181,11 @@ function initMap() {
         return "https://repository.overheid.nl/frbr/officielepublicaties/" + licenseIdArray[0] + "/" + licenseIdArray[1] + "/" + licenseId + "/1/xml/" + licenseId + ".xml";
     }
 
+    /**
+     * Parse API response.
+     * @param {!Object} responseJson JSON response.
+     * @return {void}
+     */
     function addPublications(responseJson) {
         responseJson.searchRetrieveResponse.records.record.forEach(function (inputRecord) {
             const urlDoc = inputRecord.recordData.gzd.originalData.meta.tpmeta.bronIdentifier.trim();
@@ -1070,6 +1225,10 @@ function initMap() {
         });
     }
 
+    /**
+     * Hide the active municipality marker, since this overlaps the licenses.
+     * @return {void}
+     */
     function hideActiveMunicipalityMarker() {
         appState.municipalityMarkers.forEach(function (markerObject) {
             if (markerObject.municipalityName === appState.activeMunicipality) {
@@ -1078,6 +1237,11 @@ function initMap() {
         });
     }
 
+    /**
+     * Open an historical file, where data is stored per month.
+     * @param {string} period Month to display.
+     * @return {void}
+     */
     function loadHistory(period) {
         const lookupMunicipality = (
             municipalities[appState.activeMunicipality].hasOwnProperty("lookupName")
@@ -1120,6 +1284,12 @@ function initMap() {
         });
     }
 
+    /**
+     * Call the API to get live data.
+     * @param {string} municipality Municipality to load.
+     * @param {number} startRecord Start of batch.
+     * @return {void}
+     */
     function loadDataForMunicipality(municipality, startRecord) {
         const lookupMunicipality = (
             municipalities[municipality].hasOwnProperty("lookupName")
@@ -1136,7 +1306,7 @@ function initMap() {
         ).then(function (response) {
             if (response.ok) {
                 response.json().then(function (responseJson) {
-                    var isMoreDataAvailable;
+                    let isMoreDataAvailable;
                     if (municipality !== appState.activeMunicipality || appState.isHistoryActive) {
                         // We are loading a different municipality, but user selected another one.
                         return;
@@ -1165,6 +1335,11 @@ function initMap() {
         });
     }
 
+    /**
+     * Clear markers, because of a different period, or municipality.
+     * @param {string} municipalityToHide Municipality to show licenses from.
+     * @return {void}
+     */
     function clearMarkers(municipalityToHide) {
         // https://developers.google.com/maps/documentation/javascript/markers#remove
         appState.markersArray.forEach(function (markerObject) {
@@ -1177,6 +1352,11 @@ function initMap() {
         appState.delayedMarkersArray = [];
     }
 
+    /**
+     * Populate the map with markers.
+     * @param {boolean} isNavigationNeeded Move to different center.
+     * @return {void}
+     */
     function loadData(isNavigationNeeded) {
         const municipalityComboElm = document.getElementById("idCbxMunicipality");
         const periodFilter = getPeriodFilter();
