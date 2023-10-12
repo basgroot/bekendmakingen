@@ -47,7 +47,7 @@ function initMap() {
      */
     function getInitialMapSettings() {
         let zoomLevel = appState.initialZoomLevel;
-        let center = Object.assign({}, municipalities[appState.activeMunicipality].center);
+        let center = { ...municipalities[appState.activeMunicipality].center};  // Create new copy
         let lat;
         let lng;
         if (window.URLSearchParams) {
@@ -59,7 +59,7 @@ function initMap() {
                 appState.activeMunicipality = municipalityParam;
                 console.log("Adjusted municipality from URL: " + municipalityParam);
             }
-            center = Object.assign({}, municipalities[appState.activeMunicipality].center);
+            center = { ...municipalities[appState.activeMunicipality].center};
             if (zoomParam && centerParam) {
                 zoomParam = parseFloat(zoomParam);
                 if (zoomParam > 14 && zoomParam < 20) {
@@ -172,17 +172,21 @@ function initMap() {
         }
 
         function parseDate(value) {
+            const result = {
+                "isValid": false
+            };
             const year = value.substring(6, 10);
             const month = value.substring(3, 5);
             const day = value.substring(0, 2);
             let datumBekendgemaakt;
             if (Number.isNaN(parseInt(year, 10)) || Number.isNaN(parseInt(month, 10)) || Number.isNaN(parseInt(day, 10))) {
                 console.error("Error parsing date (" + value + ") of license " + publication.urlApi);
-                return false;
+                return result;
             }
             datumBekendgemaakt = new Date(year + "-" + month + "-" + day);
-            // Remove time:
-            return new Date(datumBekendgemaakt.toDateString());
+            result.date = new Date(datumBekendgemaakt.toDateString());  // Rounded date
+            result.isValid = true;
+            return result;
         }
 
         function getDateFromText(value, publication) {
@@ -310,17 +314,19 @@ function initMap() {
                 }
                 // Remove time from dates:
                 result = parseDate(value);
-                if (result !== false) {
+                if (result.isValid) {
                     if (isDateOfDeadline) {
                         // This is the last date you can object to a decision. Extract 6 weeks.
-                        result.setDate(result.getDate() - (7 * 6));
+                        result.date.setDate(result.getDate() - (7 * 6));
                     } else if (isObjectionStartDate) {
-                        result.setDate(result.getDate() - 1);  // Objection period starts one day after date 'verzonden'
+                        result.date.setDate(result.getDate() - 1);  // Objection period starts one day after date 'verzonden'
                     }
                     return result;
                 }
             }
-            return false;
+            return {
+                "isValid": false
+            };
         }
 
         const alineas = getAlineas(responseXml);
@@ -341,11 +347,11 @@ function initMap() {
                 for (j = 0; j < alinea.childNodes.length; j += 1) {
                     if (alinea.childNodes[j].nodeName === "#text") {
                         datumBekendgemaakt = getDateFromText(alinea.childNodes[j].nodeValue.trim(), publication);
-                        if (datumBekendgemaakt !== false) {
+                        if (datumBekendgemaakt.isValid) {
                             isBezwaartermijnFound = true;
-                            looptijd = getDaysPassed(datumBekendgemaakt);
+                            looptijd = getDaysPassed(datumBekendgemaakt.date);
                             resterendAantalDagenBezwaartermijn = maxLooptijd - looptijd;
-                            textToShow = "Gepubliceerd: " + publication.date.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />Bekendgemaakt aan belanghebbende: " + datumBekendgemaakt.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />" + (
+                            textToShow = "Gepubliceerd: " + publication.date.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />Bekendgemaakt aan belanghebbende: " + datumBekendgemaakt.date.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />" + (
                                 resterendAantalDagenBezwaartermijn > 0
                                 ? "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
                                 : "<b>Geen bezwaar meer mogelijk.</b>"
@@ -509,7 +515,7 @@ function initMap() {
     function getLicenseIdFromUrl(websiteUrl) {
         const startOfUrl = "https://zoek.officielebekendmakingen.nl/";
         const endOfUrl = ".html";
-        if (websiteUrl.substring(0, startOfUrl.length) === startOfUrl) {
+        if (websiteUrl.startsWith(startOfUrl)) {
             return websiteUrl.substring(startOfUrl.length, websiteUrl.length - endOfUrl.length);
         }
         return false;
@@ -649,11 +655,15 @@ function initMap() {
             return isAvailable;
         }
 
-        while (!isCoordinateAvailable(proposedCoordinate)) {
-            proposedCoordinate.lat = proposedCoordinate.lat + 0.000017;
-            proposedCoordinate.lng = proposedCoordinate.lng + 0.000016;
+        const destinationCoordinate = {
+            "lat": proposedCoordinate.lat,
+            "lng": proposedCoordinate.lng
+        };
+        while (!isCoordinateAvailable(destinationCoordinate)) {
+            destinationCoordinate.lat = destinationCoordinate.lat + 0.000017;
+            destinationCoordinate.lng = destinationCoordinate.lng + 0.000016;
         }
-        return proposedCoordinate;
+        return destinationCoordinate;
     }
 
     /**
@@ -854,15 +864,14 @@ function initMap() {
             } else if (publication.location === undefined) {
                 console.error("Publication without position: " + JSON.stringify(publication, null, 4));
                 // Take the center of the municipality:
-                position = findUniquePosition(Object.assign({}, municipalities[appState.activeMunicipality].center));
+                position = findUniquePosition(municipalities[appState.activeMunicipality].center);
                 prepareToAddMarker(publication, periodFilter.periodToShow, position, bounds);
             } else {
                 console.error("Unsupported publication location: " + JSON.stringify(publication, null, 4));
             }
         }
         if (!isMoreDataAvailable) {
-            // Hide loading indicator - don't use style.visibility = "hidden", because then it keeps occupying space and prevents clicking on the map
-            appState.loadingIndicator.style.display = "none";
+            setLoadingIndicatorVisibility("hide");
             if (!appState.isHistoryActive) {
                 appState.isFullyLoaded = true;
             }
@@ -1089,7 +1098,7 @@ function initMap() {
         const mapSettings = getInitialMapSettings();
         const screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
         appState.loadingIndicator.id = "idLoadingIndicator";
-        appState.loadingIndicator.style.width = Math.max((screenWidth / 100) * 20, 120) + "px";
+        appState.loadingIndicator.style.width = Math.max((screenWidth / 100) * 12, 70) + "px";
         appState.loadingIndicator.src = "img/ajax-loader.gif";  // ConnectedWizard, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
         // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindowOptions
         appState.infoWindow = new google.maps.InfoWindow();
@@ -1238,6 +1247,21 @@ function initMap() {
     }
 
     /**
+     * Show or hide the loading indicator.
+     * @param {string} visibility Change visibility. Options: "show", or "hide".
+     * @return {void}
+     */
+    function setLoadingIndicatorVisibility(visibility) {
+        if (visibility === "show") {
+            // Show loading indicator
+            appState.loadingIndicator.style.display = "block";
+        } else {
+            // Hide loading indicator - don't use style.visibility = "hidden", because then it keeps occupying space and prevents clicking on the map.
+            appState.loadingIndicator.style.display = "none";
+        }
+    }
+
+    /**
      * Open an historical file, where data is stored per month.
      * @param {string} period Month to display.
      * @return {void}
@@ -1249,8 +1273,7 @@ function initMap() {
             : appState.activeMunicipality
         );
         const fileName = "https://basgroot.github.io/bekendmakingen/history/" + encodeURIComponent(lookupMunicipality.toLowerCase().replace(/\s/g, "-")) + "-" + period + ".json";
-        // Show loading indicator
-        appState.loadingIndicator.style.display = "block";
+        setLoadingIndicatorVisibility("show");
         clearMarkers(appState.activeMunicipality);
         console.log("Loading historical data of " + appState.activeMunicipality);
         fetch(
@@ -1296,8 +1319,7 @@ function initMap() {
             ? municipalities[municipality].lookupName
             : municipality
         );
-        // Show loading indicator
-        appState.loadingIndicator.style.display = "block";
+        setLoadingIndicatorVisibility("show");
         fetch(
             "https://repository.overheid.nl/sru?query=(c.product-area=lokalebekendmakingen%20AND%20cd.afgeleideGemeente=\"" + encodeURIComponent(lookupMunicipality) + "\")%20sortBy%20cd.datumTijdstipWijzigingWork%20/sort.descending&maximumRecords=1000&startRecord=" + startRecord + "&httpAccept=application/json",
             {
