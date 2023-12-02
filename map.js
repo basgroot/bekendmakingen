@@ -1,4 +1,4 @@
-/*jslint browser: true, for: true, long: true, unordered: true */
+/*jslint browser: true, for: true, long: true, unordered: true, nomen: true */
 /*global window console google municipalities periods */
 
 /**
@@ -43,11 +43,11 @@ function initMap() {
      * Examples:
      *   ?in=Hoorn&zoom=15&center=52.6603118963%2C5.0608995325
      *   ?in=Oostzaan
-     * @return {!Object}
+     * @return {!Object} Map settings.
      */
     function getInitialMapSettings() {
         let zoomLevel = appState.initialZoomLevel;
-        let center = { ...municipalities[appState.activeMunicipality].center};  // Create new copy
+        let center = Object.assign({}, municipalities[appState.activeMunicipality].center);  // Create new copy
         let lat;
         let lng;
         if (window.URLSearchParams) {
@@ -59,7 +59,7 @@ function initMap() {
                 appState.activeMunicipality = municipalityParam;
                 console.log("Adjusted municipality from URL: " + municipalityParam);
             }
-            center = { ...municipalities[appState.activeMunicipality].center};
+            center = Object.assign({}, municipalities[appState.activeMunicipality].center);
             if (zoomParam && centerParam) {
                 zoomParam = parseFloat(zoomParam);
                 if (zoomParam > 14 && zoomParam < 20) {
@@ -104,10 +104,15 @@ function initMap() {
     /**
      * Parse the response of the license document to find the date the license is granted.
      * @param {string} responseXml XML.
-     * @return {!Array<?>|NodeList<Element>}
+     * @return {!Array<?>|!NodeList<!Element>} Alineas.
      */
     function getAlineas(responseXml) {
 
+        /**
+         * Replaces tags in the given value.
+         * @param {string} value The value to replace tags in.
+         * @return {string} The value with tags replaced.
+         */
         function replaceTags(value) {
             const tags = [
                 ["<extref doc=\"https://www.alkmaar.nl/bestuur-en-organisatie/het-ergens-niet-mee-eens-zijn/bezwaar-en-beroep\">website</extref>", "website"],  // Alkmaar https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-77888/1/xml/gmb-2023-77888.xml
@@ -150,7 +155,7 @@ function initMap() {
     /**
      * Calculate the period since the license was granted, to see if it is applicable for formal objection.
      * @param {!Date} date Decision date.
-     * @return {number}
+     * @return {number} Number of days passed.
      */
     function getDaysPassed(date) {
         const today = new Date(new Date().toDateString());  // Rounded date
@@ -167,10 +172,20 @@ function initMap() {
      */
     function parseBekendmaking(responseXml, publication, licenseId) {
 
+        /**
+         * Converts month names to their corresponding numeric values.
+         * @param {string} value The month name to convert.
+         * @return {string} The numeric value of the month.
+         */
         function convertMonthNames(value) {
             return value.replace("januari", "01").replace("februari", "02").replace("maart", "03").replace("april", "04").replace("mei", "05").replace("juni", "06").replace("juli", "07").replace("augustus", "08").replace("september", "09").replace("oktober", "10").replace("november", "11").replace("december", "12");
         }
 
+        /**
+         * Parses a date value.
+         * @param {string} value The date value to parse.
+         * @return {!Object} Object with parsed date, if valid.
+         */
         function parseDate(value) {
             const result = {
                 "isValid": false
@@ -189,6 +204,12 @@ function initMap() {
             return result;
         }
 
+        /**
+         * Retrieves the date from the given text value.
+         * @param {string} value The text value to extract the date from.
+         * @param {!Object} publication The publication source.
+         * @return {!Object} Object with parsed date, if valid.
+         */
         function getDateFromText(value, publication) {
             const identifier = "@@@";
             const identifiersStart = [
@@ -317,9 +338,9 @@ function initMap() {
                 if (result.isValid) {
                     if (isDateOfDeadline) {
                         // This is the last date you can object to a decision. Extract 6 weeks.
-                        result.date.setDate(result.getDate() - (7 * 6));
+                        result.date.setDate(result.date.getDate() - (7 * 6));
                     } else if (isObjectionStartDate) {
-                        result.date.setDate(result.getDate() - 1);  // Objection period starts one day after date 'verzonden'
+                        result.date.setDate(result.date.getDate() - 1);  // Objection period starts one day after date 'verzonden'
                     }
                     return result;
                 }
@@ -369,7 +390,7 @@ function initMap() {
     }
 
     /**
-     * Call the government API for a specific license, to get more details.
+     * Call the government API for a specific license, to get more details. This is done to get the date the license is granted.
      * @param {string} licenseId License ID.
      * @param {!Object} publication Publication object.
      * @return {void}
@@ -399,11 +420,11 @@ function initMap() {
     }
 
     /**
-     * Create the option of a drop down element.
+     * Create the option of a drop down element. This is used for the municipality drop down and the period drop down.
      * @param {string} value Key.
      * @param {string} displayValue Value.
      * @param {boolean} isSelected Selected or not?
-     * @return {!HTMLOptionElement}
+     * @return {!HTMLOptionElement} Option element.
      */
     function createOption(value, displayValue, isSelected) {
         const option = document.createElement("option");
@@ -416,7 +437,7 @@ function initMap() {
     }
 
     /**
-     * Create the spinner shown when retrieving all licenses.
+     * Create the spinner shown when retrieving all licenses. This is shown in the center right.
      * @return {void}
      */
     function createMapsControlLoadingIndicator() {
@@ -431,6 +452,11 @@ function initMap() {
      */
     function createMapsControlMunicipalities() {
 
+        /**
+         * Creates an option element with the specified value. The active municipality is selected by default.
+         * @param {string} value The value of the option.
+         * @return {!HTMLOptionElement} The created option element.
+         */
         function createOptionEx(value) {
             return createOption(value, value, value === appState.activeMunicipality);
         }
@@ -451,11 +477,17 @@ function initMap() {
     }
 
     /**
-     * Create the drop down with time filter.
+     * Create the drop down with time filter. This is shown in the bottom center.
      * @return {void}
      */
     function createMapsControlPeriods() {
 
+         /**
+          * Creates an option element with the specified value. Period 14d is selected by default.
+          * @param {string} value The value of the option.
+          * @param {string} displayValue The value of the option to display.
+          * @return {!HTMLOptionElement} The created option element.
+          */
         function createOptionEx(value, displayValue) {
             return createOption(value, displayValue, value === "14d");
         }
@@ -473,7 +505,7 @@ function initMap() {
     }
 
     /**
-     * Create the button linking to this source code.
+     * Create the button linking to this source code. This is shown in the bottom left.
      * @return {void}
      */
     function createMapsControlSource() {
@@ -492,7 +524,7 @@ function initMap() {
     }
 
     /**
-     * Create the elements on the map.
+     * Create the elements on the map. This includes the loading indicator, the municipality drop down and the period drop down.
      * https://developers.google.com/maps/documentation/javascript/examples/control-custom
      * @return {void}
      */
@@ -504,13 +536,13 @@ function initMap() {
     }
 
     /**
-     * Parse the license ID.
+     * Parse the license ID. This is the last part of the URL.
      * Options: https://zoek.officielebekendmakingen.nl/prb-2023-962.html
      *          https://zoek.officielebekendmakingen.nl/gmb-2023-56454.html
      *          https://zoek.officielebekendmakingen.nl/wsb-2023-801.html
      *          https://zoek.officielebekendmakingen.nl/stcrt-2023-128.html
      * @param {string} websiteUrl Link to document.
-     * @return {string|boolean}
+     * @return {string|boolean} License ID or false.
      */
     function getLicenseIdFromUrl(websiteUrl) {
         const startOfUrl = "https://zoek.officielebekendmakingen.nl/";
@@ -529,7 +561,7 @@ function initMap() {
      * Optmized using https://svgoptimizer.com/
      * @param {string} title Name of permit.
      * @param {string} type Permit type.
-     * @return {string}
+     * @return {string} Icon file name without extension.
      */
     function getIconName(title, type) {
         const exploitatievergunningen = [
@@ -636,10 +668,15 @@ function initMap() {
     /**
      * When two licenses are on the same location, move the second, to see them both.
      * @param {!Object} proposedCoordinate Coordinate to place marker.
-     * @return {!Object}
+     * @return {!Object} Coordinate to place marker.
      */
     function findUniquePosition(proposedCoordinate) {
 
+        /**
+         * Checks if a coordinate is available.
+         * @param {!Object} coordinate The coordinate to check.
+         * @return {boolean} True if the coordinate is available, false otherwise.
+         */
         function isCoordinateAvailable(coordinate) {
             let isAvailable = true;  // Be positive
             let i;
@@ -670,7 +707,7 @@ function initMap() {
      * Set visibility of the markers, based on time filter.
      * @param {number} age Days in the past.
      * @param {string} periodToShow Selected period.
-     * @return {boolean}
+     * @return {boolean} Is marker visible?
      */
     function isMarkerVisible(age, periodToShow) {
         switch (periodToShow) {
@@ -690,10 +727,13 @@ function initMap() {
      * @param {!Object} publication Publication object.
      * @param {string} periodToShow Selected period.
      * @param {!Object} position Coordinate.
-     * @return {void}
+     * @return {!Object} Marker object. This is used to remove the marker later.
      */
     function addMarker(publication, periodToShow, position) {
 
+        /**
+         * Handles the click event. Show the info window.
+         */
         function onClick() {
             const description = publication.description + "<br /><br />Meer info: <a href=\"" + publication.urlDoc + "\" target=\"blank\">" + publication.urlDoc + "</a>.";
             const licenseId = getLicenseIdFromUrl(publication.urlDoc);
@@ -705,16 +745,19 @@ function initMap() {
             // Not supported:
             //          https://www.zaanstad.nl/mozard/!suite42.scherm1260?mObj=211278
             //          https://bekendmakingen.amsterdam.nl/bekendmakingen/overige/decos/C174AC3CD0754F9089D1553C31CD5B7A
-            if (licenseId) {
-                showInfoWindow(marker, iconName, publication.title, "<div id=\"" + licenseId + "\"><br /><br /><br /></div>" + description);
-                collectBezwaartermijn(licenseId, publication);
-            } else {
+            if (licenseId === false) {
                 // Errors:  https://www.zaanstad.nl/mozard/!suite42.scherm1260?mObj=211278
                 //          https://bekendmakingen.amsterdam.nl/bekendmakingen/overige/decos/C174AC3CD0754F9089D1553C31CD5B7A
                 showInfoWindow(marker, iconName, publication.title, description);
+            } else {
+                showInfoWindow(marker, iconName, publication.title, "<div id=\"" + licenseId + "\"><br /><br /><br /></div>" + description);
+                collectBezwaartermijn(licenseId, publication);
             }
         }
 
+        /**
+         * Handles the hover event. Highlight the icon (and related icons) on hover.
+         */
         function onMouseOver() {
             appState.markersArray.forEach(function (markerObject) {
                 if (markerObject.url === publication.urlDoc) {
@@ -726,6 +769,9 @@ function initMap() {
             });
         }
 
+        /**
+         * Handles the mouse out event. Remove the highlight.
+         */
         function onMouseOut() {
             appState.markersArray.forEach(function (markerObject) {
                 if (markerObject.url === publication.urlDoc) {
@@ -796,10 +842,15 @@ function initMap() {
 
     /**
      * Determine what time filter must be used.
-     * @return {!Object}
+     * @return {!Object} Time filter.
      */
     function getPeriodFilter() {
 
+        /**
+         * Checks if a value represents a historical period. Historical periods are notated like '2023-11'.
+         * @param {string} value The value to check.
+         * @return {boolean} Returns true if the value represents a historical period, otherwise returns false.
+         */
         function isHistoricalPeriod(value) {
             // Values of historical periods are notated like '2023-03'
             return value.length === 7 && value.substring(4, 5) === "-";
@@ -827,8 +878,8 @@ function initMap() {
 
     /**
      * Create (new) latitude/longitude object.
-     * Input example: "52.35933 4.893097"
-     * @return {!Object}
+     * @param {string} locatiepunt Latitude/longitude. Input example: "52.35933 4.893097".
+     * @return {!Object} Coordinate.
      */
     function createCoordinate(locatiepunt) {
         const coordinate = locatiepunt.split(" ");
@@ -839,7 +890,7 @@ function initMap() {
     }
 
     /**
-     * Add markers to the map.
+     * Add markers to the map. This is done in batches, to improve performance.
      * @param {number} startRecord Number of record of current batch.
      * @param {boolean} isMoreDataAvailable More to load?
      * @return {void}
@@ -879,7 +930,7 @@ function initMap() {
     }
 
     /**
-     * Add municipality markers to the map.
+     * Add municipality markers to the map. This is done in batches, to improve performance.
      * @return {void}
      */
     function addMunicipalitiyMarkers() {
@@ -919,7 +970,7 @@ function initMap() {
     }
 
     /**
-     * Reset time filter.
+     * Reset time filter. This is done when the municipality is changed.
      * @return {void}
      */
     function updatePeriodFilter() {
@@ -958,7 +1009,7 @@ function initMap() {
         if (window.URLSearchParams) {
             const urlSearchParams = new window.URLSearchParams(window.location.search);
             urlSearchParams.set("in", appState.activeMunicipality);
-            urlSearchParams.set("zoom", zoom);
+            urlSearchParams.set("zoom", zoom.toString());
             urlSearchParams.set("center", center.toUrlValue(10));
             window.history.replaceState(null, "", window.location.pathname + "?" + urlSearchParams.toString());
         }
@@ -969,7 +1020,7 @@ function initMap() {
      * Calculate the distance between two points, using the haversine formula.
      * @param {!Object} from Coordinate 1.
      * @param {!Object} to Coordinate 2.
-     * @return {number}
+     * @return {number} Distance in meters.
      */
     function computeDistanceBetween(from, to) {
         // Source: http://www.movable-type.co.uk/scripts/latlong.html
@@ -982,7 +1033,7 @@ function initMap() {
         const lngDelta = (to.lng - from.lng) * Math.PI / 180;  // Δλ
         const a = Math.sin(latDelta / 2) * Math.sin(latDelta / 2) + Math.cos(a1) * Math.cos(a2) * Math.sin(lngDelta / 2) * Math.sin(lngDelta / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return radius * c;  // Distance in metres
+        return radius * c;  // Distance in meters
     }
 
     /**
@@ -1006,7 +1057,7 @@ function initMap() {
 
     /**
      * Determine if the municipality is part of the URL.
-     * @return {boolean}
+     * @return {boolean} Is the municipality part of the URL?
      */
     function isLocationInUrl() {
         if (window.URLSearchParams) {
@@ -1061,6 +1112,10 @@ function initMap() {
      */
     function getLocationAndLoadData() {
 
+        /**
+         * Callback function for when the device's location is found.
+         * @param {!Object} position The position object containing the device's coordinates.
+         */
         function deviceLocationFound(position) {
             activateClosestMunicipality({
                 "lat": position.coords.latitude,
@@ -1069,6 +1124,9 @@ function initMap() {
             internalInitMap();
         }
 
+        /**
+         * This function is called when the device location request is rejected. This can happen when the user denies the request, or when the device does not support GPS.
+         */
         function deviceLocationRequestRejected() {
             console.log("Unable to retrieve device location.");
             // Fallback:
@@ -1161,13 +1219,14 @@ function initMap() {
     }
 
     /**
-     * Scroll map to a certain coordinate (center of municipality).
+     * Scroll map to a certain coordinate (center of municipality). This is done when the municipality is changed.
      * @param {string} municipality Municipality to center.
      * @return {void}
      */
     function navigateTo(municipality) {
         const center = municipalities[municipality].center;
-        appState.map.setCenter(new google.maps.LatLng(center.lat, center.lng), appState.initialZoomLevel);
+        appState.map.setZoom(appState.initialZoomLevel);
+        appState.map.setCenter(new google.maps.LatLng(center.lat, center.lng));
     }
 
     /**
@@ -1175,11 +1234,11 @@ function initMap() {
      * URL: https://zoek.officielebekendmakingen.nl/gmb-2022-425209.html
      * Endpoint: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-425209/1/xml/gmb-2022-425209.xml
      * @param {string} urlDoc URL of publication.
-     * @return {string}
+     * @return {string} API endpoint.
      */
     function getUrlApi(urlDoc) {
         const licenseId = getLicenseIdFromUrl(urlDoc);
-        if (!licenseId) {
+        if (licenseId === false) {
             return "UNAVAILABLE";
         }
         const licenseIdArray = licenseId.split("-");
