@@ -1,13 +1,13 @@
 const periods = [
     {
         "key": "3d",
-        "val": "Toon van laatste drie dagen"
+        "val": "Publicaties laatste drie dagen"
     }, {
         "key": "7d",
-        "val": "Toon van laatste week"
+        "val": "Publicaties laatste week"
     }, {
         "key": "14d",
-        "val": "Publicaties van laatste twee weken"
+        "val": "Publicaties laatste twee weken"
     }, {
         "key": "all",
         "val": "Alle recente publicaties"
