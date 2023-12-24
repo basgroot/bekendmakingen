@@ -37,7 +37,7 @@ function initMap() {
         // The info window shown when clicking on a marker:
         "infoWindow": null,
         // Start date of the query and indication if history must be retrieved:
-        "startDate": {}
+        "requestPeriod": {}
     };
 
     /**
@@ -1153,7 +1153,7 @@ function initMap() {
      * Determine the start date. This is used to determine if the history file can be loaded, which improves performance.
      * @return {void}
      */
-    function determineStartDate() {
+    function determineRequestPeriod() {
 
         /**
          * Prefix number with zero, if it has one digit.
@@ -1169,23 +1169,22 @@ function initMap() {
         }
 
         const currentDate = new Date();
-        const startDate = new Date();
         const previousMonth = new Date();
-        startDate.setDate(startDate.getDate() - 42);  // Substract 6 weeks
         previousMonth.setDate(0);  // Set to last day of previous month
         const previousMonthString = previousMonth.getFullYear() + "-" + addLeadingZero(previousMonth.getMonth() + 1);
-
         const periodId = periods.findIndex(function (period) {
             return period.key === previousMonthString;
         });
+        appState.requestPeriod.startDate = new Date();
+        appState.requestPeriod.startDate.setDate(appState.requestPeriod.startDate.getDate() - 42);  // Substract 6 weeks
         if (periodId >= 0) {
-            appState.startDate.historyFile = previousMonthString;
-            appState.startDate.startDateString = currentDate.getFullYear() + "-" + addLeadingZero(currentDate.getMonth() + 1) + "-" + "01";  // Start of current month, because history is already available in a faster to retrieve format
-            console.log("Historical file to add to view: " + appState.startDate.historyFile);
+            appState.requestPeriod.historyFile = previousMonthString;
+            appState.requestPeriod.startDateString = currentDate.getFullYear() + "-" + addLeadingZero(currentDate.getMonth() + 1) + "-" + "01";  // Start of current month, because history is already available in a faster to retrieve format
+            console.log("Historical file to add to view: " + appState.requestPeriod.historyFile);
         } else {
-            appState.startDate.startDateString = startDate.getFullYear() + "-" + addLeadingZero(startDate.getMonth() + 1) + "-" + addLeadingZero(startDate.getDate());
+            appState.requestPeriod.startDateString = appState.requestPeriod.startDate.getFullYear() + "-" + addLeadingZero(appState.requestPeriod.startDate.getMonth() + 1) + "-" + addLeadingZero(appState.requestPeriod.startDate.getDate());
         }
-        console.log("StartDate: " + appState.startDate.startDateString);
+        console.log("StartDate: " + appState.requestPeriod.startDateString);
     }
 
     /**
@@ -1214,7 +1213,7 @@ function initMap() {
                 "zoom": mapSettings.zoomLevel
             }
         );
-        determineStartDate();
+        determineRequestPeriod();
         createMapsControls();
         addMunicipalitiyMarkers();
         appState.map.addListener("zoom_changed", function () {
@@ -1387,6 +1386,7 @@ function initMap() {
         ).then(function (response) {
             if (response.ok) {
                 response.json().then(function (responseJson) {
+                    let startRecord = 1;
                     // Preprocess data:
                     responseJson.publications.forEach(function (publication) {
                         publication.date = new Date(publication.date);
@@ -1402,14 +1402,21 @@ function initMap() {
                             appState.isHistoryActive = true;
                         }
                         appState.publicationsArray = responseJson.publications;
-                        addMarkers(1, false);
                     } else {
                         // This is a request to add some history to the current view:
-                        let startRecord = appState.publicationsArray.length;
+                        startRecord = appState.publicationsArray.length + 1;
+                        // Delete the publications older than 6 weeks:
+                        const publicationIndex = responseJson.publications.findIndex(function (publication) {
+                            return publication.date < appState.requestPeriod.startDate;
+                        });
+                        if (publicationIndex >= 0) {
+                            console.log("Deleting " + (responseJson.publications.length - publicationIndex) + " historical items from before " + appState.requestPeriod.startDate.toDateString());
+                            responseJson.publications = responseJson.publications.slice(0, publicationIndex - 1);
+                        }
                         appState.publicationsArray = appState.publicationsArray.concat(responseJson.publications);
                         appState.isFullyLoaded = true;
-                        addMarkers(startRecord, false);
                     }
+                    addMarkers(startRecord, false);
                 });
             } else {
                 console.error(response);
@@ -1434,7 +1441,7 @@ function initMap() {
         setLoadingIndicatorVisibility("show");
         fetch(
             // Example: https://repository.overheid.nl/sru?query=(c.product-area=lokalebekendmakingen%20AND%20cd.afgeleideGemeente=%22Amsterdam%22%20AND%20dt.modified%3E=2023-12-01)%20sortBy%20cd.datumTijdstipWijzigingWork%20/sort.descending&maximumRecords=1000&startRecord=1&httpAccept=application/json
-            "https://repository.overheid.nl/sru?query=(c.product-area=lokalebekendmakingen%20AND%20cd.afgeleideGemeente=\"" + encodeURIComponent(lookupMunicipality) + "\"%20AND%20dt.modified%3E=" + appState.startDate.startDateString + ")%20sortBy%20cd.datumTijdstipWijzigingWork%20/sort.descending&maximumRecords=1000&startRecord=" + startRecord + "&httpAccept=application/json",
+            "https://repository.overheid.nl/sru?query=(c.product-area=lokalebekendmakingen%20AND%20cd.afgeleideGemeente=\"" + encodeURIComponent(lookupMunicipality) + "\"%20AND%20dt.modified%3E=" + appState.requestPeriod.startDateString + ")%20sortBy%20cd.datumTijdstipWijzigingWork%20/sort.descending&maximumRecords=1000&startRecord=" + startRecord + "&httpAccept=application/json",
             {
                 "method": "GET"
             }
@@ -1458,10 +1465,10 @@ function initMap() {
                         // Add next page:
                         console.log("Loading next page..");
                         loadDataForMunicipality(municipality, responseJson.searchRetrieveResponse.nextRecordPosition);
-                    } else if (appState.startDate.hasOwnProperty("historyFile")) {
+                    } else if (appState.requestPeriod.hasOwnProperty("historyFile")) {
                         // Load historical data and append that:
-                        console.log("Adding historical file " + appState.startDate.historyFile + " to complete the overview");
-                        loadHistory(appState.startDate.historyFile, false);
+                        console.log("Adding historical file " + appState.requestPeriod.historyFile + " to complete the overview");
+                        loadHistory(appState.requestPeriod.historyFile, false);
                     } else {
                         console.log("Data retrieval complete");
                         appState.isFullyLoaded = true;
