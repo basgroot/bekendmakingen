@@ -35,7 +35,9 @@ function initMap() {
         // Wait custor when loading data:
         "loadingIndicator": document.createElement("img"),
         // The info window shown when clicking on a marker:
-        "infoWindow": null
+        "infoWindow": null,
+        // Start date of the query and indication if history must be retrieved:
+        "startDate": {}
     };
 
     /**
@@ -976,8 +978,8 @@ function initMap() {
     function updatePeriodFilter() {
         const periodFilter = getPeriodFilter();
         if (periodFilter.isHistory) {
-            console.log("Loading historical data of: " + periodFilter.periodToShow);
-            loadHistory(periodFilter.period);
+            console.log("Loading historical data of period " + periodFilter.periodToShow);
+            loadHistory(periodFilter.period, true);
         } else {
             console.log("Filtering period to: " + periodFilter.periodToShow);
             if (appState.isHistoryActive) {
@@ -1071,7 +1073,7 @@ function initMap() {
     }
 
     /**
-     * Try to find the municipality of the visitor, by using an IP geolocation API.
+     * Try to find the municipality of the visitor, by using an IP geolocation API. This is a fallback for when the device does not support GPS.
      * @return {void}
      */
     function getLocationByIp() {
@@ -1148,6 +1150,45 @@ function initMap() {
     }
 
     /**
+     * Determine the start date. This is used to determine if the history file can be loaded, which improves performance.
+     * @return {void}
+     */
+    function determineStartDate() {
+
+        /**
+         * Prefix number with zero, if it has one digit.
+         * @param {number} n The one or two digit number representing day or month.
+         * @return {string} The formatted number.
+         */
+        function addLeadingZero(n) {
+            return (
+                n > 9
+                ? String(n)
+                : "0" + n
+            );
+        }
+
+        const currentDate = new Date();
+        const startDate = new Date();
+        const previousMonth = new Date();
+        startDate.setDate(startDate.getDate() - 42);  // Substract 6 weeks
+        previousMonth.setDate(0);  // Set to last day of previous month
+        const previousMonthString = previousMonth.getFullYear() + "-" + addLeadingZero(previousMonth.getMonth() + 1);
+
+        const periodId = periods.findIndex(function (period) {
+            return period.key === previousMonthString;
+        });
+        if (periodId >= 0) {
+            appState.startDate.historyFile = previousMonthString;
+            appState.startDate.startDateString = currentDate.getFullYear() + "-" + addLeadingZero(currentDate.getMonth() + 1) + "-" + "01";  // Start of current month, because history is already available in a faster to retrieve format
+            console.log("Historical file to add to view: " + appState.startDate.historyFile);
+        } else {
+            appState.startDate.startDateString = startDate.getFullYear() + "-" + addLeadingZero(startDate.getMonth() + 1) + "-" + addLeadingZero(startDate.getDate());
+        }
+        console.log("StartDate: " + appState.startDate.startDateString);
+    }
+
+    /**
      * Setup map.
      * @return {void}
      */
@@ -1173,6 +1214,7 @@ function initMap() {
                 "zoom": mapSettings.zoomLevel
             }
         );
+        determineStartDate();
         createMapsControls();
         addMunicipalitiyMarkers();
         appState.map.addListener("zoom_changed", function () {
@@ -1325,16 +1367,18 @@ function initMap() {
      * @param {string} period Month to display.
      * @return {void}
      */
-    function loadHistory(period) {
+    function loadHistory(period, isNewRequest) {
         const lookupMunicipality = (
             municipalities[appState.activeMunicipality].hasOwnProperty("lookupName")
             ? municipalities[appState.activeMunicipality].lookupName
             : appState.activeMunicipality
         );
         const fileName = "https://basgroot.github.io/bekendmakingen/history/" + encodeURIComponent(lookupMunicipality.toLowerCase().replace(/\s/g, "-")) + "-" + period + ".json";
-        setLoadingIndicatorVisibility("show");
-        clearMarkers(appState.activeMunicipality);
-        console.log("Loading historical data of " + appState.activeMunicipality);
+        if (isNewRequest) {
+            setLoadingIndicatorVisibility("show");
+            clearMarkers(appState.activeMunicipality);
+        }
+        console.log("Loading historical data of municipality " + appState.activeMunicipality);
         fetch(
             fileName,
             {
@@ -1343,20 +1387,29 @@ function initMap() {
         ).then(function (response) {
             if (response.ok) {
                 response.json().then(function (responseJson) {
-                    if (!appState.isHistoryActive) {
-                        if (appState.isFullyLoaded) {
-                            // Make a backup, for when the time filter is reset
-                            appState.publicationsArrayBackup = [].concat(appState.publicationsArray);
-                            console.log("Backup created");
-                        }
-                        appState.isHistoryActive = true;
-                    }
-                    appState.publicationsArray = responseJson.publications;
                     // Preprocess data:
-                    appState.publicationsArray.forEach(function (publication) {
+                    responseJson.publications.forEach(function (publication) {
                         publication.date = new Date(publication.date);
                     });
-                    addMarkers(1, false);
+                    if (isNewRequest) {
+                        // This is a request for an historic month:
+                        if (!appState.isHistoryActive) {
+                            if (appState.isFullyLoaded) {
+                                // Make a backup, for when the time filter is reset
+                                appState.publicationsArrayBackup = [].concat(appState.publicationsArray);
+                                console.log("Backup created");
+                            }
+                            appState.isHistoryActive = true;
+                        }
+                        appState.publicationsArray = responseJson.publications;
+                        addMarkers(1, false);
+                    } else {
+                        // This is a request to add some history to the current view:
+                        let startRecord = appState.publicationsArray.length;
+                        appState.publicationsArray = appState.publicationsArray.concat(responseJson.publications);
+                        appState.isFullyLoaded = true;
+                        addMarkers(startRecord, false);
+                    }
                 });
             } else {
                 console.error(response);
@@ -1380,7 +1433,8 @@ function initMap() {
         );
         setLoadingIndicatorVisibility("show");
         fetch(
-            "https://repository.overheid.nl/sru?query=(c.product-area=lokalebekendmakingen%20AND%20cd.afgeleideGemeente=\"" + encodeURIComponent(lookupMunicipality) + "\")%20sortBy%20cd.datumTijdstipWijzigingWork%20/sort.descending&maximumRecords=1000&startRecord=" + startRecord + "&httpAccept=application/json",
+            // Example: https://repository.overheid.nl/sru?query=(c.product-area=lokalebekendmakingen%20AND%20cd.afgeleideGemeente=%22Amsterdam%22%20AND%20dt.modified%3E=2023-12-01)%20sortBy%20cd.datumTijdstipWijzigingWork%20/sort.descending&maximumRecords=1000&startRecord=1&httpAccept=application/json
+            "https://repository.overheid.nl/sru?query=(c.product-area=lokalebekendmakingen%20AND%20cd.afgeleideGemeente=\"" + encodeURIComponent(lookupMunicipality) + "\"%20AND%20dt.modified%3E=" + appState.startDate.startDateString + ")%20sortBy%20cd.datumTijdstipWijzigingWork%20/sort.descending&maximumRecords=1000&startRecord=" + startRecord + "&httpAccept=application/json",
             {
                 "method": "GET"
             }
@@ -1389,7 +1443,7 @@ function initMap() {
                 response.json().then(function (responseJson) {
                     let isMoreDataAvailable;
                     if (municipality !== appState.activeMunicipality || appState.isHistoryActive) {
-                        // We are loading a different municipality, but user selected another one.
+                        // We are loading a municipality, but user selected another one.
                         return;
                     }
                     if (startRecord === 1) {
@@ -1402,8 +1456,14 @@ function initMap() {
                     isMoreDataAvailable = responseJson.searchRetrieveResponse.hasOwnProperty("nextRecordPosition");
                     if (isMoreDataAvailable) {
                         // Add next page:
+                        console.log("Loading next page..");
                         loadDataForMunicipality(municipality, responseJson.searchRetrieveResponse.nextRecordPosition);
+                    } else if (appState.startDate.hasOwnProperty("historyFile")) {
+                        // Load historical data and append that:
+                        console.log("Adding historical file " + appState.startDate.historyFile + " to complete the overview");
+                        loadHistory(appState.startDate.historyFile, false);
                     } else {
+                        console.log("Data retrieval complete");
                         appState.isFullyLoaded = true;
                     }
                     addMarkers(startRecord, isMoreDataAvailable);
@@ -1417,8 +1477,8 @@ function initMap() {
     }
 
     /**
-     * Clear markers, because of a different period, or municipality.
-     * @param {string} municipalityToHide Municipality to show licenses from.
+     * Clear markers, because of a different period, or municipality. This is done when the municipality is changed.
+     * @param {string} municipalityToHide Municipality to show licenses from. Empty string to show all.
      * @return {void}
      */
     function clearMarkers(municipalityToHide) {
@@ -1434,8 +1494,8 @@ function initMap() {
     }
 
     /**
-     * Populate the map with markers.
-     * @param {boolean} isNavigationNeeded Move to different center.
+     * Populate the map with markers. This is done when the municipality is changed. Or when the time filter is changed. Or when the map is scrolled.
+     * @param {boolean} isNavigationNeeded Move to different center. This is done when the municipality is changed.
      * @return {void}
      */
     function loadData(isNavigationNeeded) {
