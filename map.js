@@ -1192,6 +1192,11 @@ function initMap() {
      * @return {void}
      */
     function internalInitMap() {
+
+        function closeInfoWindow() {
+            appState.infoWindow.close();  // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.close
+        }
+
         const containerElm = document.getElementById("map");
         const mapSettings = getInitialMapSettings();
         const screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
@@ -1216,6 +1221,9 @@ function initMap() {
         determineRequestPeriod();
         createMapsControls();
         addMunicipalitiyMarkers();
+        // Maps events: https://developers.google.com/maps/documentation/javascript/events
+        appState.map.addListener("dragend", closeInfoWindow);
+        appState.map.addListener("click", closeInfoWindow);
         appState.map.addListener("zoom_changed", function () {
             // Add to URL: /?zoom=15&center=52.43660651356703,4.84418395002761
             const periodFilter = getPeriodFilter();
@@ -1236,7 +1244,7 @@ function initMap() {
                     updatePeriodFilter();
                 }
             }
-            appState.infoWindow.close();  // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.close
+            closeInfoWindow();
             console.log("Zoom changed to " + zoom);
         });
         appState.map.addListener("idle", function () {
@@ -1257,6 +1265,7 @@ function initMap() {
             console.log("Remaining items to add to the map: " + appState.delayedMarkersArray.length);
         });
         loadData(true);
+        console.log("Using Maps version " + google.maps.version);  // https://developers.google.com/maps/documentation/javascript/releases
     }
 
     /**
