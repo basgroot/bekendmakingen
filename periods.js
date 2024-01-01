@@ -12,6 +12,9 @@ const periods = [
         "key": "all",
         "val": "Alle recente publicaties"
     }, {
+        "key": "2023-12",
+        "val": "December 2023"
+    }, {
         "key": "2023-11",
         "val": "November 2023"
     }, {
