@@ -467,6 +467,7 @@ function initMap() {
         const combobox = document.createElement("select");
         const municipalityNames = Object.keys(municipalities);
         combobox.id = "idCbxMunicipality";
+        combobox.title = "Gemeente selecteren";
         municipalityNames.forEach(function (municipalityName) {
             combobox.add(createOptionEx(municipalityName));
         });
@@ -497,6 +498,7 @@ function initMap() {
         const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
         const combobox = document.createElement("select");
         combobox.id = "idCbxPeriod";
+        combobox.title = "Periode van de bekendmaking selecteren";
         periods.forEach(function (period) {
             combobox.add(createOptionEx(period.key, period.val));
         });
@@ -514,11 +516,15 @@ function initMap() {
         const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
         const button = document.createElement("button");
         button.id = "idBtnSource";
-        button.textContent = "Bekijk broncode";
-        button.title = "Bekijk de source op GitHub";
+        button.textContent = "Broncode";
+        button.title = "Source op GitHub bekijken";
         button.type = "button";
         button.addEventListener("click", function () {
-            window.location.href = "https://github.com/basgroot/bekendmakingen";
+            const url = "https://github.com/basgroot/bekendmakingen";
+            if (window.open(url) === null) {
+                // Popup blocker or something preventing a new tab
+                window.location.href = url;
+            }
         });
         button.classList.add("controlStyle");
         controlDiv.appendChild(button);
