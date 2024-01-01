@@ -903,7 +903,9 @@ function initMap() {
         let position;
         let i;
         let publication;
-        console.log("Adding markers " + startRecord + " to " + appState.publicationsArray.length);
+        if (appState.publicationsArray.length > 0) {
+            console.log("Adding markers " + startRecord + " to " + appState.publicationsArray.length);
+        }
         for (i = startRecord - 1; i < appState.publicationsArray.length; i += 1) {
             publication = appState.publicationsArray[i];
             if (typeof publication.location === "string") {
@@ -1302,9 +1304,17 @@ function initMap() {
     /**
      * Parse API response.
      * @param {!Object} responseJson JSON response.
-     * @return {void}
+     * @return {boolean} True if records are found.
      */
     function addPublications(responseJson) {
+        if (responseJson.searchRetrieveResponse.numberOfRecords === 0) {
+            // Nothing to do.
+            return false;
+        }
+        if (!responseJson.searchRetrieveResponse.hasOwnProperty("records")) {
+            console.error("Unexpected malformed searchRetrieveResponse loaded: " + JSON.stringify(responseJson, null, 4));
+            return false;
+        }
         responseJson.searchRetrieveResponse.records.record.forEach(function (inputRecord) {
             const urlDoc = inputRecord.recordData.gzd.originalData.meta.tpmeta.bronIdentifier.trim();
             const publication = {
@@ -1341,6 +1351,7 @@ function initMap() {
             }
             appState.publicationsArray.push(publication);
         });
+        return true;
     }
 
     /**
@@ -1467,8 +1478,11 @@ function initMap() {
                         // Hide active municipality:
                         hideActiveMunicipalityMarker();
                     }
-                    addPublications(responseJson);
-                    console.log("Found " + responseJson.searchRetrieveResponse.records.record.length + " bekendmakingen of " + responseJson.searchRetrieveResponse.numberOfRecords + " in " + municipality);
+                    if (addPublications(responseJson)) {
+                        console.log("Found " + responseJson.searchRetrieveResponse.records.record.length + " bekendmakingen of " + responseJson.searchRetrieveResponse.numberOfRecords + " in " + municipality);
+                    } else {
+                        console.log("No new bekendmakingen found in " + municipality);
+                    }
                     isMoreDataAvailable = responseJson.searchRetrieveResponse.hasOwnProperty("nextRecordPosition");
                     if (isMoreDataAvailable) {
                         // Add next page:
