@@ -1313,15 +1313,8 @@ function initMap() {
      * @return {boolean} True if records are found.
      */
     function addPublications(responseJson) {
-        if (responseJson.searchRetrieveResponse.numberOfRecords === 0) {
-            // Nothing to do.
-            return false;
-        }
-        if (!responseJson.searchRetrieveResponse.hasOwnProperty("records")) {
-            console.error("Unexpected malformed searchRetrieveResponse loaded: " + JSON.stringify(responseJson, null, 4));
-            return false;
-        }
-        responseJson.searchRetrieveResponse.records.record.forEach(function (inputRecord) {
+
+        function addPublication(inputRecord) {
             const urlDoc = inputRecord.recordData.gzd.originalData.meta.tpmeta.bronIdentifier.trim();
             const publication = {
                 // Example: "2023-02-10"
@@ -1356,7 +1349,22 @@ function initMap() {
                 publication.location = inputRecord.recordData.gzd.originalData.meta.tpmeta.locatiepunt;
             }
             appState.publicationsArray.push(publication);
-        });
+        }
+
+        if (responseJson.searchRetrieveResponse.numberOfRecords === 0) {
+            // Nothing to do.
+            return false;
+        }
+        if (!responseJson.searchRetrieveResponse.hasOwnProperty("records")) {
+            console.error("Unexpected malformed searchRetrieveResponse loaded: " + JSON.stringify(responseJson, null, 4));
+            return false;
+        }
+        if (responseJson.searchRetrieveResponse.numberOfRecords === 1) {
+            // Somehow this is not an array when there is only one.
+            addPublication(responseJson.searchRetrieveResponse.records.record);
+        } else {
+            responseJson.searchRetrieveResponse.records.record.forEach(addPublication);
+        }
         return true;
     }
 
