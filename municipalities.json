@@ -1,6 +1,4 @@
-// Source: https://organisaties.overheid.nl/Gemeenten/
-
-const municipalities = {
+{
     "Aa en Hunze": {
         "center": {
             "lat": 52.93517488,
@@ -2057,4 +2055,4 @@ const municipalities = {
             "lng": 6.09229013
         }
     }
-};
+}
