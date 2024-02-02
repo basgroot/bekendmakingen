@@ -95,12 +95,20 @@ function initMap() {
      * @return {void}
      */
     function showInfoWindow(marker, iconName, header, body) {
+        let map;
         appState.infoWindow.setContent("<div><img src=\"img/" + iconName + ".svg\" width=\"105\" height=\"135\" class=\"info_window_image\"><h2 class=\"info_window_heading\">" + header + "</h2><div class=\"info_window_body\"><p>" + body + "</p></div></div>");
+        if (appState.map.getStreetView().getVisible()) {
+            console.log("Streetview is visible. Showing infoWindow there.");
+            map = appState.map.getStreetView();
+        } else {
+            map = appState.map;
+        }
         appState.infoWindow.open({
             "anchor": marker,
-            "map": appState.map,
+            "map": map,
             "shouldFocus": true
         });
+        appState.infoWindow.setMap(map);  // Workaround for issue with infoWindow not showing in Street View: https://issuetracker.google.com/issues/35828818?pli=1
     }
 
     /**
