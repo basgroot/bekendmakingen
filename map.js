@@ -1583,7 +1583,7 @@ function initMap() {
 
     function init() {
         getData("/bekendmakingen/periods.json", function (periodsJson) {
-            appState.periods = periodsJson;
+            appState.periods = periodsJson.periods;
             getData("/bekendmakingen/municipalities.json", function (municipalitiesJson) {
                 // Source: https://organisaties.overheid.nl/Gemeenten/
                 appState.municipalities = municipalitiesJson;
