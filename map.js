@@ -1,5 +1,5 @@
 /*jslint browser: true, for: true, long: true, unordered: true, nomen: true */
-/*global window console google municipalities periods */
+/*global window console google */
 
 /**
  * Op zoek naar de website?
@@ -12,6 +12,10 @@ function initMap() {
     const appState = {
         // The map itself:
         "map": null,
+        // Periods
+        "periods": null,
+        // Municipalities
+        "municipalities": null,
         // The selected (or initial) municipality:
         "activeMunicipality": "Hoorn",
         // The zoom level when starting the app:
@@ -49,7 +53,7 @@ function initMap() {
      */
     function getInitialMapSettings() {
         let zoomLevel = appState.initialZoomLevel;
-        let center = Object.assign({}, municipalities[appState.activeMunicipality].center);  // Create new copy
+        let center = Object.assign({}, appState.municipalities[appState.activeMunicipality].center);  // Create new copy
         let lat;
         let lng;
         if (window.URLSearchParams) {
@@ -57,11 +61,11 @@ function initMap() {
             let zoomParam = urlSearchParams.get("zoom");
             let centerParam = urlSearchParams.get("center");
             const municipalityParam = urlSearchParams.get("in");
-            if (municipalityParam && municipalities[municipalityParam] !== undefined) {
+            if (municipalityParam && appState.municipalities[municipalityParam] !== undefined) {
                 appState.activeMunicipality = municipalityParam;
                 console.log("Adjusted municipality from URL: " + municipalityParam);
             }
-            center = Object.assign({}, municipalities[appState.activeMunicipality].center);
+            center = Object.assign({}, appState.municipalities[appState.activeMunicipality].center);
             if (zoomParam && centerParam) {
                 zoomParam = parseFloat(zoomParam);
                 if (zoomParam > 14 && zoomParam < 20) {
@@ -473,7 +477,7 @@ function initMap() {
 
         const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
         const combobox = document.createElement("select");
-        const municipalityNames = Object.keys(municipalities);
+        const municipalityNames = Object.keys(appState.municipalities);
         combobox.id = "idCbxMunicipality";
         combobox.title = "Gemeente selecteren";
         municipalityNames.forEach(function (municipalityName) {
@@ -507,7 +511,7 @@ function initMap() {
         const combobox = document.createElement("select");
         combobox.id = "idCbxPeriod";
         combobox.title = "Periode van de bekendmaking selecteren";
-        periods.forEach(function (period) {
+        appState.periods.forEach(function (period) {
             combobox.add(createOptionEx(period.key, period.val));
         });
         combobox.addEventListener("change", updatePeriodFilter);
@@ -933,7 +937,7 @@ function initMap() {
             } else if (publication.location === undefined) {
                 console.error("Publication without position: " + JSON.stringify(publication, null, 4));
                 // Take the center of the municipality:
-                position = findUniquePosition(municipalities[appState.activeMunicipality].center);
+                position = findUniquePosition(appState.municipalities[appState.activeMunicipality].center);
                 prepareToAddMarker(publication, periodFilter.periodToShow, position, bounds);
             } else {
                 console.error("Unsupported publication location: " + JSON.stringify(publication, null, 4));
@@ -952,9 +956,9 @@ function initMap() {
      * @return {void}
      */
     function addMunicipalitiyMarkers() {
-        const municipalityNames = Object.keys(municipalities);
+        const municipalityNames = Object.keys(appState.municipalities);
         municipalityNames.forEach(function (municipalityName) {
-            const municipalityObject = municipalities[municipalityName];
+            const municipalityObject = appState.municipalities[municipalityName];
             let marker = new google.maps.Marker({
                 "map": appState.map,
                 "position": municipalityObject.center,
@@ -1060,10 +1064,10 @@ function initMap() {
      * @return {void}
      */
     function activateClosestMunicipality(position) {
-        const municipalityNames = Object.keys(municipalities);
+        const municipalityNames = Object.keys(appState.municipalities);
         let distance = 1000000;
         municipalityNames.forEach(function (municipalityName) {
-            const municipalityObject = municipalities[municipalityName];
+            const municipalityObject = appState.municipalities[municipalityName];
             const distanceBetweenMunicipalityAndViewer = computeDistanceBetween(position, municipalityObject.center) / 1000;
             if (distanceBetweenMunicipalityAndViewer < distance) {
                 console.log("Found closer municipality: " + municipalityName);
@@ -1081,7 +1085,7 @@ function initMap() {
         if (window.URLSearchParams) {
             const urlSearchParams = new window.URLSearchParams(window.location.search);
             const municipalityParam = urlSearchParams.get("in");
-            if (municipalityParam && municipalities[municipalityParam] !== undefined) {
+            if (municipalityParam && appState.municipalities[municipalityParam] !== undefined) {
                 return true;
             }
         }
@@ -1101,7 +1105,7 @@ function initMap() {
         ).then(function (response) {
             if (response.ok) {
                 response.json().then(function (responseJson) {
-                    if (municipalities[responseJson.city] !== undefined) {
+                    if (appState.municipalities[responseJson.city] !== undefined) {
                         // Name of the city is the same as the municipality.
                         console.log("Client location in municipality " + responseJson.city);
                         appState.activeMunicipality = responseJson.city;
@@ -1188,7 +1192,7 @@ function initMap() {
         const previousMonth = new Date();
         previousMonth.setDate(0);  // Set to last day of previous month
         const previousMonthString = previousMonth.getFullYear() + "-" + addLeadingZero(previousMonth.getMonth() + 1);
-        const periodId = periods.findIndex(function (period) {
+        const periodId = appState.periods.findIndex(function (period) {
             return period.key === previousMonthString;
         });
         appState.requestPeriod.startDate = new Date();
@@ -1290,7 +1294,7 @@ function initMap() {
      * @return {void}
      */
     function navigateTo(municipality) {
-        const center = municipalities[municipality].center;
+        const center = appState.municipalities[municipality].center;
         appState.map.setZoom(appState.initialZoomLevel);
         appState.map.setCenter(new google.maps.LatLng(center.lat, center.lng));
     }
@@ -1404,67 +1408,75 @@ function initMap() {
     }
 
     /**
+     * Download json from the Github Live Pages.
+     * @param {string} path Path and file name to retrieve.
+     * @param {function} callback Function when request is successful.
+     * @return {void}
+     */
+    function getData(path, callback) {
+        const host = "https://basgroot.github.io";
+        const url = host + path;
+        console.log("Loading file " + url + "..");
+        fetch(url, {"method": "GET"}).then(function (response) {
+            if (response.ok) {
+                response.json().then(callback);
+            } else {
+                console.error(response);
+            }
+        }).catch(function (error) {
+            console.error(error);
+        });
+    }
+
+    /**
      * Open an historical file, where data is stored per month.
      * @param {string} period Month to display.
      * @return {void}
      */
     function loadHistory(period, isNewRequest) {
         const lookupMunicipality = (
-            municipalities[appState.activeMunicipality].hasOwnProperty("lookupName")
-            ? municipalities[appState.activeMunicipality].lookupName
+            appState.municipalities[appState.activeMunicipality].hasOwnProperty("lookupName")
+            ? appState.municipalities[appState.activeMunicipality].lookupName
             : appState.activeMunicipality
         );
-        const fileName = "https://basgroot.github.io/bekendmakingen/history/" + encodeURIComponent(lookupMunicipality.toLowerCase().replace(/\s/g, "-")) + "-" + period + ".json";
+        const url = "/bekendmakingen/history/" + encodeURIComponent(lookupMunicipality.toLowerCase().replace(/\s/g, "-")) + "-" + period + ".json";
         if (isNewRequest) {
             setLoadingIndicatorVisibility("show");
             clearMarkers(appState.activeMunicipality);
         }
         console.log("Loading historical data of municipality " + appState.activeMunicipality);
-        fetch(
-            fileName,
-            {
-                "method": "GET"
-            }
-        ).then(function (response) {
-            if (response.ok) {
-                response.json().then(function (responseJson) {
-                    let startRecord = 1;
-                    // Preprocess data:
-                    responseJson.publications.forEach(function (publication) {
-                        publication.date = new Date(publication.date);
-                    });
-                    if (isNewRequest) {
-                        // This is a request for an historic month:
-                        if (!appState.isHistoryActive) {
-                            if (appState.isFullyLoaded) {
-                                // Make a backup, for when the time filter is reset
-                                appState.publicationsArrayBackup = [].concat(appState.publicationsArray);
-                                console.log("Backup created");
-                            }
-                            appState.isHistoryActive = true;
-                        }
-                        appState.publicationsArray = responseJson.publications;
-                    } else {
-                        // This is a request to add some history to the current view:
-                        startRecord = appState.publicationsArray.length + 1;
-                        // Delete the publications older than 6 weeks:
-                        const publicationIndex = responseJson.publications.findIndex(function (publication) {
-                            return publication.date < appState.requestPeriod.startDate;
-                        });
-                        if (publicationIndex >= 0) {
-                            console.log("Deleting " + (responseJson.publications.length - publicationIndex) + " historical items from before " + appState.requestPeriod.startDate.toDateString());
-                            responseJson.publications = responseJson.publications.slice(0, publicationIndex - 1);
-                        }
-                        appState.publicationsArray = appState.publicationsArray.concat(responseJson.publications);
-                        appState.isFullyLoaded = true;
+        getData(url, function (responseJson) {
+            let startRecord = 1;
+            // Preprocess data:
+            responseJson.publications.forEach(function (publication) {
+                publication.date = new Date(publication.date);
+            });
+            if (isNewRequest) {
+                // This is a request for an historic month:
+                if (!appState.isHistoryActive) {
+                    if (appState.isFullyLoaded) {
+                        // Make a backup, for when the time filter is reset
+                        appState.publicationsArrayBackup = [].concat(appState.publicationsArray);
+                        console.log("Backup created");
                     }
-                    addMarkers(startRecord, false);
-                });
+                    appState.isHistoryActive = true;
+                }
+                appState.publicationsArray = responseJson.publications;
             } else {
-                console.error(response);
+                // This is a request to add some history to the current view:
+                startRecord = appState.publicationsArray.length + 1;
+                // Delete the publications older than 6 weeks:
+                const publicationIndex = responseJson.publications.findIndex(function (publication) {
+                    return publication.date < appState.requestPeriod.startDate;
+                });
+                if (publicationIndex >= 0) {
+                    console.log("Deleting " + (responseJson.publications.length - publicationIndex) + " historical items from before " + appState.requestPeriod.startDate.toDateString());
+                    responseJson.publications = responseJson.publications.slice(0, publicationIndex - 1);
+                }
+                appState.publicationsArray = appState.publicationsArray.concat(responseJson.publications);
+                appState.isFullyLoaded = true;
             }
-        }).catch(function (error) {
-            console.error(error);
+            addMarkers(startRecord, false);
         });
     }
 
@@ -1476,8 +1488,8 @@ function initMap() {
      */
     function loadDataForMunicipality(municipality, startRecord) {
         const lookupMunicipality = (
-            municipalities[municipality].hasOwnProperty("lookupName")
-            ? municipalities[municipality].lookupName
+            appState.municipalities[municipality].hasOwnProperty("lookupName")
+            ? appState.municipalities[municipality].lookupName
             : municipality
         );
         setLoadingIndicatorVisibility("show");
@@ -1569,5 +1581,16 @@ function initMap() {
         loadDataForMunicipality(appState.activeMunicipality, 1);
     }
 
-    getLocationAndLoadData();
+    function init() {
+        getData("/bekendmakingen/periods.json", function (periodsJson) {
+            appState.periods = periodsJson;
+            getData("/bekendmakingen/municipalities.json", function (municipalitiesJson) {
+                // Source: https://organisaties.overheid.nl/Gemeenten/
+                appState.municipalities = municipalitiesJson;
+                getLocationAndLoadData();
+            });
+        });
+    }
+
+    init();
 }
