@@ -50,3 +50,18 @@ h2.info_window_heading {
     outline-style: solid;
     box-shadow: 0 0 0 4px #5A01A7;
 }
+
+/* Municipality icons */
+.municipalityContainer {
+    position: relative;
+    text-align: center;
+    color: black;
+    font-size: 15px;
+}
+
+.municipalityLabel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
