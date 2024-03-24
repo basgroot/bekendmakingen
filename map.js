@@ -8,7 +8,9 @@
  * This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
  * @return {void}
  */
-function initMap() {
+async function initMap() {
+    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+
     const appState = {
         // The map itself:
         "map": null,
@@ -828,7 +830,7 @@ function initMap() {
         // https://developers.google.com/maps/documentation/javascript/reference/advanced-markers#AdvancedMarkerElementOptions
         const age = getDaysPassed(publication.date);
         const iconName = getIconName(publication.title, publication.type);
-        const marker = new google.maps.marker.AdvancedMarkerElement({
+        const marker = new AdvancedMarkerElement({
             "map": (
                 isMarkerVisible(age, periodToShow)
                 ? appState.map
@@ -974,7 +976,7 @@ function initMap() {
         const municipalityNames = Object.keys(appState.municipalities);
         municipalityNames.forEach(function (municipalityName) {
             const municipalityObject = appState.municipalities[municipalityName];
-            const marker = new google.maps.marker.AdvancedMarkerElement({
+            const marker = new AdvancedMarkerElement({
                 "map": (
                     municipalityName === appState.activeMunicipality
                     ? null
@@ -1260,7 +1262,7 @@ function initMap() {
                 "mapTypeId": google.maps.MapTypeId.ROADMAP,  // https://developers.google.com/maps/documentation/javascript/reference/map#MapTypeId
                 "gestureHandling": "greedy",  // When scrolling, keep scrolling
                 "zoom": mapSettings.zoomLevel,
-                "mapId": "fa8c70ada3bf211a"
+                "mapId": "9913fa533c4bf328"
             }
         );
         determineRequestPeriod();
