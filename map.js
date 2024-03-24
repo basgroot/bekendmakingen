@@ -743,6 +743,32 @@ function initMap() {
     }
 
     /**
+     * Create a marker icon.
+     * @param {string} sourceUrl Link to marker image.
+     * @param {boolean} isVisible Create a hidden marker, or not.
+     * @param {string=} label Optional label.
+     * @return {!HTMLDivElement} Marker node containing the image.
+     */
+    function createMarkerIcon(sourceUrl, isVisible, label) {
+        const iconContainer = document.createElement("div");
+        if (!isVisible) {
+            iconContainer.style.visibility = "hidden";
+        }
+        const icon = document.createElement("img");
+        icon.src = sourceUrl;
+        iconContainer.appendChild(icon);
+        if (label === undefined) {
+            return iconContainer;
+        }
+        iconContainer.classList.add("municipalityContainer");
+        const labelContainer = document.createElement("div");
+        labelContainer.classList.add("municipalityLabel");
+        labelContainer.innerText = label;
+        iconContainer.appendChild(labelContainer);
+        return iconContainer;
+    }
+
+    /**
      * Add a marker to the map.
      * @param {!Object} publication Publication object.
      * @param {string} periodToShow Selected period.
@@ -781,10 +807,7 @@ function initMap() {
         function onMouseOver() {
             appState.markersArray.forEach(function (markerObject) {
                 if (markerObject.url === publication.urlDoc) {
-                    markerObject.marker.setIcon({
-                        "url": "img/" + iconName + "-highlight.png",
-                        "size": iconSize
-                    });
+                    markerObject.marker.content.getElementsByTagName("img")[0].src = "img/" + iconName + "-highlight.png";
                 }
             });
         }
@@ -795,7 +818,7 @@ function initMap() {
         function onMouseOut() {
             appState.markersArray.forEach(function (markerObject) {
                 if (markerObject.url === publication.urlDoc) {
-                    markerObject.marker.setIcon(icon);
+                    markerObject.marker.content.getElementsByTagName("img")[0].src = "img/" + iconName + ".png";
                 }
             });
         }
@@ -806,21 +829,13 @@ function initMap() {
         // "TVM- 7 PV reserveren - Monnikendammerweg 27-37 - 03-07/10/2022, Monnikendammerweg 27";
         // 125171;
         // 488983
-        // https://developers.google.com/maps/documentation/javascript/reference#MarkerOptions
+        // https://developers.google.com/maps/documentation/javascript/reference/advanced-markers#AdvancedMarkerElementOptions
         const age = getDaysPassed(publication.date);
         const iconName = getIconName(publication.title, publication.type);
-        const iconSize = new google.maps.Size(35, 45);  // Make sure image is already scaled
-        const icon = {
-            "url": "img/" + iconName + ".png",
-            "size": iconSize
-        };
-        const marker = new google.maps.Marker({
+        const marker = new google.maps.marker.AdvancedMarkerElement({
             "map": appState.map,
             "position": position,
-            "clickable": true,
-            "optimized": true,
-            "visible": isMarkerVisible(age, periodToShow),
-            "icon": icon,
+            "content": createMarkerIcon("img/" + iconName + ".png", isMarkerVisible(age, periodToShow)),
             "zIndex": appState.zIndex,
             "title": publication.title
         });
@@ -835,8 +850,8 @@ function initMap() {
         appState.markersArray.push(markerObject);
         marker.addListener("click", onClick);
         // Highlight the icon (and related icons) on hover
-        marker.addListener("mouseover", onMouseOver);
-        marker.addListener("mouseout", onMouseOut);
+        marker.content.addEventListener("mouseover", onMouseOver);
+        marker.content.addEventListener("mouseout", onMouseOut);
         return markerObject;
     }
 
@@ -959,18 +974,10 @@ function initMap() {
         const municipalityNames = Object.keys(appState.municipalities);
         municipalityNames.forEach(function (municipalityName) {
             const municipalityObject = appState.municipalities[municipalityName];
-            let marker = new google.maps.Marker({
+            const marker = new google.maps.marker.AdvancedMarkerElement({
                 "map": appState.map,
                 "position": municipalityObject.center,
-                "label": municipalityName,  // https://developers.google.com/maps/documentation/javascript/reference/marker#MarkerLabel
-                "clickable": true,
-                "optimized": true,
-                //"scaleControl": true,
-                "visible": municipalityName !== appState.activeMunicipality,
-                "icon": {
-                    "url": "img/gemeente.png",
-                    "size": new google.maps.Size(50, 61)  // Make sure image is already scaled
-                },
+                "content": createMarkerIcon("img/gemeente.png", municipalityName !== appState.activeMunicipality, municipalityName),
                 "title": municipalityName
             });
             appState.municipalityMarkers.push({
@@ -989,6 +996,20 @@ function initMap() {
                 }
             );
         });
+    }
+
+    /**
+     * Show or hide a marker.
+     * @param {!Object} marker Marker object.
+     * @param {boolean} isVisible Set visibility.
+     * @return {void}
+     */
+    function setMarkerVisibility(marker, isVisible) {
+        if (isVisible) {
+            marker.content.style.visibility = "visible";
+        } else {
+            marker.content.style.visibility = "hidden";
+        }
     }
 
     /**
@@ -1015,7 +1036,7 @@ function initMap() {
                 }
             }
             appState.markersArray.forEach(function (markerObject) {
-                markerObject.marker.setVisible(isMarkerVisible(markerObject.age, periodFilter.periodToShow));
+                setMarkerVisibility(markerObject.marker, isMarkerVisible(markerObject.age, periodFilter.periodToShow));
             });
         }
     }
@@ -1231,11 +1252,11 @@ function initMap() {
             {
                 "backgroundColor": "#9CC0F9",  // https://developers.google.com/maps/documentation/javascript/reference/map#MapOptions.backgroundColor
                 "clickableIcons": false,  // https://developers.google.com/maps/documentation/javascript/reference/map#MapOptions.clickableIcons
-                // Paid feature - "mapId": "c2a918307d540be7",
                 "center": new google.maps.LatLng(mapSettings.center.lat, mapSettings.center.lng),
                 "mapTypeId": google.maps.MapTypeId.ROADMAP,  // https://developers.google.com/maps/documentation/javascript/reference/map#MapTypeId
                 "gestureHandling": "greedy",  // When scrolling, keep scrolling
-                "zoom": mapSettings.zoomLevel
+                "zoom": mapSettings.zoomLevel,
+                "mapId": "fa8c70ada3bf211a"
             }
         );
         determineRequestPeriod();
@@ -1387,7 +1408,7 @@ function initMap() {
     function hideActiveMunicipalityMarker() {
         appState.municipalityMarkers.forEach(function (markerObject) {
             if (markerObject.municipalityName === appState.activeMunicipality) {
-                markerObject.marker.setVisible(false);
+                setMarkerVisibility(markerObject.marker, false);
             }
         });
     }
@@ -1551,7 +1572,7 @@ function initMap() {
             markerObject.marker.setMap(null);
         });
         appState.municipalityMarkers.forEach(function (markerObject) {
-            markerObject.marker.setVisible(markerObject.municipalityName !== municipalityToHide);
+            setMarkerVisibility(markerObject.marker, markerObject.municipalityName !== municipalityToHide);
         });
         appState.markersArray = [];
         appState.delayedMarkersArray = [];
