@@ -745,15 +745,11 @@ function initMap() {
     /**
      * Create a marker icon.
      * @param {string} sourceUrl Link to marker image.
-     * @param {boolean} isVisible Create a hidden marker, or not.
      * @param {string=} label Optional label.
      * @return {!HTMLDivElement} Marker node containing the image.
      */
-    function createMarkerIcon(sourceUrl, isVisible, label) {
+    function createMarkerIcon(sourceUrl, label) {
         const iconContainer = document.createElement("div");
-        if (!isVisible) {
-            iconContainer.style.visibility = "hidden";
-        }
         const icon = document.createElement("img");
         icon.src = sourceUrl;
         iconContainer.appendChild(icon);
@@ -833,9 +829,13 @@ function initMap() {
         const age = getDaysPassed(publication.date);
         const iconName = getIconName(publication.title, publication.type);
         const marker = new google.maps.marker.AdvancedMarkerElement({
-            "map": appState.map,
+            "map": (
+                isMarkerVisible(age, periodToShow)
+                ? appState.map
+                : null
+            ),
             "position": position,
-            "content": createMarkerIcon("img/" + iconName + ".png", isMarkerVisible(age, periodToShow)),
+            "content": createMarkerIcon("img/" + iconName + ".png"),
             "zIndex": appState.zIndex,
             "title": publication.title
         });
@@ -975,9 +975,13 @@ function initMap() {
         municipalityNames.forEach(function (municipalityName) {
             const municipalityObject = appState.municipalities[municipalityName];
             const marker = new google.maps.marker.AdvancedMarkerElement({
-                "map": appState.map,
+                "map": (
+                    municipalityName === appState.activeMunicipality
+                    ? null
+                    : appState.map
+                ),
                 "position": municipalityObject.center,
-                "content": createMarkerIcon("img/gemeente.png", municipalityName !== appState.activeMunicipality, municipalityName),
+                "content": createMarkerIcon("img/gemeente.png", municipalityName),
                 "title": municipalityName
             });
             appState.municipalityMarkers.push({
@@ -999,16 +1003,16 @@ function initMap() {
     }
 
     /**
-     * Show or hide a marker.
+     * Show or hide a marker. This replaces the setVisibility function of the legacy marker element.
      * @param {!Object} marker Marker object.
      * @param {boolean} isVisible Set visibility.
      * @return {void}
      */
     function setMarkerVisibility(marker, isVisible) {
         if (isVisible) {
-            marker.content.style.visibility = "visible";
+            marker.map = appState.map;
         } else {
-            marker.content.style.visibility = "hidden";
+            marker.map = null;
         }
     }
 
