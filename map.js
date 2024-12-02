@@ -1371,7 +1371,11 @@ async function initMap() {
                     : inputRecord.recordData.gzd.originalData.meta.owmsmantel.subject.$.trim().toLowerCase()
                 ),
                 // Example: "Besluit apv vergunning Verleend Overtoom 10-H"
-                "title": inputRecord.recordData.gzd.originalData.meta.owmskern.title.trim(),
+                "title": (
+                    inputRecord.recordData.gzd.originalData.meta.owmskern.hasOwnProperty("title")
+                    ? inputRecord.recordData.gzd.originalData.meta.owmskern.title.trim()
+                    : "Vergunning " + inputRecord.recordData.gzd.originalData.meta.tpmeta.straatnaam
+                ),
                 // Example: "TVM 2 vakken - Overtoom 10-12 13 februari 2023, Overtoom 10-H"
                 "description": (
                     typeof inputRecord.recordData.gzd.originalData.meta.owmsmantel.description === "string"
