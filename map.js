@@ -718,9 +718,12 @@ async function initMap() {
             "lat": proposedCoordinate.lat,
             "lng": proposedCoordinate.lng
         };
+        // The deviation from the original coordinate
+        const latShift = 0.000017;
+        const lngShift = 0.000016;
         while (!isCoordinateAvailable(destinationCoordinate)) {
-            destinationCoordinate.lat = destinationCoordinate.lat + 0.000017;
-            destinationCoordinate.lng = destinationCoordinate.lng + 0.000016;
+            destinationCoordinate.lat = destinationCoordinate.lat + latShift;
+            destinationCoordinate.lng = destinationCoordinate.lng + lngShift;
         }
         return destinationCoordinate;
     }
