@@ -163,8 +163,8 @@ async function initMap() {
         zakelijkeMededeling = xmlDoc.getElementsByTagName("zakelijke-mededeling-tekst");
         return (
             zakelijkeMededeling.length === 0
-            ? []
-            : zakelijkeMededeling[0].querySelectorAll("al,tussenkop")  // Tussenkop is required for Den Haag https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-78971/1/xml/gmb-2023-78971.xml
+                ? []
+                : zakelijkeMededeling[0].querySelectorAll("al,tussenkop")  // Tussenkop is required for Den Haag https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-78971/1/xml/gmb-2023-78971.xml
         );
     }
 
@@ -368,7 +368,7 @@ async function initMap() {
 
         const alineas = getAlineas(responseXml);
         const maxLooptijd = (6 * 7) + 1;  // 6 weken de tijd om bezwaar te maken
-        const dateFormatOptions = {"weekday": "long", "year": "numeric", "month": "long", "day": "numeric"};
+        const dateFormatOptions = { "weekday": "long", "year": "numeric", "month": "long", "day": "numeric" };
         let datumBekendgemaakt;  // Datum verzonden aan belanghebbende(n)
         let looptijd;
         let resterendAantalDagenBezwaartermijn;
@@ -390,8 +390,8 @@ async function initMap() {
                             resterendAantalDagenBezwaartermijn = maxLooptijd - looptijd;
                             textToShow = "Gepubliceerd: " + publication.date.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />Bekendgemaakt aan belanghebbende: " + datumBekendgemaakt.date.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />" + (
                                 resterendAantalDagenBezwaartermijn > 0
-                                ? "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
-                                : "<b>Geen bezwaar meer mogelijk.</b>"
+                                    ? "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
+                                    : "<b>Geen bezwaar meer mogelijk.</b>"
                             ) + "<br /><br />";
                         }
                         break;
@@ -499,12 +499,12 @@ async function initMap() {
      */
     function createMapsControlPeriods() {
 
-         /**
-          * Creates an option element with the specified value. Period 14d is selected by default.
-          * @param {string} value The value of the option.
-          * @param {string} displayValue The value of the option to display.
-          * @return {!HTMLOptionElement} The created option element.
-          */
+        /**
+         * Creates an option element with the specified value. Period 14d is selected by default.
+         * @param {string} value The value of the option.
+         * @param {string} displayValue The value of the option to display.
+         * @return {!HTMLOptionElement} The created option element.
+         */
         function createOptionEx(value, displayValue) {
             return createOption(value, displayValue, value === "14d");
         }
@@ -736,14 +736,14 @@ async function initMap() {
      */
     function isMarkerVisible(age, periodToShow) {
         switch (periodToShow) {
-        case "3d":
-            return age <= 3;
-        case "7d":
-            return age <= 7;
-        case "14d":
-            return age <= 14;
-        default:
-            return true;
+            case "3d":
+                return age <= 3;
+            case "7d":
+                return age <= 7;
+            case "14d":
+                return age <= 14;
+            default:
+                return true;
         }
     }
 
@@ -836,8 +836,8 @@ async function initMap() {
         const marker = new AdvancedMarkerElement({
             "map": (
                 isMarkerVisible(age, periodToShow)
-                ? appState.map
-                : null
+                    ? appState.map
+                    : null
             ),
             "position": position,
             "content": createMarkerIcon("img/" + iconName + ".png"),
@@ -982,8 +982,8 @@ async function initMap() {
             const marker = new AdvancedMarkerElement({
                 "map": (
                     municipalityName === appState.activeMunicipality
-                    ? null
-                    : appState.map
+                        ? null
+                        : appState.map
                 ),
                 "position": municipalityObject.center,
                 "content": createMarkerIcon("img/gemeente.png", municipalityName),
@@ -1213,8 +1213,8 @@ async function initMap() {
         function addLeadingZero(n) {
             return (
                 n > 9
-                ? String(n)
-                : "0" + n
+                    ? String(n)
+                    : "0" + n
             );
         }
 
@@ -1370,20 +1370,20 @@ async function initMap() {
                     // Sometimes multiple subjects, when both bouwvergunning and omgevingsvergunning are requested
                     // Used for matching, so trim and lowercase
                     Array.isArray(inputRecord.recordData.gzd.originalData.meta.owmsmantel.subject)
-                    ? inputRecord.recordData.gzd.originalData.meta.owmsmantel.subject[0].$.trim().toLowerCase()
-                    : inputRecord.recordData.gzd.originalData.meta.owmsmantel.subject.$.trim().toLowerCase()
+                        ? inputRecord.recordData.gzd.originalData.meta.owmsmantel.subject[0].$.trim().toLowerCase()
+                        : inputRecord.recordData.gzd.originalData.meta.owmsmantel.subject.$.trim().toLowerCase()
                 ),
                 // Example: "Besluit apv vergunning Verleend Overtoom 10-H"
                 "title": (
                     inputRecord.recordData.gzd.originalData.meta.owmskern.hasOwnProperty("title")
-                    ? inputRecord.recordData.gzd.originalData.meta.owmskern.title.trim()
-                    : "Vergunning " + inputRecord.recordData.gzd.originalData.meta.tpmeta.straatnaam
+                        ? inputRecord.recordData.gzd.originalData.meta.owmskern.title.trim()
+                        : "Vergunning " + inputRecord.recordData.gzd.originalData.meta.tpmeta.straatnaam
                 ),
                 // Example: "TVM 2 vakken - Overtoom 10-12 13 februari 2023, Overtoom 10-H"
                 "description": (
                     typeof inputRecord.recordData.gzd.originalData.meta.owmsmantel.description === "string"
-                    ? inputRecord.recordData.gzd.originalData.meta.owmsmantel.description.trim()
-                    : inputRecord.recordData.gzd.originalData.meta.owmsmantel.description.toString()  // Example: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-366976/1/xml/gmb-2023-366976.xml
+                        ? inputRecord.recordData.gzd.originalData.meta.owmsmantel.description.trim()
+                        : inputRecord.recordData.gzd.originalData.meta.owmsmantel.description.toString()  // Example: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-366976/1/xml/gmb-2023-366976.xml
                 )
             };
             if (Array.isArray(inputRecord.recordData.gzd.originalData.meta.tpmeta.locatiepunt)) {
@@ -1451,7 +1451,7 @@ async function initMap() {
         const host = "https://basgroot.github.io";
         const url = host + path;
         console.log("Loading file " + url + "..");
-        fetch(url, {"method": "GET"}).then(function (response) {
+        fetch(url, { "method": "GET" }).then(function (response) {
             if (response.ok) {
                 response.json().then(callback);
             } else {
@@ -1470,8 +1470,8 @@ async function initMap() {
     function loadHistory(period, isNewRequest) {
         const lookupMunicipality = (
             appState.municipalities[appState.activeMunicipality].hasOwnProperty("lookupName")
-            ? appState.municipalities[appState.activeMunicipality].lookupName
-            : appState.activeMunicipality
+                ? appState.municipalities[appState.activeMunicipality].lookupName
+                : appState.activeMunicipality
         );
         const periodArray = period.split("-");
         if (periodArray.length !== 2) {
@@ -1527,8 +1527,8 @@ async function initMap() {
     function loadDataForMunicipality(municipality, startRecord) {
         const lookupMunicipality = (
             appState.municipalities[municipality].hasOwnProperty("lookupName")
-            ? appState.municipalities[municipality].lookupName
-            : municipality
+                ? appState.municipalities[municipality].lookupName
+                : municipality
         );
         setLoadingIndicatorVisibility("show");
         fetch(
