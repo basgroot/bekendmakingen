@@ -1475,7 +1475,7 @@ async function initMap() {
         );
         const periodArray = period.split("-");
         if (periodArray.length !== 2) {
-            throw "Invalid period: " + period;
+            throw new Error("Invalid period: " + period);
         }
         const url = "/bekendmakingen/history/" + periodArray[0] + "/" + encodeURIComponent(lookupMunicipality.toLowerCase().replace(/\s/g, "-")) + "-" + period + ".json";
         if (isNewRequest) {
