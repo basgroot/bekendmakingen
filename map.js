@@ -1473,7 +1473,11 @@ async function initMap() {
             ? appState.municipalities[appState.activeMunicipality].lookupName
             : appState.activeMunicipality
         );
-        const url = "/bekendmakingen/history/" + encodeURIComponent(lookupMunicipality.toLowerCase().replace(/\s/g, "-")) + "-" + period + ".json";
+        const periodArray = period.split("-");
+        if (periodArray.length !== 2) {
+            throw "Invalid period: " + period;
+        }
+        const url = "/bekendmakingen/history/" + periodArray[0] + "/" + encodeURIComponent(lookupMunicipality.toLowerCase().replace(/\s/g, "-")) + "-" + period + ".json";
         if (isNewRequest) {
             setLoadingIndicatorVisibility("show");
             clearMarkers(appState.activeMunicipality);
