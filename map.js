@@ -905,21 +905,26 @@ async function initMap() {
         }
         for (i = startRecord - 1; i < appState.publicationsArray.length; i += 1) {
             publication = appState.publicationsArray[i];
-            if (typeof publication.location === "string") {
-                position = findUniquePosition(createCoordinate(publication.location));
-                prepareToAddMarker(publication, periodFilter.periodToShow, position, bounds);
-            } else if (Array.isArray(publication.location)) {
-                publication.location.forEach(function (locatiepunt) {
-                    position = findUniquePosition(createCoordinate(locatiepunt));
+            try {
+                if (typeof publication.location === "string") {
+                    position = findUniquePosition(createCoordinate(publication.location));
                     prepareToAddMarker(publication, periodFilter.periodToShow, position, bounds);
-                });
-            } else if (publication.location === undefined) {
-                console.error("Publication without position: " + JSON.stringify(publication, null, 4));
-                // Take the center of the municipality:
-                position = findUniquePosition(appState.municipalities[appState.activeMunicipality].center);
-                prepareToAddMarker(publication, periodFilter.periodToShow, position, bounds);
-            } else {
-                console.error("Unsupported publication location: " + JSON.stringify(publication, null, 4));
+                } else if (Array.isArray(publication.location)) {
+                    publication.location.forEach(function (locatiepunt) {
+                        position = findUniquePosition(createCoordinate(locatiepunt));
+                        prepareToAddMarker(publication, periodFilter.periodToShow, position, bounds);
+                    });
+                } else if (publication.location === undefined) {
+                    console.error("Publication without position: " + JSON.stringify(publication, null, 4));
+                    // Take the center of the municipality:
+                    position = findUniquePosition(appState.municipalities[appState.activeMunicipality].center);
+                    prepareToAddMarker(publication, periodFilter.periodToShow, position, bounds);
+                } else {
+                    console.error("Unsupported publication location: " + JSON.stringify(publication, null, 4));
+                }
+            } catch (e) {
+                console.error(e);
+                console.error(JSON.stringify(publication, null, 4));
             }
         }
         if (!isMoreDataAvailable) {
@@ -1375,7 +1380,7 @@ async function initMap() {
 
                 function processLine(locatiegebied) {
                     if (Array.isArray(locatiegebied)) {
-                        locatiegebied.forEach(processPolygon);
+                        locatiegebied.forEach(processLine);
                         return;
                     }
                     // LINESTRING(6.2351666 52.129457,6.2353781 52.129824,6.2369047 52.130226)
@@ -1404,32 +1409,24 @@ async function initMap() {
                     });
                 }
 
-                if (gebiedsmarkering.hasOwnProperty("Punt")) {
+                if (gebiedsmarkering.hasOwnProperty("Punt") && gebiedsmarkering.Punt.hasOwnProperty("locatiepunt")) {
                     list.push(gebiedsmarkering.Punt.locatiepunt);  // "51.5153294378518 4.6993593555447"
-                } else if (gebiedsmarkering.hasOwnProperty("Adres")) {
+                } else if (gebiedsmarkering.hasOwnProperty("Adres") && gebiedsmarkering.Adres.hasOwnProperty("locatiepunt")) {
                     list.push(gebiedsmarkering.Adres.locatiepunt);  // "51.5153294378518 4.6993593555447"
-                } else if (gebiedsmarkering.hasOwnProperty("Vlak")) {
+                } else if (gebiedsmarkering.hasOwnProperty("Vlak") && gebiedsmarkering.Vlak.hasOwnProperty("locatiegebied")) {
                     // POLYGON((4.6486927 51.821361,4.6486994 51.821359,4.6490134 51.821248,4.6493861 51.82149,4.6493794 51.821528,4.6491439 51.821666,4.6490908 51.82163,4.6488611 51.821475,4.6486927 51.821361))
                     processPolygon(gebiedsmarkering.Vlak.locatiegebied);
-                } else if (gebiedsmarkering.hasOwnProperty("Perceel")) {
+                } else if (gebiedsmarkering.hasOwnProperty("Perceel") && gebiedsmarkering.Perceel.hasOwnProperty("locatiegebied")) {
                     processPolygon(gebiedsmarkering.Perceel.locatiegebied);
-                } else if (gebiedsmarkering.hasOwnProperty("Buurt")) {
+                } else if (gebiedsmarkering.hasOwnProperty("Buurt") && gebiedsmarkering.Buurt.hasOwnProperty("locatiegebied")) {
                     processPolygon(gebiedsmarkering.Buurt.locatiegebied);
-                } else if (gebiedsmarkering.hasOwnProperty("Wijk")) {
+                } else if (gebiedsmarkering.hasOwnProperty("Wijk") && gebiedsmarkering.Wijk.hasOwnProperty("locatiegebied")) {
                     processPolygon(gebiedsmarkering.Wijk.locatiegebied);
-                } else if (gebiedsmarkering.hasOwnProperty("GeometrieRef")) {
-                    if (Array.isArray(gebiedsmarkering.GeometrieRef.locatiegebied)) {
-                        gebiedsmarkering.GeometrieRef.locatiegebied.forEach(processPolygon);
-                    } else {
-                        processPolygon(gebiedsmarkering.GeometrieRef.locatiegebied);
-                    }
-                } else if (gebiedsmarkering.hasOwnProperty("Weg")) {
-                    if (Array.isArray(gebiedsmarkering.Weg.locatiegebied)) {
-                        gebiedsmarkering.Weg.locatiegebied.forEach(processLine);
-                    } else {
-                        processLine(gebiedsmarkering.Weg.locatiegebied);
-                    }
-                } else if (gebiedsmarkering.hasOwnProperty("Lijn")) {
+                } else if (gebiedsmarkering.hasOwnProperty("GeometrieRef") && gebiedsmarkering.GeometrieRef.hasOwnProperty("locatiegebied")) {
+                    processPolygon(gebiedsmarkering.GeometrieRef.locatiegebied);
+                } else if (gebiedsmarkering.hasOwnProperty("Weg") && gebiedsmarkering.Weg.hasOwnProperty("locatiegebied")) {
+                    processLine(gebiedsmarkering.Weg.locatiegebied);
+                } else if (gebiedsmarkering.hasOwnProperty("Lijn") && gebiedsmarkering.Lijn.hasOwnProperty("locatiegebied")) {
                     processLine(gebiedsmarkering.Lijn.locatiegebied);
                 } else if (gebiedsmarkering.hasOwnProperty("Gemeente") ||
                     gebiedsmarkering.hasOwnProperty("Woonplaats") ||
