@@ -587,47 +587,18 @@ async function initMap() {
      */
     function getIconName(title, type) {
         const exploitatievergunningen = [
-            "drank- en horecavergunning",
-            "exploitatievergunning",
-            "gebruiksvergunning",
-            "kansspelvergunning",
-            "openingstijden"
-        ];
-        const evenementenvergunningen = [
-            "collectevergunning",
-            "evenementenvergunning",
-            "vuurwerkvergunning"
-        ];
-        const onttrekkingsvergunningen = [
-            "leegstandvergunning",
-            "onttrekkingsvergunning",
-            "splitsingsvergunning"
-        ];
-        const watervergunningen = [
-            "aanlegvergunning",
-            "ligplaatsvergunning",
-            "watervergunning"
+            "brandveilig gebruik"
         ];
         const milieuvergunningen = [
-            "bodembeschermingsvergunning",
-            "geluidvergunning",
-            "huisafval",
-            "milieu-informatie",
-            "milieueffectrapportage besluit",
-            "milieuvergunning",
-            "natuurbeschermingsvergunning"
+            "milieu",
+            "natuur"
         ];
         const verkeersvergunningen = [
-            "apv vergunning",
-            "gehandicaptenparkeervergunning",
-            "in- en uitritvergunning",
-            "verkeersbesluit"
+            "uitweg en inrit"
         ];
         const bouwvergunningen = [
-            "bouwvergunning",
-            "monumentenvergunning",
-            "omgevingsvergunning",
-            "sloopvergunning"
+            "bouwen",
+            "slopen"
         ];
         title = title.toLowerCase();
         if (title.indexOf("aanvraag") !== -1 || title.indexOf("verlenging") !== -1) {
@@ -636,14 +607,13 @@ async function initMap() {
         if (exploitatievergunningen.indexOf(type) !== -1 || title.indexOf("exploitatievergunning") !== -1 || title.indexOf("alcoholwetvergunning") !== -1) {
             return "bar";
         }
-        if (evenementenvergunningen.indexOf(type) !== -1 || title.indexOf("evenement") !== -1) {
+        if (title.indexOf("evenement") !== -1 || title.indexOf("loterij") !== -1) {
             return "evenement";
-            // De 'loterij' met type 'overig' valt eruit!
         }
         if (title.indexOf("bed & breakfast") !== -1 || title.indexOf("vakantieverhuur") !== -1) {
             return "hotel";
         }
-        if (type === "kapvergunning" || title.indexOf("houtopstand") !== -1 || title.indexOf("(kap)") !== -1) {
+        if (type === "kappen" || title.indexOf("houtopstand") !== -1 || title.indexOf("(kap)") !== -1) {
             return "boomkap";
         }
         if (title.indexOf("oplaadplaats") !== -1 || title.indexOf("opladen") !== -1 || title.indexOf("laadpaal") !== -1) {
@@ -657,13 +627,13 @@ async function initMap() {
             // Verify this after 'parkeervakken/tvm':
             return "verkeer";
         }
-        if (onttrekkingsvergunningen.indexOf(type) !== -1) {
+        if (title.indexOf("onttrekkingsvergunning") !== -1 || title.indexOf("omzettingsvergunning") !== -1) {
             return "kamerverhuur";  // EpicPupper, CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0, via Wikimedia Commons
         }
-        if (watervergunningen.indexOf(type) !== -1) {
+        if (title.indexOf("water") !== -1) {
             return "boot";  // Barbetorte, CC BY-SA 3.0 https://creativecommons.org/licenses/by-sa/3.0, via Wikimedia Commons
         }
-        if (type === "reclamevergunning") {
+        if (type === "reclame") {
             return "reclame";  // Verdy_p (complete construction and vectorisation, based on mathematical properties of the symbol, and not drawn manually, and then manually edited without using any SVG editor)., Public domain, via Wikimedia Commons
         }
         if (milieuvergunningen.indexOf(type) !== -1) {
@@ -673,18 +643,7 @@ async function initMap() {
             return "constructie";
         }
         return "wetboek";  // By No machine-readable author provided. Chris-martin assumed (based on copyright claims). Own work assumed (based on copyright claims)., CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=1010176
-        // "aanwijzingsbesluit",
-        // "agenda en notulen",
-        // "bestemmingsplan",
-        // "inspraak",
-        // "mededelingen",
-        // "meldingen",
-        // "overig",
-        // "rectificatie",
-        // "register kinderopvang",
-        // "standplaatsvergunning",
-        // "verkiezingen",
-        // "verordeningen en reglementen",
+        // "ruimtelijke ordening",
     }
 
     /**
@@ -1356,43 +1315,160 @@ async function initMap() {
      */
     function addPublications(responseJson) {
 
+        function sortPublications(a, b) {
+            // Sort by publication date, title and number.
+            if (a.date === b.date) {
+                return String(a.title + a.urlDoc).localeCompare(b.title + b.urlDoc, "nl");
+            }
+            return a.date - b.date;
+        }
+
         function addPublication(inputRecord) {
-            const urlDoc = inputRecord.recordData.gzd.originalData.meta.tpmeta.bronIdentifier.trim();
+
+            function getType(meta) {
+                if (meta.tpmeta.hasOwnProperty("activiteit")) {
+                    if (Array.isArray(meta.tpmeta.activiteit)) {
+                        // Select the first one..
+                        meta.tpmeta.activiteit = meta.tpmeta.activiteit[0];
+                    }
+                    switch (meta.tpmeta.activiteit.$) {
+                    case "bouwen":
+                    case "slopen":
+                    case "uitweg en inrit":
+                    case "kappen":
+                    case "milieu":
+                    case "natuur":
+                    case "reclame":
+                    case "brandveilig gebruik":
+                    case "ruimtelijke ordening":
+                        return meta.tpmeta.activiteit.$;
+                    default:
+                        console.error("Unexpected activiteit: '" + meta.tpmeta.activiteit.$ + "' " + JSON.stringify(meta, null, 4));
+                    }
+                }
+                return (
+                    Array.isArray(meta.owmskern.type)
+                    ? meta.owmskern.type[0].$.trim()
+                    : meta.owmskern.type.$.trim()
+                );
+            }
+
+            function getDate(dateString) {
+                const date = new Date(dateString);
+                // Remove the time from the date:
+                date.setHours(-date.getTimezoneOffset() / 60, 0, 0, 0);
+                return date;
+            }
+
+            function getTitle(inputRecord, type) {
+                if (inputRecord.recordData.gzd.originalData.meta.owmsmantel.hasOwnProperty("abstract")) {
+                    return inputRecord.recordData.gzd.originalData.meta.owmsmantel.abstract.trim();
+                }
+                let title = type;
+                if (inputRecord.recordData.gzd.originalData.meta.owmskern.hasOwnProperty("activiteit")) {
+                    title += " " + inputRecord.recordData.gzd.originalData.meta.tpmeta.activiteit.$.trim();
+                }
+                return title;
+            }
+
+            function processCoordinate(list, gebiedsmarkering) {
+
+                function processLine(locatiegebied) {
+                    if (Array.isArray(locatiegebied)) {
+                        locatiegebied.forEach(processPolygon);
+                        return;
+                    }
+                    // LINESTRING(6.2351666 52.129457,6.2353781 52.129824,6.2369047 52.130226)
+                    // Extract coordinates from string.
+                    const coordinates = locatiegebied.replace("LINESTRING(", "").replace(")", "").split(",");
+                    coordinates.forEach(function (coordinate) {
+                        const latLng = coordinate.trim().split(" ");
+                        if (latLng.length === 2) {
+                            list.push(latLng[1] + " " + latLng[0]);
+                        }
+                    });
+                }
+
+                function processPolygon(locatiegebied) {
+                    if (Array.isArray(locatiegebied)) {
+                        locatiegebied.forEach(processPolygon);
+                        return;
+                    }
+                    // POLYGON((4.6486927 51.821361,4.6486994 51.821359,4.6490134 51.821248,4.6493861 51.82149,4.6493794 51.821528,4.6491439 51.821666,4.6490908 51.82163,4.6488611 51.821475,4.6486927 51.821361))
+                    const coordinates = locatiegebied.replace("POLYGON((", "").replace("))", "").split(",");
+                    coordinates.forEach(function (coordinate) {
+                        const latLng = coordinate.trim().split(" ");
+                        if (latLng.length === 2) {
+                            list.push(latLng[1] + " " + latLng[0]);
+                        }
+                    });
+                }
+
+                if (gebiedsmarkering.hasOwnProperty("Punt")) {
+                    list.push(gebiedsmarkering.Punt.locatiepunt);  // "51.5153294378518 4.6993593555447"
+                } else if (gebiedsmarkering.hasOwnProperty("Adres")) {
+                    list.push(gebiedsmarkering.Adres.locatiepunt);  // "51.5153294378518 4.6993593555447"
+                } else if (gebiedsmarkering.hasOwnProperty("Vlak")) {
+                    // POLYGON((4.6486927 51.821361,4.6486994 51.821359,4.6490134 51.821248,4.6493861 51.82149,4.6493794 51.821528,4.6491439 51.821666,4.6490908 51.82163,4.6488611 51.821475,4.6486927 51.821361))
+                    processPolygon(gebiedsmarkering.Vlak.locatiegebied);
+                } else if (gebiedsmarkering.hasOwnProperty("Perceel")) {
+                    processPolygon(gebiedsmarkering.Perceel.locatiegebied);
+                } else if (gebiedsmarkering.hasOwnProperty("Buurt")) {
+                    processPolygon(gebiedsmarkering.Buurt.locatiegebied);
+                } else if (gebiedsmarkering.hasOwnProperty("Wijk")) {
+                    processPolygon(gebiedsmarkering.Wijk.locatiegebied);
+                } else if (gebiedsmarkering.hasOwnProperty("GeometrieRef")) {
+                    if (Array.isArray(gebiedsmarkering.GeometrieRef.locatiegebied)) {
+                        gebiedsmarkering.GeometrieRef.locatiegebied.forEach(processPolygon);
+                    } else {
+                        processPolygon(gebiedsmarkering.GeometrieRef.locatiegebied);
+                    }
+                } else if (gebiedsmarkering.hasOwnProperty("Weg")) {
+                    if (Array.isArray(gebiedsmarkering.Weg.locatiegebied)) {
+                        gebiedsmarkering.Weg.locatiegebied.forEach(processLine);
+                    } else {
+                        processLine(gebiedsmarkering.Weg.locatiegebied);
+                    }
+                } else if (gebiedsmarkering.hasOwnProperty("Lijn")) {
+                    processLine(gebiedsmarkering.Lijn.locatiegebied);
+                } else if (gebiedsmarkering.hasOwnProperty("Gemeente") ||
+                    gebiedsmarkering.hasOwnProperty("Woonplaats") ||
+                    gebiedsmarkering.hasOwnProperty("Waterschap") ||
+                    gebiedsmarkering.hasOwnProperty("Provincie")) {
+                    // Ignore this.
+                } else {
+                    console.error("gebiedsmarkering not recognized: " + JSON.stringify(gebiedsmarkering, null, 4));
+                }
+            }
+
+            const urlDoc = inputRecord.recordData.gzd.enrichedData.preferredUrl.trim();
+            const description = inputRecord.recordData.gzd.originalData.meta.owmskern.title;
+            const type = getType(inputRecord.recordData.gzd.originalData.meta);
             const publication = {
                 // Example: "2023-02-10"
-                "date": new Date(inputRecord.recordData.gzd.originalData.meta.tpmeta.geldigheidsperiode_startdatum),
-                // Example: "https:\/\/zoek.officielebekendmakingen.nl\/gmb-2023-59059.html"
+                "date": getDate(inputRecord.recordData.gzd.originalData.meta.tpmeta.datumTijdstipWijzigingWork),
+                // Example: "https://zoek.officielebekendmakingen.nl/gmb-2023-59059.html"
                 "urlDoc": urlDoc,
-                // Example: "https:\/\/repository.overheid.nl\/frbr\/officielepublicaties\/gmb\/2023\/gmb-2023-59059\/1\/xml\/gmb-2023-59059.xml"
+                // Example: "https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-59059/1/xml/gmb-2023-59059.xml"
                 "urlApi": getUrlApi(urlDoc),
                 // Example "kapvergunning"
-                "type": (
-                    // Sometimes multiple subjects, when both bouwvergunning and omgevingsvergunning are requested
-                    // Used for matching, so trim and lowercase
-                    Array.isArray(inputRecord.recordData.gzd.originalData.meta.owmsmantel.subject)
-                    ? inputRecord.recordData.gzd.originalData.meta.owmsmantel.subject[0].$.trim().toLowerCase()
-                    : inputRecord.recordData.gzd.originalData.meta.owmsmantel.subject.$.trim().toLowerCase()
-                ),
+                "type": type,
                 // Example: "Besluit apv vergunning Verleend Overtoom 10-H"
-                "title": (
-                    inputRecord.recordData.gzd.originalData.meta.owmskern.hasOwnProperty("title")
-                    ? inputRecord.recordData.gzd.originalData.meta.owmskern.title.trim()
-                    : "Vergunning " + inputRecord.recordData.gzd.originalData.meta.tpmeta.straatnaam
-                ),
+                "title": getTitle(inputRecord, type),
                 // Example: "TVM 2 vakken - Overtoom 10-12 13 februari 2023, Overtoom 10-H"
-                "description": (
-                    typeof inputRecord.recordData.gzd.originalData.meta.owmsmantel.description === "string"
-                    ? inputRecord.recordData.gzd.originalData.meta.owmsmantel.description.trim()
-                    : inputRecord.recordData.gzd.originalData.meta.owmsmantel.description.toString()  // Example: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-366976/1/xml/gmb-2023-366976.xml
-                )
+                "description": description
             };
-            if (Array.isArray(inputRecord.recordData.gzd.originalData.meta.tpmeta.locatiepunt)) {
-                // Example: ["52.36374 4.877971"]
-                publication.location = [];
-                Array.prototype.push.apply(publication.location, inputRecord.recordData.gzd.originalData.meta.tpmeta.locatiepunt);
-            } else {
-                // Example: "52.36374 4.877971"
-                publication.location = inputRecord.recordData.gzd.originalData.meta.tpmeta.locatiepunt;
+            publication.location = [];
+            if (inputRecord.recordData.gzd.originalData.meta.tpmeta.hasOwnProperty("gebiedsmarkering")) {
+                if (Array.isArray(inputRecord.recordData.gzd.originalData.meta.tpmeta.gebiedsmarkering)) {
+                    // Process one by one.
+                    inputRecord.recordData.gzd.originalData.meta.tpmeta.gebiedsmarkering.forEach(function (gebiedsmarkering) {
+                        processCoordinate(publication.location, gebiedsmarkering);
+                    });
+                } else {
+                    // Process one.
+                    processCoordinate(publication.location, inputRecord.recordData.gzd.originalData.meta.tpmeta.gebiedsmarkering);
+                }
             }
             appState.publicationsArray.push(publication);
         }
@@ -1411,6 +1487,7 @@ async function initMap() {
         } else {
             responseJson.searchRetrieveResponse.records.record.forEach(addPublication);
         }
+        appState.publicationsArray.sort(sortPublications);
         return true;
     }
 
@@ -1532,8 +1609,8 @@ async function initMap() {
         );
         setLoadingIndicatorVisibility("show");
         fetch(
-            // Example: https://repository.overheid.nl/sru?query=(c.product-area=lokalebekendmakingen%20AND%20cd.afgeleideGemeente=%22Amsterdam%22%20AND%20dt.modified%3E=2023-12-01)%20sortBy%20cd.datumTijdstipWijzigingWork%20/sort.descending&maximumRecords=1000&startRecord=1&httpAccept=application/json
-            "https://repository.overheid.nl/sru?query=(c.product-area=lokalebekendmakingen%20AND%20cd.afgeleideGemeente=\"" + encodeURIComponent(lookupMunicipality) + "\"%20AND%20dt.modified%3E=" + appState.requestPeriod.startDateString + ")%20sortBy%20cd.datumTijdstipWijzigingWork%20/sort.descending&maximumRecords=1000&startRecord=" + startRecord + "&httpAccept=application/json",
+            // Example: https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.modified%3E=2025-05-01%20AND%20dt.creator=%22Amsterdam%22%20sortBy%20dt.modified%20/sort.descending&maximumRecords=1000&startRecord=1&httpAccept=application/json
+            "https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.modified%3E=" + appState.requestPeriod.startDateString + "%20AND%20dt.creator=%22" + encodeURIComponent(lookupMunicipality) + "%22%20sortBy%20dt.modified%20/sort.descending&maximumRecords=1000&startRecord=" + startRecord + "&httpAccept=application/json",
             {
                 "method": "GET"
             }
