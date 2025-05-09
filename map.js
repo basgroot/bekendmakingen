@@ -906,21 +906,15 @@ async function initMap() {
         for (i = startRecord - 1; i < appState.publicationsArray.length; i += 1) {
             publication = appState.publicationsArray[i];
             try {
-                if (typeof publication.location === "string") {
-                    position = findUniquePosition(createCoordinate(publication.location));
-                    prepareToAddMarker(publication, periodFilter.periodToShow, position, bounds);
-                } else if (Array.isArray(publication.location)) {
-                    publication.location.forEach(function (locatiepunt) {
-                        position = findUniquePosition(createCoordinate(locatiepunt));
-                        prepareToAddMarker(publication, periodFilter.periodToShow, position, bounds);
-                    });
-                } else if (publication.location === undefined) {
-                    console.error("Publication without position: " + JSON.stringify(publication, null, 4));
+                if (publication.location.length === 0) {
                     // Take the center of the municipality:
                     position = findUniquePosition(appState.municipalities[appState.activeMunicipality].center);
                     prepareToAddMarker(publication, periodFilter.periodToShow, position, bounds);
                 } else {
-                    console.error("Unsupported publication location: " + JSON.stringify(publication, null, 4));
+                    publication.location.forEach(function (locatiepunt) {
+                        position = findUniquePosition(createCoordinate(locatiepunt));
+                        prepareToAddMarker(publication, periodFilter.periodToShow, position, bounds);
+                    });
                 }
             } catch (e) {
                 console.error(e);
@@ -1366,7 +1360,8 @@ async function initMap() {
             }
 
             function getTitle(inputRecord, type) {
-                if (inputRecord.recordData.gzd.originalData.meta.owmsmantel.hasOwnProperty("abstract")) {
+                if (inputRecord.recordData.gzd.originalData.meta.owmsmantel.hasOwnProperty("abstract") && typeof inputRecord.recordData.gzd.originalData.meta.owmsmantel.abstract === "string") {
+                    // Abstract can be a number in some cases (Enkhuizen, December 2024)
                     return inputRecord.recordData.gzd.originalData.meta.owmsmantel.abstract.trim();
                 }
                 let title = type;
@@ -1377,6 +1372,31 @@ async function initMap() {
             }
 
             function processCoordinate(list, gebiedsmarkering) {
+
+                function convertRijksdriehoekToLatLng(x, y) {
+                    // The city "Amsterfoort" is used as reference "Rijksdriehoek" coordinate.
+                    const referenceRdX = 155000;
+                    const referenceRdY = 463000;
+                    const dX = (x - referenceRdX) * (Math.pow(10, -5));
+                    const dY = (y - referenceRdY) * (Math.pow(10, -5));
+                    const sumN = (3235.65389 * dY) + (-32.58297 * Math.pow(dX, 2)) + (-0.2475 * Math.pow(dY, 2)) + (-0.84978 * Math.pow(dX, 2) * dY) + (-0.0655 * Math.pow(dY, 3)) + (-0.01709 * Math.pow(dX, 2) * Math.pow(dY, 2)) + (-0.00738 * dX) + (0.0053 * Math.pow(dX, 4)) + (-0.00039 * Math.pow(dX, 2) * Math.pow(dY, 3)) + (0.00033 * Math.pow(dX, 4) * dY) + (-0.00012 * dX * dY);
+                    const sumE = (5260.52916 * dX) + (105.94684 * dX * dY) + (2.45656 * dX * Math.pow(dY, 2)) + (-0.81885 * Math.pow(dX, 3)) + (0.05594 * dX * Math.pow(dY, 3)) + (-0.05607 * Math.pow(dX, 3) * dY) + (0.01199 * dY) + (-0.00256 * Math.pow(dX, 3) * Math.pow(dY, 2)) + (0.00128 * dX * Math.pow(dY, 4)) + (0.00022 * Math.pow(dY, 2)) + (-0.00022 * Math.pow(dX, 2)) + (0.00026 * Math.pow(dX, 5));
+                    // The city "Amersfoort" is used as reference "WGS84" coordinate.
+                    const referenceWgs84X = 52.15517;
+                    const referenceWgs84Y = 5.387206;
+                    const latitude = referenceWgs84X + (sumN / 3600);
+                    const longitude = referenceWgs84Y + (sumE / 3600);
+                    // Input
+                    // x = 122202
+                    // y = 487250
+                    //
+                    // Result
+                    // "52.372143838117, 4.90559760435224"
+                    return {
+                        "lat": latitude,
+                        "lng": longitude
+                    };
+                }
 
                 function processLine(locatiegebied) {
                     if (Array.isArray(locatiegebied)) {
@@ -1390,6 +1410,8 @@ async function initMap() {
                         const latLng = coordinate.trim().split(" ");
                         if (latLng.length === 2) {
                             list.push(latLng[1] + " " + latLng[0]);
+                        } else {
+                            console.error("Unable to convert line coordinate " + locatiegebied + " " + JSON.stringify(gebiedsmarkering, null, 4));
                         }
                     });
                 }
@@ -1399,18 +1421,42 @@ async function initMap() {
                         locatiegebied.forEach(processPolygon);
                         return;
                     }
-                    // POLYGON((4.6486927 51.821361,4.6486994 51.821359,4.6490134 51.821248,4.6493861 51.82149,4.6493794 51.821528,4.6491439 51.821666,4.6490908 51.82163,4.6488611 51.821475,4.6486927 51.821361))
-                    const coordinates = locatiegebied.replace("POLYGON((", "").replace("))", "").split(",");
-                    coordinates.forEach(function (coordinate) {
-                        const latLng = coordinate.trim().split(" ");
-                        if (latLng.length === 2) {
-                            list.push(latLng[1] + " " + latLng[0]);
-                        }
-                    });
+                    if (locatiegebied.startsWith("POLYGON")) {
+                        // POLYGON((4.6486927 51.821361,4.6486994 51.821359,4.6490134 51.821248,4.6493861 51.82149,4.6493794 51.821528,4.6491439 51.821666,4.6490908 51.82163,4.6488611 51.821475,4.6486927 51.821361))
+                        const coordinates = locatiegebied.replace("POLYGON((", "").replace("))", "").split(",");
+                        coordinates.forEach(function (coordinate) {
+                            const latLng = coordinate.trim().split(" ");
+                            if (latLng.length === 2) {
+                                list.push(latLng[1] + " " + latLng[0]);
+                            } else {
+                                console.error("Unable to convert polygon coordinate " + locatiegebied + " " + JSON.stringify(gebiedsmarkering, null, 4));
+                            }
+                        });
+                    } else if (locatiegebied.startsWith("LINESTRING")) {
+                        processLine(locatiegebied);
+                    } else {
+                        // In some edge cases this is the contents of the polygon: "52.087781,5.1068402"
+                        console.log("Adding locatiegebied " + locatiegebied);
+                        list.push(locatiegebied.replace(",", " "));
+                    }
+                }
+
+                function processPointLegacy(geometrie) {
+                    // POINT(120097.26  488031.32)
+                    const coordinates = geometrie.replace("POINT", "").trim().replace("(", "").replace(")", "").split("  ");
+                    if (coordinates.length === 2) {
+                        const latLng = convertRijksdriehoekToLatLng(parseFloat(coordinates[0], 10), parseFloat(coordinates[1], 10));
+                        list.push(latLng.lat + " " + latLng.lng);
+                        console.log("Converted " + geometrie + " to " + latLng.lat + " " + latLng.lng);
+                    } else {
+                        console.error("Unable to convert legacy point " + geometrie);
+                    }
                 }
 
                 if (gebiedsmarkering.hasOwnProperty("Punt") && gebiedsmarkering.Punt.hasOwnProperty("locatiepunt")) {
                     list.push(gebiedsmarkering.Punt.locatiepunt);  // "51.5153294378518 4.6993593555447"
+                } else if (gebiedsmarkering.hasOwnProperty("Punt") && gebiedsmarkering.Punt.hasOwnProperty("geometrie")) {
+                    processPointLegacy(gebiedsmarkering.Punt.geometrie);  // "POINT(120097.26  488031.32)"
                 } else if (gebiedsmarkering.hasOwnProperty("Adres") && gebiedsmarkering.Adres.hasOwnProperty("locatiepunt")) {
                     list.push(gebiedsmarkering.Adres.locatiepunt);  // "51.5153294378518 4.6993593555447"
                 } else if (gebiedsmarkering.hasOwnProperty("Vlak") && gebiedsmarkering.Vlak.hasOwnProperty("locatiegebied")) {
@@ -1434,7 +1480,7 @@ async function initMap() {
                     gebiedsmarkering.hasOwnProperty("Provincie")) {
                     // Ignore this.
                 } else {
-                    console.error("gebiedsmarkering not recognized: " + JSON.stringify(gebiedsmarkering, null, 4));
+                    console.error("Format of gebiedsmarkering not supported: " + JSON.stringify(gebiedsmarkering, null, 4));
                 }
             }
 
