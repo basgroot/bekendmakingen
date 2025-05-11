@@ -1421,8 +1421,8 @@ async function initMap() {
                         locatiegebied.forEach(processPolygon);
                         return;
                     }
+                    // POLYGON((4.6486927 51.821361,4.6486994 51.821359,4.6490134 51.821248,4.6493861 51.82149,4.6493794 51.821528,4.6491439 51.821666,4.6490908 51.82163,4.6488611 51.821475,4.6486927 51.821361))
                     if (locatiegebied.startsWith("POLYGON")) {
-                        // POLYGON((4.6486927 51.821361,4.6486994 51.821359,4.6490134 51.821248,4.6493861 51.82149,4.6493794 51.821528,4.6491439 51.821666,4.6490908 51.82163,4.6488611 51.821475,4.6486927 51.821361))
                         const coordinates = locatiegebied.replace("POLYGON((", "").replace("))", "").split(",");
                         coordinates.forEach(function (coordinate) {
                             const latLng = coordinate.trim().split(" ");
@@ -1433,11 +1433,20 @@ async function initMap() {
                             }
                         });
                     } else if (locatiegebied.startsWith("LINESTRING")) {
+                        console.log("Found LINESTRING in locatiegebied, calling processLine() for " + locatiegebied);
                         processLine(locatiegebied);
                     } else {
-                        // In some edge cases this is the contents of the polygon: "52.087781,5.1068402"
-                        console.log("Adding locatiegebied " + locatiegebied);
-                        list.push(locatiegebied.replace(",", " "));
+                        if (locatiegebied.indexOf(" ") > 0) {
+                            // "51.976387,4.6128864 51.976192,4.6125665 51.976078,4.6127763 51.976124,4.6128507 51.976143,4.6128216 51.976276,4.6130733 51.976387,4.6128864"
+                            locatiegebied.split(" ").forEach(function (coordinate) {
+                                console.log("Adding splitted locatiegebied " + coordinate);
+                                list.push(coordinate.replace(",", " "));
+                            });
+                        } else {
+                            // "52.087781,5.1068402"
+                            console.log("Adding locatiegebied " + locatiegebied);
+                            list.push(locatiegebied.replace(",", " "));
+                        }
                     }
                 }
 
