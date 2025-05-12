@@ -1373,6 +1373,14 @@ async function initMap() {
 
             function processCoordinate(list, gebiedsmarkering) {
 
+                function addCoordinateToList(coordinate) {
+                    // Prevent duplicates:
+                    if (list.indexOf(coordinate) === -1) {
+                        list.push(coordinate);
+                    } else {
+                        console.log("Coordinate already added: " + coordinate);
+                    }
+                }
                 function convertRijksdriehoekToLatLng(x, y) {
                     // The city "Amsterfoort" is used as reference "Rijksdriehoek" coordinate.
                     const referenceRdX = 155000;
@@ -1405,15 +1413,21 @@ async function initMap() {
                     }
                     // LINESTRING(6.2351666 52.129457,6.2353781 52.129824,6.2369047 52.130226)
                     // Extract coordinates from string.
-                    const coordinates = locatiegebied.replace("LINESTRING(", "").replace(")", "").split(",");
-                    coordinates.forEach(function (coordinate) {
-                        const latLng = coordinate.trim().split(" ");
-                        if (latLng.length === 2) {
-                            list.push(latLng[1] + " " + latLng[0]);
-                        } else {
-                            console.error("Unable to convert line coordinate " + locatiegebied + " " + JSON.stringify(gebiedsmarkering, null, 4));
-                        }
-                    });
+                    if (locatiegebied.startsWith("LINESTRING")) {
+                        const coordinates = locatiegebied.replace("LINESTRING(", "").replace(")", "").split(",");
+                        coordinates.forEach(function (coordinate) {
+                            const latLng = coordinate.trim().split(" ");
+                            if (latLng.length === 2) {
+                                addCoordinateToList(latLng[1] + " " + latLng[0]);
+                            } else {
+                                console.error("Unable to convert line coordinate " + locatiegebied + " " + JSON.stringify(gebiedsmarkering, null, 4));
+                            }
+                        });
+                    } else {
+                        // "52.087781,5.1068402"
+                        console.log("Adding locatiegebied LINESTRING as point: " + locatiegebied);
+                        addCoordinateToList(locatiegebied.replace(",", " "));
+                    }
                 }
 
                 function processPolygon(locatiegebied) {
@@ -1427,7 +1441,7 @@ async function initMap() {
                         coordinates.forEach(function (coordinate) {
                             const latLng = coordinate.trim().split(" ");
                             if (latLng.length === 2) {
-                                list.push(latLng[1] + " " + latLng[0]);
+                                addCoordinateToList(latLng[1] + " " + latLng[0]);
                             } else {
                                 console.error("Unable to convert polygon coordinate " + locatiegebied + " " + JSON.stringify(gebiedsmarkering, null, 4));
                             }
@@ -1440,34 +1454,49 @@ async function initMap() {
                             // "51.976387,4.6128864 51.976192,4.6125665 51.976078,4.6127763 51.976124,4.6128507 51.976143,4.6128216 51.976276,4.6130733 51.976387,4.6128864"
                             locatiegebied.split(" ").forEach(function (coordinate) {
                                 console.log("Adding splitted locatiegebied " + coordinate);
-                                list.push(coordinate.replace(",", " "));
+                                addCoordinateToList(coordinate.replace(",", " "));
                             });
                         } else {
                             // "52.087781,5.1068402"
                             console.log("Adding locatiegebied " + locatiegebied);
-                            list.push(locatiegebied.replace(",", " "));
+                            addCoordinateToList(locatiegebied.replace(",", " "));
                         }
                     }
                 }
 
                 function processPointLegacy(geometrie) {
-                    // POINT(120097.26  488031.32)
-                    const coordinates = geometrie.replace("POINT", "").trim().replace("(", "").replace(")", "").split("  ");
-                    if (coordinates.length === 2) {
-                        const latLng = convertRijksdriehoekToLatLng(parseFloat(coordinates[0], 10), parseFloat(coordinates[1], 10));
-                        list.push(latLng.lat + " " + latLng.lng);
-                        console.log("Converted " + geometrie + " to " + latLng.lat + " " + latLng.lng);
+                    // POLYGON ((177456.1123260837 361401.39174773294, 177459.78992509528 361374.02033973142, 177472.86583269207 361378.10562450776, 177471.23134424246 361401.80027621059, 177456.1123260837 361401.39174773294))
+                    if (geometrie.startsWith("POLYGON")) {
+                        const coordinates = geometrie.replace("POLYGON ((", "").replace("))", "").split(",");
+                        coordinates.forEach(function (coordinate) {
+                            const latLngRijksdriehoek = coordinate.trim().split(" ");
+                            if (latLngRijksdriehoek.length === 2) {
+                                const latLng = convertRijksdriehoekToLatLng(parseFloat(latLngRijksdriehoek[0], 10), parseFloat(latLngRijksdriehoek[1], 10));
+                                addCoordinateToList(latLng.lat + " " + latLng.lng);
+                                console.log("Converted " + geometrie + " to " + latLng.lat + " " + latLng.lng);
+                            } else {
+                                console.error("Unable to convert legacy point as polygon coordinate " + geometrie + " " + JSON.stringify(gebiedsmarkering, null, 4));
+                            }
+                        });
                     } else {
-                        console.error("Unable to convert legacy point " + geometrie);
+                        // POINT(120097.26  488031.32)
+                        const coordinates = geometrie.replace("POINT", "").trim().replace("(", "").replace(")", "").split("  ");
+                        if (coordinates.length === 2) {
+                            const latLng = convertRijksdriehoekToLatLng(parseFloat(coordinates[0], 10), parseFloat(coordinates[1], 10));
+                            addCoordinateToList(latLng.lat + " " + latLng.lng);
+                            console.log("Converted " + geometrie + " to " + latLng.lat + " " + latLng.lng);
+                        } else {
+                            console.error("Unable to convert legacy point " + geometrie);
+                        }
                     }
                 }
 
                 if (gebiedsmarkering.hasOwnProperty("Punt") && gebiedsmarkering.Punt.hasOwnProperty("locatiepunt")) {
-                    list.push(gebiedsmarkering.Punt.locatiepunt);  // "51.5153294378518 4.6993593555447"
+                    addCoordinateToList(gebiedsmarkering.Punt.locatiepunt);  // "51.5153294378518 4.6993593555447"
                 } else if (gebiedsmarkering.hasOwnProperty("Punt") && gebiedsmarkering.Punt.hasOwnProperty("geometrie")) {
                     processPointLegacy(gebiedsmarkering.Punt.geometrie);  // "POINT(120097.26  488031.32)"
                 } else if (gebiedsmarkering.hasOwnProperty("Adres") && gebiedsmarkering.Adres.hasOwnProperty("locatiepunt")) {
-                    list.push(gebiedsmarkering.Adres.locatiepunt);  // "51.5153294378518 4.6993593555447"
+                    addCoordinateToList(gebiedsmarkering.Adres.locatiepunt);  // "51.5153294378518 4.6993593555447"
                 } else if (gebiedsmarkering.hasOwnProperty("Vlak") && gebiedsmarkering.Vlak.hasOwnProperty("locatiegebied")) {
                     // POLYGON((4.6486927 51.821361,4.6486994 51.821359,4.6490134 51.821248,4.6493861 51.82149,4.6493794 51.821528,4.6491439 51.821666,4.6490908 51.82163,4.6488611 51.821475,4.6486927 51.821361))
                     processPolygon(gebiedsmarkering.Vlak.locatiegebied);
