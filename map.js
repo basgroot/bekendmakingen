@@ -1691,7 +1691,7 @@ async function initMap() {
         setLoadingIndicatorVisibility("show");
         fetch(
             // Example: https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.modified%3E=2025-05-01%20AND%20dt.creator=%22Amsterdam%22%20sortBy%20dt.modified%20/sort.descending&maximumRecords=1000&startRecord=1&httpAccept=application/json
-            "https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.modified%3E=" + appState.requestPeriod.startDateString + "%20AND%20dt.creator=%22" + encodeURIComponent(lookupMunicipality) + "%22%20sortBy%20dt.modified%20/sort.descending&maximumRecords=1000&startRecord=" + startRecord + "&httpAccept=application/json",
+            "https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.modified%3E=" + appState.requestPeriod.startDateString + "%20AND%20dt.creator=%22" + encodeURIComponent(lookupMunicipality) + "%22%20sortBy%20dt.modified%20/sort.descending&maximumRecords=500&startRecord=" + startRecord + "&httpAccept=application/json",
             {
                 "method": "GET"
             }
