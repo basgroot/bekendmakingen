@@ -1357,16 +1357,28 @@ async function initMap() {
                 return date;
             }
 
-            function getTitle(inputRecord, type) {
-                if (inputRecord.recordData.gzd.originalData.meta.owmsmantel.hasOwnProperty("abstract") && typeof inputRecord.recordData.gzd.originalData.meta.owmsmantel.abstract === "string") {
+            function getTitle(meta, type) {
+                if (meta.owmskern.hasOwnProperty("title") && typeof meta.owmskern.title === "string") {
+                    return meta.owmskern.title.trim();
+                }
+                if (meta.owmsmantel.hasOwnProperty("abstract") && typeof meta.owmsmantel.abstract === "string") {
                     // Abstract can be a number in some cases (Enkhuizen, December 2024)
-                    return inputRecord.recordData.gzd.originalData.meta.owmsmantel.abstract.trim();
+                    return meta.owmsmantel.abstract.trim();
                 }
-                let title = type;
-                if (inputRecord.recordData.gzd.originalData.meta.owmskern.hasOwnProperty("activiteit")) {
-                    title += " " + inputRecord.recordData.gzd.originalData.meta.tpmeta.activiteit.$.trim();
+                console.warn("Title fallback to " + type + " because no better available: " + JSON.stringify(meta, null, 4));
+                return type;
+            }
+
+            function getDescription(meta) {
+                if (meta.owmsmantel.hasOwnProperty("abstract") && typeof meta.owmsmantel.abstract === "string") {
+                    // Abstract can be a number in some cases (Enkhuizen, December 2024)
+                    return meta.owmsmantel.abstract.trim();
                 }
-                return title;
+                if (meta.owmskern.hasOwnProperty("title") && typeof meta.owmskern.title === "string") {
+                    return meta.owmskern.title.trim();
+                }
+                console.warn("Abstract fallback to '-' because no better available: " + JSON.stringify(meta, null, 4));
+                return "-";
             }
 
             function processCoordinate(list, gebiedsmarkering) {
@@ -1376,7 +1388,7 @@ async function initMap() {
                     if (list.indexOf(coordinate) === -1) {
                         list.push(coordinate);
                     } else {
-                        console.log("Coordinate already added: " + coordinate);
+                        console.debug("Coordinate already added: " + coordinate);
                     }
                 }
                 function convertRijksdriehoekToLatLng(x, y) {
@@ -1521,7 +1533,7 @@ async function initMap() {
             }
 
             const urlDoc = inputRecord.recordData.gzd.enrichedData.preferredUrl.trim();
-            const description = inputRecord.recordData.gzd.originalData.meta.owmskern.title;
+            const description = getDescription(inputRecord.recordData.gzd.originalData.meta);
             const type = getType(inputRecord.recordData.gzd.originalData.meta);
             const publication = {
                 // Example: "2023-02-10"
@@ -1533,7 +1545,7 @@ async function initMap() {
                 // Example "kapvergunning"
                 "type": type,
                 // Example: "Besluit apv vergunning Verleend Overtoom 10-H"
-                "title": getTitle(inputRecord, type),
+                "title": getTitle(inputRecord.recordData.gzd.originalData.meta, type),
                 // Example: "TVM 2 vakken - Overtoom 10-12 13 februari 2023, Overtoom 10-H"
                 "description": description
             };
