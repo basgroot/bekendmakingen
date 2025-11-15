@@ -1,6 +1,3 @@
-/*jslint browser: true, for: true, long: true, unordered: true, nomen: true */
-/*global window console google */
-
 /**
  * Op zoek naar de website?
  * Bezoek https://basgroot.github.io/bekendmakingen/?in=Hoorn
@@ -8,6 +5,7 @@
  * This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
  * @return {void}
  */
+/* eslint-disable no-unused-vars */
 async function initMap() {
     const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
