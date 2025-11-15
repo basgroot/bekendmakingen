@@ -36,7 +36,7 @@ async function initMap() {
         "isFullyLoaded": false,
         // Order of different license markers, newest on top. Set to some high number:
         "zIndex": 2147483647,
-        // Wait custor when loading data:
+        // Wait cursor when loading data:
         "loadingIndicator": document.createElement("img"),
         // The info window shown when clicking on a marker:
         "infoWindow": null,
@@ -1353,7 +1353,7 @@ async function initMap() {
             function getDate(dateString) {
                 const date = new Date(dateString);
                 // Remove the time from the date:
-                date.setHours(-date.getTimezoneOffset() / 60, 0, 0, 0);
+                date.setHours(0, 0, 0, 0);
                 return date;
             }
 
