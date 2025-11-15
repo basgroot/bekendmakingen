@@ -970,11 +970,11 @@ async function initMap() {
      * @return {void}
      */
     function setMarkerVisibility(marker, isVisible) {
-        if (isVisible) {
-            marker.map = appState.map;
-        } else {
-            marker.map = null;
-        }
+        marker.setMap(
+            isVisible
+            ? appState.map
+            : null
+        );
     }
 
     /**
