@@ -192,7 +192,19 @@ async function initMap() {
          * @return {string} The numeric value of the month.
          */
         function convertMonthNames(value) {
-            return value.replace("januari", "01").replace("februari", "02").replace("maart", "03").replace("april", "04").replace("mei", "05").replace("juni", "06").replace("juli", "07").replace("augustus", "08").replace("september", "09").replace("oktober", "10").replace("november", "11").replace("december", "12");
+            return value
+                .replace("januari", "01")
+                .replace("februari", "02")
+                .replace("maart", "03")
+                .replace("april", "04")
+                .replace("mei", "05")
+                .replace("juni", "06")
+                .replace("juli", "07")
+                .replace("augustus", "08")
+                .replace("september", "09")
+                .replace("oktober", "10")
+                .replace("november", "11")
+                .replace("december", "12");
         }
 
         /**
@@ -207,12 +219,11 @@ async function initMap() {
             const year = value.substring(6, 10);
             const month = value.substring(3, 5);
             const day = value.substring(0, 2);
-            let datumBekendgemaakt;
             if (Number.isNaN(parseInt(year, 10)) || Number.isNaN(parseInt(month, 10)) || Number.isNaN(parseInt(day, 10))) {
                 console.error("Error parsing date (" + value + ") of license " + publication.urlApi);
                 return result;
             }
-            datumBekendgemaakt = new Date(year + "-" + month + "-" + day);
+            const datumBekendgemaakt = new Date(year + "-" + month + "-" + day);
             result.date = new Date(datumBekendgemaakt.toDateString());  // Rounded date
             result.isValid = true;
             return result;
