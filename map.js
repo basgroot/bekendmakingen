@@ -149,7 +149,6 @@ async function initMap() {
 
         const parser = new window.DOMParser();
         let xmlDoc;
-        let zakelijkeMededeling;
         try {
             xmlDoc = parser.parseFromString(replaceTags(responseXml).toLowerCase(), "text/xml");
         } catch (e) {
@@ -158,7 +157,7 @@ async function initMap() {
             return [];
         }
         // gemeenteblad / zakelijke-mededeling / zakelijke-mededeling-tekst / tekst / <al>Verzonden naar aanvrager op: 20-09-2022</al>
-        zakelijkeMededeling = xmlDoc.getElementsByTagName("zakelijke-mededeling-tekst");
+        const zakelijkeMededeling = xmlDoc.getElementsByTagName("zakelijke-mededeling-tekst");
         return (
             zakelijkeMededeling.length === 0
             ? []
@@ -1470,18 +1469,16 @@ async function initMap() {
                     } else if (locatiegebied.startsWith("LINESTRING")) {
                         console.log("Found LINESTRING in locatiegebied, calling processLine() for " + locatiegebied);
                         processLine(locatiegebied);
+                    } else if (locatiegebied.indexOf(" ") > 0) {
+                        // "51.976387,4.6128864 51.976192,4.6125665 51.976078,4.6127763 51.976124,4.6128507 51.976143,4.6128216 51.976276,4.6130733 51.976387,4.6128864"
+                        locatiegebied.split(" ").forEach(function (coordinate) {
+                            console.log("Adding splitted locatiegebied " + coordinate);
+                            addCoordinateToList(coordinate.replace(",", " "));
+                        });
                     } else {
-                        if (locatiegebied.indexOf(" ") > 0) {
-                            // "51.976387,4.6128864 51.976192,4.6125665 51.976078,4.6127763 51.976124,4.6128507 51.976143,4.6128216 51.976276,4.6130733 51.976387,4.6128864"
-                            locatiegebied.split(" ").forEach(function (coordinate) {
-                                console.log("Adding splitted locatiegebied " + coordinate);
-                                addCoordinateToList(coordinate.replace(",", " "));
-                            });
-                        } else {
-                            // "52.087781,5.1068402"
-                            console.log("Adding locatiegebied " + locatiegebied);
-                            addCoordinateToList(locatiegebied.replace(",", " "));
-                        }
+                        // "52.087781,5.1068402"
+                        console.log("Adding locatiegebied " + locatiegebied);
+                        addCoordinateToList(locatiegebied.replace(",", " "));
                     }
                 }
 
