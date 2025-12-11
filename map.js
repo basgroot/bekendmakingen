@@ -47,7 +47,7 @@ async function initMap() {
     /**
      * Customize the map based on query parameters.
      * Examples:
-     *   ?in=Hoorn&zoom=15&center=52.6603118963%2C5.0608995325
+     *   ?in=Hoorn&zoom=15.67&center=52.66031%2C5.06090
      *   ?in=Oostzaan
      * @return {!Object} Map settings.
      */
@@ -1023,12 +1023,16 @@ async function initMap() {
      * @return {void}
      */
     function updateUrl(zoom, center) {
-        // Add to URL: /?in=Alkmaar&zoom=15&center=52.43660651356703,4.84418395002761
+        // Add to URL: /?in=Alkmaar&zoom=15.76&center=52.4366,4.8441
+        // Round zoom and center to have an accurate, but short URL
+        const zoomDecimals = 2;
+        const centerDecimals = 5;
         if (window.URLSearchParams) {
             const urlSearchParams = new window.URLSearchParams(window.location.search);
             urlSearchParams.set("in", appState.activeMunicipality);
-            urlSearchParams.set("zoom", zoom.toString());
-            urlSearchParams.set("center", center.toUrlValue(10));
+            urlSearchParams.set("zoom", zoom.toFixed(zoomDecimals));
+            // https://developers.google.com/maps/documentation/javascript/reference/coordinates#LatLng.toUrlValue
+            urlSearchParams.set("center", center.toUrlValue(centerDecimals));
             window.history.replaceState(null, "", window.location.pathname + "?" + urlSearchParams.toString());
         }
         document.title = "Bekendmakingen " + appState.activeMunicipality;
@@ -1241,7 +1245,7 @@ async function initMap() {
         appState.map.addListener("dragend", closeInfoWindow);
         appState.map.addListener("click", closeInfoWindow);
         appState.map.addListener("zoom_changed", function () {
-            // Add to URL: /?zoom=15&center=52.43660651356703,4.84418395002761
+            // Add to URL: /?zoom=15.81&center=52.43660,4.84418
             const periodFilter = getPeriodFilter();
             const zoom = appState.map.getZoom();
             if (!periodFilter.isHistory) {
