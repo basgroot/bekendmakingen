@@ -1036,6 +1036,9 @@ async function initMap() {
             window.history.replaceState(null, "", window.location.pathname + "?" + urlSearchParams.toString());
         }
         document.title = "Bekendmakingen " + appState.activeMunicipality;
+        // Update the meta tags for the preview on social media:
+        document.querySelector('meta[property="og:title"]').setAttribute("content", document.title);
+        document.querySelector('meta[name="twitter:title"]').setAttribute("content", document.title);
     }
 
     /**
