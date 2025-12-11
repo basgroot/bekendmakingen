@@ -1023,6 +1023,25 @@ async function initMap() {
      * @return {void}
      */
     function updateUrl(zoom, center) {
+
+        /**
+         * Remove trailing zeros from a number represented as a string.
+         * @param {string} value
+         * @returns {string} Value without trailing zeros.
+         */
+        function removeTrailingZeros(value) {
+            if (value.indexOf(".") === -1) {
+                return value;  // Prevent removing zeros from integers
+            }
+            while (value.endsWith("0")) {
+                value = value.slice(0, -1);
+            }
+            if (value.endsWith(".")) {
+                value = value.slice(0, -1);
+            }
+            return value;
+        }
+
         // Add to URL: /?in=Alkmaar&zoom=15.76&center=52.4366,4.8441
         // Round zoom and center to have an accurate, but short URL
         const zoomDecimals = 2;
@@ -1030,15 +1049,21 @@ async function initMap() {
         if (window.URLSearchParams) {
             const urlSearchParams = new window.URLSearchParams(window.location.search);
             urlSearchParams.set("in", appState.activeMunicipality);
-            urlSearchParams.set("zoom", zoom.toFixed(zoomDecimals));
+            urlSearchParams.set("zoom", removeTrailingZeros(zoom.toFixed(zoomDecimals)));
             // https://developers.google.com/maps/documentation/javascript/reference/coordinates#LatLng.toUrlValue
             urlSearchParams.set("center", center.toUrlValue(centerDecimals));
             window.history.replaceState(null, "", window.location.pathname + "?" + urlSearchParams.toString());
         }
         document.title = "Bekendmakingen " + appState.activeMunicipality;
         // Update the meta tags for the preview on social media:
-        document.querySelector('meta[property="og:title"]').setAttribute("content", document.title);
-        document.querySelector('meta[name="twitter:title"]').setAttribute("content", document.title);
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) {
+            ogTitle.setAttribute("content", document.title);
+        }
+        const twitterTitle = document.querySelector('meta[name="twitter:title"]');
+        if (twitterTitle) {
+            twitterTitle.setAttribute("content", document.title);
+        }
     }
 
     /**
