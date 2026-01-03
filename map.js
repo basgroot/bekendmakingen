@@ -1263,6 +1263,7 @@ async function initMap() {
                 "mapTypeId": google.maps.MapTypeId.ROADMAP,  // https://developers.google.com/maps/documentation/javascript/reference/map#MapTypeId
                 "gestureHandling": "greedy",  // When scrolling, keep scrolling
                 "zoom": mapSettings.zoomLevel,
+                "isFractionalZoomEnabled": true,  // https://developers.google.com/maps/documentation/javascript/reference/map#MapOptions.isFractionalZoomEnabled
                 "mapId": "9913fa533c4bf328"
             }
         );
