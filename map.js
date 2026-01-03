@@ -1717,7 +1717,7 @@ async function initMap() {
                 });
                 if (publicationIndex >= 0) {
                     console.log("Deleting " + (responseJson.publications.length - publicationIndex) + " historical items from before " + appState.requestPeriod.startDate.toDateString());
-                    responseJson.publications = responseJson.publications.slice(0, publicationIndex - 1);
+                    responseJson.publications = responseJson.publications.slice(0, publicationIndex);
                 }
                 appState.publicationsArray = appState.publicationsArray.concat(responseJson.publications);
                 appState.isFullyLoaded = true;
