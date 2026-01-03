@@ -1049,6 +1049,7 @@ async function initMap() {
         if (window.URLSearchParams) {
             const urlSearchParams = new window.URLSearchParams(window.location.search);
             urlSearchParams.set("in", appState.activeMunicipality);
+            // This only works with isFractionalZoomEnabled set to true in the map options
             urlSearchParams.set("zoom", removeTrailingZeros(zoom.toFixed(zoomDecimals)));
             // https://developers.google.com/maps/documentation/javascript/reference/coordinates#LatLng.toUrlValue
             urlSearchParams.set("center", center.toUrlValue(centerDecimals));
@@ -1264,6 +1265,7 @@ async function initMap() {
                 "gestureHandling": "greedy",  // When scrolling, keep scrolling
                 "zoom": mapSettings.zoomLevel,
                 "isFractionalZoomEnabled": true,  // https://developers.google.com/maps/documentation/javascript/reference/map#MapOptions.isFractionalZoomEnabled
+                "renderingType": google.maps.RenderingType.VECTOR,  // https://developers.google.com/maps/documentation/javascript/map-rendering-type#rendering-type
                 "mapId": "9913fa533c4bf328"
             }
         );
@@ -1294,7 +1296,6 @@ async function initMap() {
                 }
             }
             closeInfoWindow();
-            console.log("Zoom changed to " + zoom);
         });
         appState.map.addListener("idle", function () {
             // Time to display other markers..
@@ -1315,6 +1316,7 @@ async function initMap() {
         });
         loadData(true);
         console.log("Using Maps version " + google.maps.version);  // https://developers.google.com/maps/documentation/javascript/releases
+        console.log("Map renderingType " + appState.map.renderingType);
     }
 
     /**
