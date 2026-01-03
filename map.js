@@ -1265,7 +1265,8 @@ async function initMap() {
                 "gestureHandling": "greedy",  // When scrolling, keep scrolling
                 "zoom": mapSettings.zoomLevel,
                 "isFractionalZoomEnabled": true,  // https://developers.google.com/maps/documentation/javascript/reference/map#MapOptions.isFractionalZoomEnabled
-                "renderingType": google.maps.RenderingType.VECTOR,  // https://developers.google.com/maps/documentation/javascript/map-rendering-type#rendering-type
+                // If VECTOR, the map freezes sometimes when a lot of markers are added. RASTER seems more stable.
+                "renderingType": google.maps.RenderingType.RASTER,  // https://developers.google.com/maps/documentation/javascript/map-rendering-type#rendering-type
                 "mapId": "9913fa533c4bf328"
             }
         );
