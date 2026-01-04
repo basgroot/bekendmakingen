@@ -20,6 +20,8 @@ async function initMap() {
         "activeMunicipality": "Hoorn",
         // The zoom level when starting the app:
         "initialZoomLevel": 16,
+        // The initial period to show:
+        "initialPeriod": "14d",
         // The marker objects of the municipalities:
         "municipalityMarkers": [],
         // Te list with markers on the map:
@@ -81,7 +83,7 @@ async function initMap() {
                     console.log("Adjusted center from URL");
                 }
             }
-            updateUrl(zoomLevel, new google.maps.LatLng(center.lat, center.lng));
+            updateUrlForLocation(zoomLevel, new google.maps.LatLng(center.lat, center.lng));
         }
         return {
             "zoomLevel": zoomLevel,
@@ -507,22 +509,51 @@ async function initMap() {
      */
     function createMapsControlPeriods() {
 
+        /**
+         * Get the period to select based on the URL parameter or the default value.
+         * @return {string} Period key.
+        */
+        function getPeriodToSelect() {
+            if (window.URLSearchParams) {
+                const urlSearchParams = new window.URLSearchParams(window.location.search);
+                let periodParam = urlSearchParams.get("period");
+                if (periodParam) {
+                    // Verify if the period is valid:
+                    const periodKeys = appState.periods.map(function (period) {
+                        return period.key;
+                    });
+                    if (periodKeys.indexOf(periodParam) === -1) {
+                        updateUrlForPeriod(appState.initialPeriod);
+                        console.error("Invalid period in URL");
+                    } else {
+                        appState.initialPeriod = periodParam;
+                        console.log("Adjusted period from URL: " + periodParam);
+                    }
+                }
+            }
+            return appState.initialPeriod;
+        }
+
          /**
           * Creates an option element with the specified value. Period 14d is selected by default.
           * @param {string} value The value of the option.
           * @param {string} displayValue The value of the option to display.
+          * @param {string} defaultValue The default value to select.
           * @return {!HTMLOptionElement} The created option element.
           */
-        function createOptionEx(value, displayValue) {
-            return createOption(value, displayValue, value === "14d");
+        function createOptionEx(value, displayValue, defaultValue) {
+            return createOption(value, displayValue, value === defaultValue);
         }
+
+        // Get the period from the URL parameter or default to 2weeks:
+        let selectedPeriod = getPeriodToSelect();
 
         const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
         const combobox = document.createElement("select");
         combobox.id = "idCbxPeriod";
         combobox.title = "Periode van de bekendmaking selecteren";
         appState.periods.forEach(function (period) {
-            combobox.add(createOptionEx(period.key, period.val));
+            combobox.add(createOptionEx(period.key, period.val, selectedPeriod));
         });
         combobox.addEventListener("change", updatePeriodFilter);
         combobox.classList.add("controlStyle");
@@ -870,6 +901,7 @@ async function initMap() {
             "isHistory": false
         };
         if (result.elm === null) {
+            updateUrlForPeriod(result.period);
             return result;  // Default when loading
         }
         // If this is an historical period, default to 'all':
@@ -988,7 +1020,7 @@ async function initMap() {
     }
 
     /**
-     * Reset time filter. This is done when the municipality is changed.
+     * Reset time filter. This is done when the municipality is changed, or when a different combo box option is selected.
      * @return {void}
      */
     function updatePeriodFilter() {
@@ -1014,6 +1046,20 @@ async function initMap() {
                 setMarkerVisibility(markerObject.marker, isMarkerVisible(markerObject.age, periodFilter.periodToShow));
             });
         }
+        updateUrlForPeriod(periodFilter.period);
+    }
+
+    /**
+     * Add the period parameter to the URL, so the view can be shared.
+     * @param {string} period Selected period.
+     * @return {void}
+     */
+    function updateUrlForPeriod(period) {
+        if (window.URLSearchParams) {
+            const urlSearchParams = new window.URLSearchParams(window.location.search);
+            urlSearchParams.set("period", period);
+            window.history.replaceState(null, "", window.location.pathname + "?" + urlSearchParams.toString());
+        }
     }
 
     /**
@@ -1022,7 +1068,7 @@ async function initMap() {
      * @param {!Object} center Coordinate of center of map.
      * @return {void}
      */
-    function updateUrl(zoom, center) {
+    function updateUrlForLocation(zoom, center) {
 
         /**
          * Remove trailing zeros from a number represented as a string.
@@ -1312,7 +1358,7 @@ async function initMap() {
                     appState.delayedMarkersArray.splice(i, 1);
                 }
             }
-            updateUrl(appState.map.getZoom(), appState.map.getCenter());
+            updateUrlForLocation(appState.map.getZoom(), appState.map.getCenter());
             console.log("Remaining items to add to the map: " + appState.delayedMarkersArray.length);
         });
         loadData(true);
@@ -1825,6 +1871,7 @@ async function initMap() {
             if (appState.isHistoryActive) {
                 appState.isHistoryActive = false;
                 periodFilter.elm.value = "14d";
+                updateUrlForPeriod("14d");
             }
         }
         appState.isFullyLoaded = false;
