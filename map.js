@@ -24,7 +24,7 @@ async function initMap() {
         "initialPeriod": "14d",
         // The marker objects of the municipalities:
         "municipalityMarkers": [],
-        // Te list with markers on the map:
+        // The list with markers on the map:
         "markersArray": [],
         // The markers outside the screen, to be shown after becoming visible (scroll):
         "delayedMarkersArray": [],
@@ -412,7 +412,10 @@ async function initMap() {
         if (!isBezwaartermijnFound) {
             textToShow = "Gepubliceerd: " + publication.date.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br /><br />";
         }
-        document.getElementById(licenseId).innerHTML = textToShow;
+        const licenseIdElm = document.getElementById(licenseId);
+        if (licenseIdElm !== null) {
+            licenseIdElm.innerHTML = textToShow;
+        }
     }
 
     /**
@@ -803,7 +806,7 @@ async function initMap() {
         /**
          * Handles the hover event. Highlight the icon (and related icons) on hover.
          */
-        function onMouseOver() {
+        function handleMarkerMouseOver() {
             appState.markersArray.forEach(function (markerObject) {
                 if (markerObject.url === publication.urlDoc) {
                     markerObject.marker.content.getElementsByTagName("img")[0].src = "img/" + iconName + "-highlight.png";
@@ -814,7 +817,7 @@ async function initMap() {
         /**
          * Handles the mouse out event. Remove the highlight.
          */
-        function onMouseOut() {
+        function handleMarkerMouseOut() {
             appState.markersArray.forEach(function (markerObject) {
                 if (markerObject.url === publication.urlDoc) {
                     markerObject.marker.content.getElementsByTagName("img")[0].src = "img/" + iconName + ".png";
@@ -853,8 +856,8 @@ async function initMap() {
         appState.markersArray.push(markerObject);
         marker.addListener("click", onClick);
         // Highlight the icon (and related icons) on hover
-        marker.content.addEventListener("mouseover", onMouseOver);
-        marker.content.addEventListener("mouseout", onMouseOut);
+        marker.content.addEventListener("mouseover", handleMarkerMouseOver);
+        marker.content.addEventListener("mouseout", handleMarkerMouseOut);
         return markerObject;
     }
 
@@ -1845,6 +1848,7 @@ async function initMap() {
         // https://developers.google.com/maps/documentation/javascript/markers#remove
         appState.markersArray.forEach(function (markerObject) {
             markerObject.marker.setMap(null);
+            markerObject.marker = null;
         });
         appState.municipalityMarkers.forEach(function (markerObject) {
             setMarkerVisibility(markerObject.marker, markerObject.municipalityName !== municipalityToHide);
