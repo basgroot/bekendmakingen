@@ -1,0 +1,42 @@
+{
+  "short_name": "Bekendmakingen op kaart",
+  "name": "Vergunningen en bekendmakingen op de kaart",
+  "icons": [
+    {
+      "src": "/img/icon-192.png",
+      "sizes": "192x192"
+    }
+  ],
+  "start_url": "/?in=Utrecht&zoom=16&center=52.09079%2C5.1214&period=7d",
+  "background_color": "#3367D6",
+  "display": "fullscreen",
+  "scope": "/",
+  "theme_color": "#3367D6",
+  "shortcuts": [
+    {
+      "name": "Bekendmakingen in Zaanstad",
+      "short_name": "Zaanstad",
+      "description": "Vergunningen deze week verleend in Zaanstad",
+      "url": "/?in=Zaanstad&zoom=15.35&center=52.43789%2C4.82721&period=7d",
+      "icons": [
+        {
+          "src": "/img/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Bekendmakingen in Amsterdam",
+      "short_name": "Amsterdam",
+      "description": "Vergunningen deze week verleend in Amsterdam",
+      "url": "/?in=Amsterdam&zoom=15.66&center=52.35596%2C4.89885&period=7d",
+      "icons": [
+        {
+          "src": "/img/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "description": "Bekendmakingen aangevraagde en verleende vergunningen op de kaart"
+}
