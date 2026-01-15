@@ -751,13 +751,17 @@ async function initMap() {
     /**
      * Create a marker icon.
      * @param {string} sourceUrl Link to marker image.
+     * @param {number} width Width of the image.
+     * @param {number} height Height of the image.
      * @param {string=} label Optional label.
      * @return {!HTMLDivElement} Marker node containing the image.
      */
-    function createMarkerIcon(sourceUrl, label) {
+    function createMarkerIcon(sourceUrl, width, height, label) {
         const iconContainer = document.createElement("div");
         const icon = document.createElement("img");
         icon.src = sourceUrl;
+        icon.width = width;
+        icon.height = height;
         iconContainer.appendChild(icon);
         if (label === undefined) {
             return iconContainer;
@@ -841,7 +845,7 @@ async function initMap() {
                 : null
             ),
             "position": position,
-            "content": createMarkerIcon("img/" + iconName + ".png"),
+            "content": createMarkerIcon("img/" + iconName + ".png", 35, 45),
             "zIndex": appState.zIndex,
             "title": publication.title
         });
@@ -987,7 +991,7 @@ async function initMap() {
                     : appState.map
                 ),
                 "position": municipalityObject.center,
-                "content": createMarkerIcon("img/gemeente.png", municipalityName),
+                "content": createMarkerIcon("img/gemeente.png", 50, 61, municipalityName),
                 "title": municipalityName
             });
             appState.municipalityMarkers.push({
