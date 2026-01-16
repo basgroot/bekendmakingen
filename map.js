@@ -60,7 +60,6 @@ async function initMap() {
         Object.keys(appState.municipalities).forEach(function (municipalityKey) {
             if (municipalityKey.toLowerCase() === municipalityToFind) {
                 foundMunicipality = municipalityKey;
-                console.log("Found municipality: " + municipalityKey);
             }
         });
         return foundMunicipality;
@@ -450,6 +449,7 @@ async function initMap() {
             return;
         }
         // Endpoint: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-425209/1/xml/gmb-2022-425209.xml
+        console.debug("Retrieving " + publication.urlApi + "..");
         fetch(
             publication.urlApi,
             {
@@ -913,7 +913,7 @@ async function initMap() {
     function getPeriodFilter() {
 
         /**
-         * Checks if a value represents a historical period. Historical periods are notated like '2023-11'.
+         * Checks if a value represents a historical period. Historical periods are noted like '2023-11'.
          * @param {string} value The value to check.
          * @return {boolean} Returns true if the value represents a historical period, otherwise returns false.
          */
@@ -929,7 +929,6 @@ async function initMap() {
             "isHistory": false
         };
         if (result.elm === null) {
-            updateUrlForPeriod(result.period);
             return result;  // Default when loading
         }
         // If this is an historical period, default to 'all':
@@ -1200,8 +1199,10 @@ async function initMap() {
      * @return {void}
      */
     function getLocationByIp() {
+        const url = "https://basement.nl/proxy-server/location.php";
+        console.debug("Retrieving " + url + "..");
         fetch(
-            "https://basement.nl/proxy-server/location.php",
+            url,
             {
                 "method": "GET"
             }
@@ -1736,7 +1737,7 @@ async function initMap() {
     function getData(path, callback) {
         const host = "https://basgroot.github.io";
         const url = host + path;
-        console.log("Loading file " + url + "..");
+        console.debug("Retrieving " + url + "..");
         fetch(url, {"method": "GET"}).then(function (response) {
             if (response.ok) {
                 response.json().then(callback);
@@ -1817,9 +1818,11 @@ async function initMap() {
             : municipality
         );
         setLoadingIndicatorVisibility("show");
+        const url = "https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.modified%3E=" + appState.requestPeriod.startDateString + "%20AND%20dt.creator=%22" + encodeURIComponent(lookupMunicipality) + "%22%20sortBy%20dt.modified%20/sort.descending&maximumRecords=500&startRecord=" + startRecord + "&httpAccept=application/json";
+        console.debug("Retrieving " + url + "..");
         fetch(
             // Example: https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.modified%3E=2025-05-01%20AND%20dt.creator=%22Amsterdam%22%20sortBy%20dt.modified%20/sort.descending&maximumRecords=1000&startRecord=1&httpAccept=application/json
-            "https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.modified%3E=" + appState.requestPeriod.startDateString + "%20AND%20dt.creator=%22" + encodeURIComponent(lookupMunicipality) + "%22%20sortBy%20dt.modified%20/sort.descending&maximumRecords=500&startRecord=" + startRecord + "&httpAccept=application/json",
+            url,
             {
                 "method": "GET"
             }
@@ -1889,7 +1892,6 @@ async function initMap() {
      */
     function loadData(isNavigationNeeded) {
         const municipalityComboElm = document.getElementById("idCbxMunicipality");
-        const periodFilter = getPeriodFilter();
         if (municipalityComboElm !== null) {
             appState.activeMunicipality = municipalityComboElm.value;
             clearMarkers("");
@@ -1899,8 +1901,9 @@ async function initMap() {
             }
             if (appState.isHistoryActive) {
                 appState.isHistoryActive = false;
-                periodFilter.elm.value = "14d";
-                updateUrlForPeriod("14d");
+                const periodFilter = getPeriodFilter();
+                periodFilter.elm.value = appState.initialPeriod;
+                updateUrlForPeriod(appState.initialPeriod);
             }
         }
         appState.isFullyLoaded = false;
