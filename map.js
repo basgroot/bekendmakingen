@@ -47,6 +47,26 @@ async function initMap() {
     };
 
     /**
+     * Find the municipality by name, case insensitive. This must match: ?in=beverwijk
+     * @param {string} municipalityName
+     * @returns {string|boolean} Municipality key or false if not found.
+     */
+    function getMunicipalityFromUrl(municipalityName) {
+        if (!municipalityName) {
+            return false;
+        }
+        const municipalityToFind = municipalityName.toLowerCase();
+        let foundMunicipality = false;
+        Object.keys(appState.municipalities).forEach(function (municipalityKey) {
+            if (municipalityKey.toLowerCase() === municipalityToFind) {
+                foundMunicipality = municipalityKey;
+                console.log("Found municipality: " + municipalityKey);
+            }
+        });
+        return foundMunicipality;
+    }
+
+    /**
      * Customize the map based on query parameters.
      * Examples:
      *   ?in=Hoorn&zoom=15.67&center=52.66031%2C5.06090
@@ -62,8 +82,8 @@ async function initMap() {
             const urlSearchParams = new window.URLSearchParams(window.location.search);
             let zoomParam = urlSearchParams.get("zoom");
             let centerParam = urlSearchParams.get("center");
-            const municipalityParam = urlSearchParams.get("in");
-            if (municipalityParam && appState.municipalities[municipalityParam] !== undefined) {
+            const municipalityParam = getMunicipalityFromUrl(urlSearchParams.get("in"));
+            if (municipalityParam) {
                 appState.activeMunicipality = municipalityParam;
                 console.log("Adjusted municipality from URL: " + municipalityParam);
             }
@@ -762,6 +782,7 @@ async function initMap() {
         icon.src = sourceUrl;
         icon.width = width;
         icon.height = height;
+        icon.alt = "";
         iconContainer.appendChild(icon);
         if (label === undefined) {
             return iconContainer;
