@@ -77,8 +77,8 @@ async function initMap() {
         let center = Object.assign({}, appState.municipalities[appState.activeMunicipality].center);  // Create new copy
         let lat;
         let lng;
-        if (window.URLSearchParams) {
-            const urlSearchParams = new window.URLSearchParams(window.location.search);
+        if (globalThis.URLSearchParams) {
+            const urlSearchParams = new globalThis.URLSearchParams(globalThis.location.search);
             let zoomParam = urlSearchParams.get("zoom");
             let centerParam = urlSearchParams.get("center");
             const municipalityParam = getMunicipalityFromUrl(urlSearchParams.get("in"));
@@ -168,7 +168,7 @@ async function initMap() {
             return result;
         }
 
-        const parser = new window.DOMParser();
+        const parser = new globalThis.DOMParser();
         let xmlDoc;
         try {
             xmlDoc = parser.parseFromString(replaceTags(responseXml).toLowerCase(), "text/xml");
@@ -537,8 +537,8 @@ async function initMap() {
          * @return {string} Period key.
         */
         function getPeriodToSelect() {
-            if (window.URLSearchParams) {
-                const urlSearchParams = new window.URLSearchParams(window.location.search);
+            if (globalThis.URLSearchParams) {
+                const urlSearchParams = new globalThis.URLSearchParams(globalThis.location.search);
                 let periodParam = urlSearchParams.get("period");
                 if (periodParam) {
                     // Verify if the period is valid:
@@ -597,9 +597,9 @@ async function initMap() {
         button.type = "button";
         button.addEventListener("click", function () {
             const url = "https://github.com/basgroot/bekendmakingen";
-            if (window.open(url) === null) {
+            if (globalThis.open(url) === null) {
                 // Popup blocker or something preventing a new tab
-                window.location.href = url;
+                globalThis.location.href = url;
             }
         });
         button.classList.add("controlStyle");
@@ -1047,7 +1047,7 @@ async function initMap() {
     }
 
     /**
-     * Reset time filter. This is done when the municipality is changed, or when a different combo box option is selected.
+     * Reset time filter. This is done when the zoom level is changed, or when a different combo box option is selected.
      * @return {void}
      */
     function updatePeriodFilter() {
@@ -1056,7 +1056,7 @@ async function initMap() {
             console.log("Loading historical data of period " + periodFilter.periodToShow);
             loadHistory(periodFilter.period, true);
         } else {
-            console.log("Filtering period to: " + periodFilter.periodToShow);
+            console.log("Filtering period to " + periodFilter.periodToShow);
             if (appState.isHistoryActive) {
                 appState.isHistoryActive = false;
                 if (appState.isFullyLoaded) {
@@ -1082,10 +1082,11 @@ async function initMap() {
      * @return {void}
      */
     function updateUrlForPeriod(period) {
-        if (window.URLSearchParams) {
-            const urlSearchParams = new window.URLSearchParams(window.location.search);
+        if (globalThis.URLSearchParams) {
+            const urlSearchParams = new globalThis.URLSearchParams(globalThis.location.search);
             urlSearchParams.set("period", period);
-            window.history.replaceState(null, "", window.location.pathname + "?" + urlSearchParams.toString());
+            console.log("Updated URL for period " + period);
+            globalThis.history.replaceState(null, "", globalThis.location.pathname + "?" + urlSearchParams.toString());
         }
     }
 
@@ -1119,14 +1120,14 @@ async function initMap() {
         // Round zoom and center to have an accurate, but short URL
         const zoomDecimals = 2;
         const centerDecimals = 5;
-        if (window.URLSearchParams) {
-            const urlSearchParams = new window.URLSearchParams(window.location.search);
+        if (globalThis.URLSearchParams) {
+            const urlSearchParams = new globalThis.URLSearchParams(globalThis.location.search);
             urlSearchParams.set("in", appState.activeMunicipality);
             // This only works with isFractionalZoomEnabled set to true in the map options
             urlSearchParams.set("zoom", removeTrailingZeros(zoom.toFixed(zoomDecimals)));
             // https://developers.google.com/maps/documentation/javascript/reference/coordinates#LatLng.toUrlValue
             urlSearchParams.set("center", center.toUrlValue(centerDecimals));
-            window.history.replaceState(null, "", window.location.pathname + "?" + urlSearchParams.toString());
+            globalThis.history.replaceState(null, "", globalThis.location.pathname + "?" + urlSearchParams.toString());
         }
         document.title = "Bekendmakingen " + appState.activeMunicipality;
         // Update the meta tags for the preview on social media:
@@ -1184,8 +1185,8 @@ async function initMap() {
      * @return {boolean} Is the municipality part of the URL?
      */
     function isLocationInUrl() {
-        if (window.URLSearchParams) {
-            const urlSearchParams = new window.URLSearchParams(window.location.search);
+        if (globalThis.URLSearchParams) {
+            const urlSearchParams = new globalThis.URLSearchParams(globalThis.location.search);
             const municipalityParam = urlSearchParams.get("in");
             if (municipalityParam && appState.municipalities[municipalityParam] !== undefined) {
                 return true;
@@ -1209,16 +1210,16 @@ async function initMap() {
         ).then(function (response) {
             if (response.ok) {
                 response.json().then(function (responseJson) {
-                    if (appState.municipalities[responseJson.city] !== undefined) {
-                        // Name of the city is the same as the municipality.
-                        console.log("Client location in municipality " + responseJson.city);
-                        appState.activeMunicipality = responseJson.city;
-                    } else {
+                    if (appState.municipalities[responseJson.city] === undefined) {
                         // Try to locate the closest municipality:
                         activateClosestMunicipality({
                             "lat": responseJson.lat,
                             "lng": responseJson.lng
                         });
+                    } else {
+                        // Name of the city is the same as the municipality.
+                        console.log("Client location in municipality " + responseJson.city);
+                        appState.activeMunicipality = responseJson.city;
                     }
                     internalInitMap();
                 });
@@ -1812,6 +1813,78 @@ async function initMap() {
      * @return {void}
      */
     function loadDataForMunicipality(municipality, startRecord) {
+
+        /**
+         * Process the API response.
+         * @param {Object} responseJson
+         * @returns
+         */
+        function processResponse(responseJson) {
+            let isMoreDataAvailable;
+            if (municipality !== appState.activeMunicipality || appState.isHistoryActive) {
+                // We are loading a municipality, but user selected another one.
+                return;
+            }
+            if (startRecord === 1) {
+                appState.publicationsArray = [];
+                // Hide active municipality:
+                hideActiveMunicipalityMarker();
+            }
+            if (addPublications(responseJson)) {
+                console.log("Found " + responseJson.searchRetrieveResponse.records.record.length + " bekendmakingen of " + responseJson.searchRetrieveResponse.numberOfRecords + " in " + municipality);
+            } else {
+                console.log("No new bekendmakingen found in " + municipality);
+            }
+            isMoreDataAvailable = responseJson.searchRetrieveResponse.hasOwnProperty("nextRecordPosition");
+            if (isMoreDataAvailable) {
+                // Add next page:
+                console.log("Loading next page..");
+                loadDataForMunicipality(municipality, responseJson.searchRetrieveResponse.nextRecordPosition);
+            } else if (appState.requestPeriod.hasOwnProperty("historyFile")) {
+                // Load historical data and append that:
+                console.log("Adding historical file " + appState.requestPeriod.historyFile + " to complete the overview");
+                loadHistory(appState.requestPeriod.historyFile, false);
+            } else {
+                console.log("Data retrieval complete");
+                appState.isFullyLoaded = true;
+            }
+            addMarkers(startRecord, isMoreDataAvailable);
+        }
+
+        /**
+         * Fetch data and retry when something goes wrong.
+         * @param {string} url
+         * @param {number} retriesLeft
+         * @return {void}
+         */
+        function loadDataWithRetries(url, retriesLeft) {
+            if (retriesLeft <= 0) {
+                console.error("Giving up loading " + url + " after multiple retries.");
+                globalThis.alert("Er is een probleem opgetreden bij het laden van de bekendmakingen van " + municipality + ".\nProbeer het later nogmaals.");
+                setLoadingIndicatorVisibility("hide");
+                return;
+            }
+            console.debug("Retrieving " + url + " (" + retriesLeft + " retries left)..");
+            fetch(
+                // Example: https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.modified%3E=2025-05-01%20AND%20dt.creator=%22Amsterdam%22%20sortBy%20dt.modified%20/sort.descending&maximumRecords=1000&startRecord=1&httpAccept=application/json
+                url,
+                {
+                    "method": "GET"
+                }
+            ).then(function (response) {
+                if (response.ok) {
+                    response.json().then(processResponse);
+                } else {
+                    console.error(response);
+                    // This happens when response is 503 Service Unavailable, for example.
+                    loadDataWithRetries(url, retriesLeft - 1);
+                }
+            }).catch(function (error) {
+                console.error(error);
+                loadDataWithRetries(url, retriesLeft - 1);
+            });
+        }
+
         const lookupMunicipality = (
             appState.municipalities[municipality].hasOwnProperty("lookupName")
             ? appState.municipalities[municipality].lookupName
@@ -1819,52 +1892,7 @@ async function initMap() {
         );
         setLoadingIndicatorVisibility("show");
         const url = "https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.modified%3E=" + appState.requestPeriod.startDateString + "%20AND%20dt.creator=%22" + encodeURIComponent(lookupMunicipality) + "%22%20sortBy%20dt.modified%20/sort.descending&maximumRecords=500&startRecord=" + startRecord + "&httpAccept=application/json";
-        console.debug("Retrieving " + url + "..");
-        fetch(
-            // Example: https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.modified%3E=2025-05-01%20AND%20dt.creator=%22Amsterdam%22%20sortBy%20dt.modified%20/sort.descending&maximumRecords=1000&startRecord=1&httpAccept=application/json
-            url,
-            {
-                "method": "GET"
-            }
-        ).then(function (response) {
-            if (response.ok) {
-                response.json().then(function (responseJson) {
-                    let isMoreDataAvailable;
-                    if (municipality !== appState.activeMunicipality || appState.isHistoryActive) {
-                        // We are loading a municipality, but user selected another one.
-                        return;
-                    }
-                    if (startRecord === 1) {
-                        appState.publicationsArray = [];
-                        // Hide active municipality:
-                        hideActiveMunicipalityMarker();
-                    }
-                    if (addPublications(responseJson)) {
-                        console.log("Found " + responseJson.searchRetrieveResponse.records.record.length + " bekendmakingen of " + responseJson.searchRetrieveResponse.numberOfRecords + " in " + municipality);
-                    } else {
-                        console.log("No new bekendmakingen found in " + municipality);
-                    }
-                    isMoreDataAvailable = responseJson.searchRetrieveResponse.hasOwnProperty("nextRecordPosition");
-                    if (isMoreDataAvailable) {
-                        // Add next page:
-                        console.log("Loading next page..");
-                        loadDataForMunicipality(municipality, responseJson.searchRetrieveResponse.nextRecordPosition);
-                    } else if (appState.requestPeriod.hasOwnProperty("historyFile")) {
-                        // Load historical data and append that:
-                        console.log("Adding historical file " + appState.requestPeriod.historyFile + " to complete the overview");
-                        loadHistory(appState.requestPeriod.historyFile, false);
-                    } else {
-                        console.log("Data retrieval complete");
-                        appState.isFullyLoaded = true;
-                    }
-                    addMarkers(startRecord, isMoreDataAvailable);
-                });
-            } else {
-                console.error(response);
-            }
-        }).catch(function (error) {
-            console.error(error);
-        });
+        loadDataWithRetries(url, 3);
     }
 
     /**
