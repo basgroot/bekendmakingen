@@ -1472,8 +1472,8 @@ async function initMap() {
                         : meta.owmskern.type.$.trim()
                     );
                 }
-                console.warn("Type fallback to 'Onbekend' because no better available: " + JSON.stringify(meta, null, 4));
-                return "Onbekend";
+                console.warn("Type fallback to 'onbekend' because no better available: " + JSON.stringify(meta, null, 4));
+                return "onbekend";
             }
 
             function getDate(meta) {
