@@ -1445,7 +1445,7 @@ async function initMap() {
         function addPublication(inputRecord) {
 
             function getType(meta) {
-                if (meta.tpmeta.hasOwnProperty("activiteit")) {
+                if (meta.hasOwnProperty("tpmeta") && meta.tpmeta.hasOwnProperty("activiteit")) {
                     if (Array.isArray(meta.tpmeta.activiteit)) {
                         // Select the first one..
                         meta.tpmeta.activiteit = meta.tpmeta.activiteit[0];
@@ -1465,25 +1465,36 @@ async function initMap() {
                         console.error("Unexpected activiteit: '" + meta.tpmeta.activiteit.$ + "' " + JSON.stringify(meta, null, 4));
                     }
                 }
-                return (
-                    Array.isArray(meta.owmskern.type)
-                    ? meta.owmskern.type[0].$.trim()
-                    : meta.owmskern.type.$.trim()
-                );
+                if (meta.hasOwnProperty("owmskern") && meta.owmskern.hasOwnProperty("type")) {
+                    return (
+                        Array.isArray(meta.owmskern.type)
+                        ? meta.owmskern.type[0].$.trim()
+                        : meta.owmskern.type.$.trim()
+                    );
+                }
+                console.warn("Type fallback to 'Onbekend' because no better available: " + JSON.stringify(meta, null, 4));
+                return "Onbekend";
             }
 
-            function getDate(dateString) {
-                const date = new Date(dateString);
-                // Remove the time from the date:
-                date.setHours(0, 0, 0, 0);
-                return date;
+            function getDate(meta) {
+                if (meta.hasOwnProperty("tpmeta") && meta.tpmeta.hasOwnProperty("datumTijdstipWijzigingWork")) {
+                    const date = new Date(meta.tpmeta.datumTijdstipWijzigingWork);
+                    // Remove the time from the date:
+                    date.setHours(0, 0, 0, 0);
+                    return date;
+                }
+                // Return today as fallback:
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                console.warn("Date fallback to today because no better available: " + JSON.stringify(meta, null, 4));
+                return today;
             }
 
             function getTitle(meta, type) {
-                if (meta.owmskern.hasOwnProperty("title") && typeof meta.owmskern.title === "string") {
+                if (meta.hasOwnProperty("owmskern") && meta.owmskern.hasOwnProperty("title") && typeof meta.owmskern.title === "string") {
                     return meta.owmskern.title.trim();
                 }
-                if (meta.owmsmantel.hasOwnProperty("abstract") && typeof meta.owmsmantel.abstract === "string") {
+                if (meta.hasOwnProperty("owmsmantel") && meta.owmsmantel.hasOwnProperty("abstract") && typeof meta.owmsmantel.abstract === "string") {
                     // Abstract can be a number in some cases (Enkhuizen, December 2024)
                     return meta.owmsmantel.abstract.trim();
                 }
@@ -1492,11 +1503,11 @@ async function initMap() {
             }
 
             function getDescription(meta) {
-                if (meta.owmsmantel.hasOwnProperty("abstract") && typeof meta.owmsmantel.abstract === "string") {
+                if (meta.hasOwnProperty("owmsmantel") && meta.owmsmantel.hasOwnProperty("abstract") && typeof meta.owmsmantel.abstract === "string") {
                     // Abstract can be a number in some cases (Enkhuizen, December 2024)
                     return meta.owmsmantel.abstract.trim();
                 }
-                if (meta.owmskern.hasOwnProperty("title") && typeof meta.owmskern.title === "string") {
+                if (meta.hasOwnProperty("owmskern") && meta.owmskern.hasOwnProperty("title") && typeof meta.owmskern.title === "string") {
                     return meta.owmskern.title.trim();
                 }
                 console.warn("Abstract fallback to '-' because no better available: " + JSON.stringify(meta, null, 4));
@@ -1652,36 +1663,45 @@ async function initMap() {
                 }
             }
 
-            const urlDoc = inputRecord.recordData.gzd.enrichedData.preferredUrl.trim();
-            const description = getDescription(inputRecord.recordData.gzd.originalData.meta);
-            const type = getType(inputRecord.recordData.gzd.originalData.meta);
-            const publication = {
-                // Example: "2023-02-10"
-                "date": getDate(inputRecord.recordData.gzd.originalData.meta.tpmeta.datumTijdstipWijzigingWork),
-                // Example: "https://zoek.officielebekendmakingen.nl/gmb-2023-59059.html"
-                "urlDoc": urlDoc,
-                // Example: "https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-59059/1/xml/gmb-2023-59059.xml"
-                "urlApi": getUrlApi(urlDoc),
-                // Example "kapvergunning"
-                "type": type,
-                // Example: "Besluit apv vergunning Verleend Overtoom 10-H"
-                "title": getTitle(inputRecord.recordData.gzd.originalData.meta, type),
-                // Example: "TVM 2 vakken - Overtoom 10-12 13 februari 2023, Overtoom 10-H"
-                "description": description
-            };
-            publication.location = [];
-            if (inputRecord.recordData.gzd.originalData.meta.tpmeta.hasOwnProperty("gebiedsmarkering")) {
-                if (Array.isArray(inputRecord.recordData.gzd.originalData.meta.tpmeta.gebiedsmarkering)) {
-                    // Process one by one.
-                    inputRecord.recordData.gzd.originalData.meta.tpmeta.gebiedsmarkering.forEach(function (gebiedsmarkering) {
-                        processCoordinate(publication.location, gebiedsmarkering);
-                    });
-                } else {
-                    // Process one.
-                    processCoordinate(publication.location, inputRecord.recordData.gzd.originalData.meta.tpmeta.gebiedsmarkering);
+            try {
+                const urlDoc = (
+                    inputRecord.recordData.gzd.enrichedData.hasOwnProperty("preferredUrl") && typeof inputRecord.recordData.gzd.enrichedData.preferredUrl === "string"
+                    ? inputRecord.recordData.gzd.enrichedData.preferredUrl.trim()
+                    : ""
+                );
+
+                const description = getDescription(inputRecord.recordData.gzd.originalData.meta);
+                const type = getType(inputRecord.recordData.gzd.originalData.meta);
+                const publication = {
+                    // Example: "2023-02-10"
+                    "date": getDate(inputRecord.recordData.gzd.originalData.meta),
+                    // Example: "https://zoek.officielebekendmakingen.nl/gmb-2023-59059.html"
+                    "urlDoc": urlDoc,
+                    // Example: "https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-59059/1/xml/gmb-2023-59059.xml"
+                    "urlApi": getUrlApi(urlDoc),
+                    // Example "kapvergunning"
+                    "type": type,
+                    // Example: "Besluit apv vergunning Verleend Overtoom 10-H"
+                    "title": getTitle(inputRecord.recordData.gzd.originalData.meta, type),
+                    // Example: "TVM 2 vakken - Overtoom 10-12 13 februari 2023, Overtoom 10-H"
+                    "description": description
+                };
+                publication.location = [];
+                if (inputRecord.recordData.gzd.originalData.meta.hasOwnProperty("tpmeta") && inputRecord.recordData.gzd.originalData.meta.tpmeta.hasOwnProperty("gebiedsmarkering")) {
+                    if (Array.isArray(inputRecord.recordData.gzd.originalData.meta.tpmeta.gebiedsmarkering)) {
+                        // Process one by one.
+                        inputRecord.recordData.gzd.originalData.meta.tpmeta.gebiedsmarkering.forEach(function (gebiedsmarkering) {
+                            processCoordinate(publication.location, gebiedsmarkering);
+                        });
+                    } else {
+                        // Process one.
+                        processCoordinate(publication.location, inputRecord.recordData.gzd.originalData.meta.tpmeta.gebiedsmarkering);
+                    }
                 }
+                appState.publicationsArray.push(publication);
+            } catch (error) {
+                console.error("Error processing publication: " + JSON.stringify(inputRecord, null, 4) + " Error: " + error);
             }
-            appState.publicationsArray.push(publication);
         }
 
         if (responseJson.searchRetrieveResponse.numberOfRecords === 0) {
