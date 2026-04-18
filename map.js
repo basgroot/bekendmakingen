@@ -176,7 +176,7 @@ async function initMap() {
             try {
                 parsedUrl = new URL(urlDoc, window.location.href);
             } catch (ignore) {
-                parsedUrl = null;
+                // parsedUrl remains null
             }
             if (parsedUrl !== null && (parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:")) {
                 const linkPara = document.createElement("p");
@@ -986,7 +986,7 @@ async function initMap() {
 
         // 2022-09-05T09:04:57.175Z;
         // https://zoek.officielebekendmakingen.nl/gmb-2022-396401.html;
-        // "Besluit apv vergunning Verleend Monnikendammerweg 27";
+        // "Besluit apv vergunning Verleend Monnikendammerweg 27";
         // "TVM- 7 PV reserveren - Monnikendammerweg 27-37 - 03-07/10/2022, Monnikendammerweg 27";
         // 125171;
         // 488983
@@ -2050,7 +2050,7 @@ async function initMap() {
                     "urlApi": getUrlApi(urlDoc),
                     // Example "kapvergunning"
                     "type": type,
-                    // Example: "Besluit apv vergunning Verleend Overtoom 10-H"
+                    // Example: "Besluit apv vergunning Verleend Overtoom 10-H"
                     "title": getTitle(inputRecord.recordData.gzd.originalData.meta, type),
                     // Example: "TVM 2 vakken - Overtoom 10-12 13 februari 2023, Overtoom 10-H"
                     "description": description
