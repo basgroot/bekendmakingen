@@ -318,9 +318,13 @@ async function initMap() {
          * Retrieves the date from the given text value.
          * @param {string} value The text value to extract the date from.
          * @param {!Object} publication The publication source.
-         * @return {!Object} Object with parsed date, if valid.
+         * @param {boolean} isNextValueBekendmakingsDate Whether the previous
+         *     text node was the "datum bekendmaking besluit:" marker, meaning
+         *     the current value should be interpreted as that date (Den Haag).
+         * @return {!Object} Object with parsed date (when isValid is true) and
+         *     the updated isNextValueBekendmakingsDate flag for the next call.
          */
-        function getDateFromText(value, publication) {
+        function getDateFromText(value, publication, isNextValueBekendmakingsDate) {
             const identifier = "@@@";
             const identifiersStart = [
                 "verzonden naar aanvrager op: ",
@@ -370,14 +374,19 @@ async function initMap() {
             let isObjectionStartDate = false;
             let result;
             if (value === identifierNextValueIsDate) {
-                isNextValueBekendmakingsDate = true;
-            } else {
-                value = convertMonthNames(value);
-                if (isNextValueBekendmakingsDate === true) {
-                    value = identifier + value;
-                }
-                isNextValueBekendmakingsDate = false;
+                // Marker text only - the actual date is in the next text node.
+                // Skip the rest of the identifier matching since none can match
+                // the marker itself.
+                return {
+                    "isValid": false,
+                    "isNextValueBekendmakingsDate": true
+                };
             }
+            value = convertMonthNames(value);
+            if (isNextValueBekendmakingsDate === true) {
+                value = identifier + value;
+            }
+            isNextValueBekendmakingsDate = false;
             // If not found, try the regular way of publishing:
             if (value.substring(0, identifier.length) !== identifier) {
                 for (i = 0; i < identifiersStart.length; i += 1) {
@@ -452,11 +461,13 @@ async function initMap() {
                     } else if (isObjectionStartDate) {
                         result.date.setDate(result.date.getDate() - 1);  // Objection period starts one day after date 'verzonden'
                     }
+                    result.isNextValueBekendmakingsDate = isNextValueBekendmakingsDate;
                     return result;
                 }
             }
             return {
-                "isValid": false
+                "isValid": false,
+                "isNextValueBekendmakingsDate": isNextValueBekendmakingsDate
             };
         }
 
@@ -477,7 +488,8 @@ async function initMap() {
             if (alinea.childNodes.length > 0) {
                 for (j = 0; j < alinea.childNodes.length; j += 1) {
                     if (alinea.childNodes[j].nodeName === "#text") {
-                        datumBekendgemaakt = getDateFromText(alinea.childNodes[j].nodeValue.trim(), publication);
+                        datumBekendgemaakt = getDateFromText(alinea.childNodes[j].nodeValue.trim(), publication, isNextValueBekendmakingsDate);
+                        isNextValueBekendmakingsDate = datumBekendgemaakt.isNextValueBekendmakingsDate;
                         if (datumBekendgemaakt.isValid) {
                             isBezwaartermijnFound = true;
                             looptijd = getDaysPassed(datumBekendgemaakt.date);
