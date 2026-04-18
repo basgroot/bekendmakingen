@@ -44,7 +44,14 @@ async function initMap() {
         "requestPeriod": {},
         // License id of the publication whose info-window is currently open
         // (used to deep-link via ?pub=<licenseId> and to avoid re-opening it):
-        "openedPublicationLicenseId": null
+        "openedPublicationLicenseId": null,
+        // True for a brief window after a user gesture (wheel / pointer / key).
+        // The zoom-driven period auto-shrink only fires when this is true, so
+        // programmatic zoom changes (initial map load, panTo for permalink,
+        // history.replaceState navigation) do NOT clobber ?period=.
+        "isUserZooming": false,
+        // Timeout id for clearing isUserZooming.
+        "userZoomingTimeout": null
     };
 
     /**
@@ -1570,11 +1577,37 @@ async function initMap() {
         // Maps events: https://developers.google.com/maps/documentation/javascript/events
         appState.map.addListener("dragend", closeInfoWindow);
         appState.map.addListener("click", closeInfoWindow);
+        // Mark a short window during which any zoom_changed event is
+        // attributed to a user gesture. Programmatic zoom changes (initial
+        // load, panTo, etc.) happen outside this window and therefore do not
+        // trigger the period auto-shrink below.
+        const markUserZooming = function () {
+            appState.isUserZooming = true;
+            if (appState.userZoomingTimeout !== null) {
+                globalThis.clearTimeout(appState.userZoomingTimeout);
+            }
+            appState.userZoomingTimeout = globalThis.setTimeout(function () {
+                appState.isUserZooming = false;
+                appState.userZoomingTimeout = null;
+            }, 750);
+        };
+        containerElm.addEventListener("wheel", markUserZooming, { "passive": true });
+        containerElm.addEventListener("pointerdown", markUserZooming);
+        containerElm.addEventListener("dblclick", markUserZooming);
+        containerElm.addEventListener("keydown", function (event) {
+            // Arrow keys, +, -, PageUp/PageDown all manipulate the map.
+            if (event.key === "+" || event.key === "-" || event.key === "=" || event.key.startsWith("Arrow") || event.key === "PageUp" || event.key === "PageDown") {
+                markUserZooming();
+            }
+        });
         appState.map.addListener("zoom_changed", function () {
             // Add to URL: /?zoom=15.81&center=52.43660,4.84418
             const periodFilter = getPeriodFilter();
             const zoom = appState.map.getZoom();
-            if (!periodFilter.isHistory) {
+            // Only auto-shrink on user-initiated zoom, not on programmatic
+            // zooms (initial load, panTo for permalink, etc.). This keeps
+            // ?period=…&pub=… working from a shared link.
+            if (!periodFilter.isHistory && appState.isUserZooming) {
                 // Iterate over markers and call setVisible
                 if (zoom <= 13 && (periodFilter.period === "7d" || periodFilter.period === "14d" || periodFilter.period === "all")) {
                     // Set to 3 days
