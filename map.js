@@ -1411,6 +1411,10 @@ async function initMap() {
      */
     function internalInitMap() {
 
+        /**
+         * Close the shared info window.
+         * @return {void}
+         */
         function closeInfoWindow() {
             appState.infoWindow.close();  // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.close
         }
@@ -1538,6 +1542,11 @@ async function initMap() {
          */
         function sortRecords(a, b) {
 
+            /**
+             * Extract the modification-date string from a raw SRU record.
+             * @param {!Object} record Raw SRU record.
+             * @return {string} ISO-like timestamp string to compare. Empty string when the field is missing.
+             */
             function getRawDate(record) {
                 const meta = record.recordData.gzd.originalData.meta;
                 if (meta.hasOwnProperty("tpmeta") && meta.tpmeta.hasOwnProperty("datumTijdstipWijzigingWork")) {
@@ -1546,6 +1555,11 @@ async function initMap() {
                 return "";
             }
 
+            /**
+             * Extract the title from a raw SRU record. Used as a secondary sort key to keep the order stable when two records share the modification date.
+             * @param {!Object} record Raw SRU record.
+             * @return {string} Title, or empty string when missing.
+             */
             function getRawTitle(record) {
                 const meta = record.recordData.gzd.originalData.meta;
                 if (meta.hasOwnProperty("owmskern") && meta.owmskern.hasOwnProperty("title") && typeof meta.owmskern.title === "string") {
@@ -1554,6 +1568,11 @@ async function initMap() {
                 return "";
             }
 
+            /**
+             * Extract the canonical URL from a raw SRU record. Used as a tertiary sort key.
+             * @param {!Object} record Raw SRU record.
+             * @return {string} Preferred URL, or empty string when missing.
+             */
             function getRawUrl(record) {
                 const enriched = record.recordData.gzd.enrichedData;
                 if (enriched.hasOwnProperty("preferredUrl") && typeof enriched.preferredUrl === "string") {
@@ -1574,8 +1593,19 @@ async function initMap() {
             return (getRawTitle(a) + getRawUrl(a)).localeCompare(getRawTitle(b) + getRawUrl(b), "nl");
         }
 
+        /**
+         * Convert a single raw SRU record into a publication object and append it to appState.publicationsArray.
+         * @param {!Object} inputRecord Raw SRU record.
+         * @return {void}
+         */
         function addPublication(inputRecord) {
 
+            /**
+             * Determine the publication type from the record's metadata.
+             * Prefers the fine-grained tpmeta.activiteit when present, falls back to the generic owmskern.type, and finally to "onbekend".
+             * @param {!Object} meta originalData.meta object.
+             * @return {string} Type slug (e.g. "bouwen", "kappen").
+             */
             function getType(meta) {
                 if (meta.hasOwnProperty("tpmeta") && meta.tpmeta.hasOwnProperty("activiteit")) {
                     if (Array.isArray(meta.tpmeta.activiteit)) {
@@ -1608,6 +1638,12 @@ async function initMap() {
                 return "onbekend";
             }
 
+            /**
+             * Determine the publication date from the record's metadata.
+             * Rounds to midnight so all publications from a single day share an identical Date value. Falls back to today when the field is missing.
+             * @param {!Object} meta originalData.meta object.
+             * @return {!Date} Midnight-aligned publication date.
+             */
             function getDate(meta) {
                 if (meta.hasOwnProperty("tpmeta") && meta.tpmeta.hasOwnProperty("datumTijdstipWijzigingWork")) {
                     const date = new Date(meta.tpmeta.datumTijdstipWijzigingWork);
@@ -1622,6 +1658,12 @@ async function initMap() {
                 return today;
             }
 
+            /**
+             * Determine the human-readable title. Prefers owmskern.title, falls back to owmsmantel.abstract, and finally to the type slug when neither is a usable string.
+             * @param {!Object} meta originalData.meta object.
+             * @param {string} type Type slug to use as last-resort fallback.
+             * @return {string} Publication title.
+             */
             function getTitle(meta, type) {
                 if (meta.hasOwnProperty("owmskern") && meta.owmskern.hasOwnProperty("title") && typeof meta.owmskern.title === "string") {
                     return meta.owmskern.title.trim();
@@ -1634,6 +1676,11 @@ async function initMap() {
                 return type;
             }
 
+            /**
+             * Determine the long-form description. Prefers owmsmantel.abstract, falls back to owmskern.title, and finally to "-" when neither is a usable string.
+             * @param {!Object} meta originalData.meta object.
+             * @return {string} Publication description.
+             */
             function getDescription(meta) {
                 if (meta.hasOwnProperty("owmsmantel") && meta.owmsmantel.hasOwnProperty("abstract") && typeof meta.owmsmantel.abstract === "string") {
                     // Abstract can be a number in some cases (Enkhuizen, December 2024)
@@ -1646,8 +1693,19 @@ async function initMap() {
                 return "-";
             }
 
+            /**
+             * Parse a gebiedsmarkering (area marker) in any of its historical formats (POINT / LINESTRING / POLYGON / legacy Rijksdriehoek) and append the resulting "lat lng" strings to the provided list.
+             * @param {!Array<string>} list Mutable target list receiving "lat lng" coordinate strings.
+             * @param {*} gebiedsmarkering Area marker structure from the SRU record; may be a string, object, or array of either.
+             * @return {void}
+             */
             function processCoordinate(list, gebiedsmarkering) {
 
+                /**
+                 * Append a "lat lng" coordinate to the outer list, skipping exact duplicates (common when the same point appears as both the first and last vertex of a closed polygon).
+                 * @param {string} coordinate "lat lng" coordinate string.
+                 * @return {void}
+                 */
                 function addCoordinateToList(coordinate) {
                     // Prevent duplicates:
                     if (list.indexOf(coordinate) === -1) {
@@ -1656,6 +1714,14 @@ async function initMap() {
                         console.debug("Coordinate already added: " + coordinate);
                     }
                 }
+
+                /**
+                 * Convert a legacy Rijksdriehoek (RD / EPSG:28992) coordinate pair to WGS84 lat/lng. Reference implementation from
+                 * https://thomasv.nl/2019/02/rijksdriehoek-coordinates-to-wgs84/
+                 * @param {number} x RD easting in metres.
+                 * @param {number} y RD northing in metres.
+                 * @return {!Object} Object with numeric "lat" and "lng".
+                 */
                 function convertRijksdriehoekToLatLng(x, y) {
                     // The city "Amsterfoort" is used as reference "Rijksdriehoek" coordinate.
                     const referenceRdX = 155000;
@@ -1681,6 +1747,11 @@ async function initMap() {
                     };
                 }
 
+                /**
+                 * Parse a LINESTRING gebiedsmarkering (or a comma-separated point fallback) and append each vertex to the coordinate list.
+                 * @param {string|!Array<string>} locatiegebied LINESTRING WKT or a single "lat,lng" point (legacy).
+                 * @return {void}
+                 */
                 function processLine(locatiegebied) {
                     if (Array.isArray(locatiegebied)) {
                         locatiegebied.forEach(processLine);
@@ -1705,6 +1776,11 @@ async function initMap() {
                     }
                 }
 
+                /**
+                 * Parse a POLYGON gebiedsmarkering and append each vertex to the coordinate list.
+                 * @param {string|!Array<string>} locatiegebied POLYGON WKT or a legacy point/line encoding.
+                 * @return {void}
+                 */
                 function processPolygon(locatiegebied) {
                     if (Array.isArray(locatiegebied)) {
                         locatiegebied.forEach(processPolygon);
@@ -1737,6 +1813,11 @@ async function initMap() {
                     }
                 }
 
+                /**
+                 * Parse a legacy Rijksdriehoek geometry (POINT or POLYGON in RD coordinates) and append the WGS84-converted vertices to the coordinate list.
+                 * @param {string} geometrie WKT in RD coordinates.
+                 * @return {void}
+                 */
                 function processPointLegacy(geometrie) {
                     // POLYGON ((177456.1123260837 361401.39174773294, 177459.78992509528 361374.02033973142, 177472.86583269207 361378.10562450776, 177471.23134424246 361401.80027621059, 177456.1123260837 361401.39174773294))
                     if (geometrie.startsWith("POLYGON")) {
@@ -1905,7 +1986,12 @@ async function initMap() {
 
     /**
      * Open an historical file, where data is stored per month.
-     * @param {string} period Month to display.
+     * @param {string} period Month to display, formatted as "YYYY-MM".
+     * @param {boolean} isNewRequest When true, replace the current view:
+     *     clear existing markers, show the loading indicator and overwrite
+     *     publicationsArray with the response. When false, append the
+     *     response to the existing view (used to extend the visible range
+     *     with an older month without discarding what is already loaded).
      * @return {void}
      */
     function loadHistory(period, isNewRequest) {
@@ -2091,6 +2177,10 @@ async function initMap() {
         loadDataForMunicipality(appState.activeMunicipality, 1);
     }
 
+    /**
+     * Application entry point. Loads the static periods and municipalities configuration files, then resolves the user's location and kicks off the initial SRU fetch.
+     * @return {void}
+     */
     function init() {
         getData("/bekendmakingen/periods.json", function (periodsJson) {
             appState.periods = periodsJson.periods;
