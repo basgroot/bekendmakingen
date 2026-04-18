@@ -1744,7 +1744,7 @@ async function initMap() {
                         coordinates.forEach(function (coordinate) {
                             const latLngRijksdriehoek = coordinate.trim().split(" ");
                             if (latLngRijksdriehoek.length === 2) {
-                                const latLng = convertRijksdriehoekToLatLng(parseFloat(latLngRijksdriehoek[0], 10), parseFloat(latLngRijksdriehoek[1], 10));
+                                const latLng = convertRijksdriehoekToLatLng(parseFloat(latLngRijksdriehoek[0]), parseFloat(latLngRijksdriehoek[1]));
                                 addCoordinateToList(latLng.lat + " " + latLng.lng);
                                 console.log("Converted " + geometrie + " to " + latLng.lat + " " + latLng.lng);
                             } else {
@@ -1755,7 +1755,7 @@ async function initMap() {
                         // POINT(120097.26  488031.32)
                         const coordinates = geometrie.replace("POINT", "").trim().replace("(", "").replace(")", "").split("  ");
                         if (coordinates.length === 2) {
-                            const latLng = convertRijksdriehoekToLatLng(parseFloat(coordinates[0], 10), parseFloat(coordinates[1], 10));
+                            const latLng = convertRijksdriehoekToLatLng(parseFloat(coordinates[0]), parseFloat(coordinates[1]));
                             addCoordinateToList(latLng.lat + " " + latLng.lng);
                             console.log("Converted " + geometrie + " to " + latLng.lat + " " + latLng.lng);
                         } else {
