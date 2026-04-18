@@ -317,14 +317,13 @@ async function initMap() {
         /**
          * Retrieves the date from the given text value.
          * @param {string} value The text value to extract the date from.
-         * @param {!Object} publication The publication source.
          * @param {boolean} isNextValueBekendmakingsDate Whether the previous
          *     text node was the "datum bekendmaking besluit:" marker, meaning
          *     the current value should be interpreted as that date (Den Haag).
          * @return {!Object} Object with parsed date (when isValid is true) and
          *     the updated isNextValueBekendmakingsDate flag for the next call.
          */
-        function getDateFromText(value, publication, isNextValueBekendmakingsDate) {
+        function getDateFromText(value, isNextValueBekendmakingsDate) {
             const identifier = "@@@";
             const identifiersStart = [
                 "verzonden naar aanvrager op: ",
@@ -488,7 +487,7 @@ async function initMap() {
             if (alinea.childNodes.length > 0) {
                 for (j = 0; j < alinea.childNodes.length; j += 1) {
                     if (alinea.childNodes[j].nodeName === "#text") {
-                        datumBekendgemaakt = getDateFromText(alinea.childNodes[j].nodeValue.trim(), publication, isNextValueBekendmakingsDate);
+                        datumBekendgemaakt = getDateFromText(alinea.childNodes[j].nodeValue.trim(), isNextValueBekendmakingsDate);
                         isNextValueBekendmakingsDate = datumBekendgemaakt.isNextValueBekendmakingsDate;
                         if (datumBekendgemaakt.isValid) {
                             isBezwaartermijnFound = true;
