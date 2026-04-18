@@ -818,9 +818,22 @@ async function initMap() {
         // The deviation from the original coordinate
         const latShift = 0.000017;
         const lngShift = 0.000016;
+        // Pigeonhole bound: along a strictly monotonic shift sequence, an
+        // unoccupied coordinate must be reached within markersArray.length + 1
+        // iterations. The +1 covers the initial check at the proposed point.
+        const maxIterations = appState.markersArray.length + 1;
+        let iterations = 0;
         while (!isCoordinateAvailable(destinationCoordinate)) {
             destinationCoordinate.lat = destinationCoordinate.lat + latShift;
             destinationCoordinate.lng = destinationCoordinate.lng + lngShift;
+            iterations += 1;
+            if (iterations > maxIterations) {
+                // Defensive guard: should be unreachable given the pigeonhole
+                // bound above. Log and return the current shifted position
+                // rather than hanging the UI.
+                console.error("findUniquePosition exceeded " + maxIterations + " iterations; returning shifted coordinate.");
+                break;
+            }
         }
         return destinationCoordinate;
     }
