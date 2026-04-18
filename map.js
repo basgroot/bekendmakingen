@@ -1117,13 +1117,20 @@ async function initMap() {
     /**
      * Create (new) latitude/longitude object.
      * @param {string} locatiepunt Latitude/longitude. Input example: "52.35933 4.893097".
-     * @return {!Object} Coordinate.
+     * @return {?Object} Coordinate, or null when input cannot be parsed to two finite numbers.
      */
     function createCoordinate(locatiepunt) {
-        const coordinate = locatiepunt.split(" ");
+        // Tolerate "lat lng", "lat,lng", or any mix of whitespace/comma separators.
+        const coordinate = String(locatiepunt).split(/[\s,]+/).filter(Boolean);
+        const lat = parseFloat(coordinate[0]);
+        const lng = parseFloat(coordinate[1]);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+            console.warn("createCoordinate: unparseable locatiepunt " + JSON.stringify(locatiepunt));
+            return null;
+        }
         return {
-            "lat": parseFloat(coordinate[0]),
-            "lng": parseFloat(coordinate[1])
+            "lat": lat,
+            "lng": lng
         };
     }
 
@@ -1151,7 +1158,12 @@ async function initMap() {
                     prepareToAddMarker(publication, periodFilter.periodToShow, position, bounds);
                 } else {
                     publication.location.forEach(function (locatiepunt) {
-                        position = findUniquePosition(createCoordinate(locatiepunt));
+                        const baseCoordinate = createCoordinate(locatiepunt);
+                        if (baseCoordinate === null) {
+                            console.warn("addMarkers: skipping publication " + (publication.urlDoc || publication.id || "?") + " due to unparseable location " + JSON.stringify(locatiepunt));
+                            return;
+                        }
+                        position = findUniquePosition(baseCoordinate);
                         prepareToAddMarker(publication, periodFilter.periodToShow, position, bounds);
                     });
                 }
@@ -1975,9 +1987,11 @@ async function initMap() {
                         locatiegebied.forEach(processPolygon);
                         return;
                     }
-                    // POLYGON((4.6486927 51.821361,4.6486994 51.821359,4.6490134 51.821248,4.6493861 51.82149,4.6493794 51.821528,4.6491439 51.821666,4.6490908 51.82163,4.6488611 51.821475,4.6486927 51.821361))
+                    // Single-ring: POLYGON((4.6486927 51.821361,4.6486994 51.821359,...))
+                    // Multi-ring (donut/island): POLYGON((outer...),(inner1...),(inner2...))
+                    // We render every vertex regardless of which ring it belongs to, so flatten all rings by stripping every "(" and ")".
                     if (locatiegebied.startsWith("POLYGON")) {
-                        const coordinates = locatiegebied.replace("POLYGON((", "").replace("))", "").split(",");
+                        const coordinates = locatiegebied.replace(/^POLYGON\s*/, "").replace(/[()]/g, "").split(",");
                         coordinates.forEach(function (coordinate) {
                             const latLng = coordinate.trim().split(" ");
                             if (latLng.length === 2) {
@@ -2008,11 +2022,12 @@ async function initMap() {
                  * @return {void}
                  */
                 function processPointLegacy(geometrie) {
-                    // POLYGON ((177456.1123260837 361401.39174773294, 177459.78992509528 361374.02033973142, 177472.86583269207 361378.10562450776, 177471.23134424246 361401.80027621059, 177456.1123260837 361401.39174773294))
+                    // Single-ring: POLYGON ((177456.11 361401.39, 177459.78 361374.02, ..., 177456.11 361401.39))
+                    // Multi-ring is also possible; flatten all rings by stripping every "(" and ")".
                     if (geometrie.startsWith("POLYGON")) {
-                        const coordinates = geometrie.replace("POLYGON ((", "").replace("))", "").split(",");
+                        const coordinates = geometrie.replace(/^POLYGON\s*/, "").replace(/[()]/g, "").split(",");
                         coordinates.forEach(function (coordinate) {
-                            const latLngRijksdriehoek = coordinate.trim().split(" ");
+                            const latLngRijksdriehoek = coordinate.trim().split(/\s+/);
                             if (latLngRijksdriehoek.length === 2) {
                                 const latLng = convertRijksdriehoekToLatLng(parseFloat(latLngRijksdriehoek[0]), parseFloat(latLngRijksdriehoek[1]));
                                 addCoordinateToList(latLng.lat + " " + latLng.lng);
