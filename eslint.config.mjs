@@ -6,8 +6,7 @@ export default [
         ignores: [
             "node_modules/**",
             "history/**",
-            "**/*.min.js",
-            "closure/**"
+            "**/*.min.js"
         ]
     },
     js.configs.recommended,
