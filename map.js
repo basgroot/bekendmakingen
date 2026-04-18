@@ -113,13 +113,80 @@ async function initMap() {
      * https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.open
      * @param {!Object} marker Marker showing the popup.
      * @param {string} iconName Icon file name.
-     * @param {string} header Title.
-     * @param {string} body Contents.
+     * @param {string} title Title (plain text).
+     * @param {string} description Description (plain text).
+     * @param {string} urlDoc Link to the official publication.
+     * @param {?string} licenseId License id, or null when there is no detail
      * @return {void}
      */
-    function showInfoWindow(marker, iconName, header, body) {
+    function showInfoWindow(marker, iconName, title, description, urlDoc, licenseId) {
         let map;
-        appState.infoWindow.setContent("<div><img src=\"img/" + iconName + ".svg\" width=\"105\" height=\"135\" class=\"info_window_image\"><h2 class=\"info_window_heading\">" + header + "</h2><div class=\"info_window_body\"><p>" + body + "</p></div></div>");
+        const container = document.createElement("div");
+
+        const img = document.createElement("img");
+        img.src = "img/" + iconName + ".svg";
+        img.width = 105;
+        img.height = 135;
+        img.className = "info_window_image";
+        img.alt = "";
+        container.appendChild(img);
+
+        const heading = document.createElement("h2");
+        heading.className = "info_window_heading";
+        heading.textContent = title;
+        container.appendChild(heading);
+
+        const body = document.createElement("div");
+        body.className = "info_window_body";
+
+        // Placeholder element that parseBekendmaking() locates via getElementById
+        // and fills with the bezwaartermijn details. Setting .id as a property
+        // is safe regardless of what characters licenseId contains.
+        if (licenseId !== null && licenseId !== false) {
+            const placeholder = document.createElement("div");
+            placeholder.id = licenseId;
+            // Reserve some vertical space (matches previous layout).
+            placeholder.appendChild(document.createElement("br"));
+            placeholder.appendChild(document.createElement("br"));
+            placeholder.appendChild(document.createElement("br"));
+            body.appendChild(placeholder);
+        }
+
+        const descriptionPara = document.createElement("p");
+        descriptionPara.textContent = description;
+        body.appendChild(descriptionPara);
+
+        // Only render the link when urlDoc is an http(s) URL. This blocks
+        // javascript:, data:, and other scheme-based XSS vectors that would
+        // otherwise be executed when the user clicks the link. Parsing via
+        // the URL constructor (with location.href as the base) accepts both
+        // absolute and protocol-relative/relative forms.
+        if (urlDoc) {
+            let parsedUrl = null;
+            try {
+                parsedUrl = new URL(urlDoc, window.location.href);
+            } catch (ignore) {
+                parsedUrl = null;
+            }
+            if (parsedUrl !== null && (parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:")) {
+                const linkPara = document.createElement("p");
+                linkPara.appendChild(document.createTextNode("Meer info: "));
+                const link = document.createElement("a");
+                link.href = parsedUrl.href;
+                // Original code had target="blank" (a named window called "blank")
+                // instead of "_blank" (new tab). Use the correct value plus rel
+                // attributes that prevent the opened page from accessing this one.
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
+                link.textContent = parsedUrl.href;
+                linkPara.appendChild(link);
+                linkPara.appendChild(document.createTextNode("."));
+                body.appendChild(linkPara);
+            }
+        }
+
+        container.appendChild(body);
+        appState.infoWindow.setContent(container);
         if (appState.map.getStreetView().getVisible()) {
             console.log("Streetview is visible. Showing infoWindow there.");
             map = appState.map.getStreetView();
@@ -806,7 +873,6 @@ async function initMap() {
          * Handles the click event. Show the info window.
          */
         function onClick() {
-            const description = publication.description + "<br /><br />Meer info: <a href=\"" + publication.urlDoc + "\" target=\"blank\">" + publication.urlDoc + "</a>.";
             const licenseId = getLicenseIdFromUrl(publication.urlDoc);
             // Supported is "Gemeentelijk blad (gmb)", "Provinciaal blad (prb)", "Waterschapsblad (wsb) and Staatscourant (stcrt)"
             // Options: https://zoek.officielebekendmakingen.nl/prb-2023-962.html
@@ -819,9 +885,9 @@ async function initMap() {
             if (licenseId === false) {
                 // Errors:  https://www.zaanstad.nl/mozard/!suite42.scherm1260?mObj=211278
                 //          https://bekendmakingen.amsterdam.nl/bekendmakingen/overige/decos/C174AC3CD0754F9089D1553C31CD5B7A
-                showInfoWindow(marker, iconName, publication.title, description);
+                showInfoWindow(marker, iconName, publication.title, publication.description, publication.urlDoc, null);
             } else {
-                showInfoWindow(marker, iconName, publication.title, "<div id=\"" + licenseId + "\"><br /><br /><br /></div>" + description);
+                showInfoWindow(marker, iconName, publication.title, publication.description, publication.urlDoc, licenseId);
                 collectBezwaartermijn(licenseId, publication);
             }
         }
