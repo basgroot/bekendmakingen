@@ -41,7 +41,10 @@ async function initMap() {
         // The info window shown when clicking on a marker:
         "infoWindow": null,
         // Start date of the query and indication if history must be retrieved:
-        "requestPeriod": {}
+        "requestPeriod": {},
+        // License id of the publication whose info-window is currently open
+        // (used to deep-link via ?pub=<licenseId> and to avoid re-opening it):
+        "openedPublicationLicenseId": null
     };
 
     /**
@@ -185,8 +188,44 @@ async function initMap() {
             }
         }
 
+        // "Kopieer link" button: copies the current URL (including ?pub=) to
+        // the clipboard so the deep link to this info-window can be shared.
+        if (licenseId) {
+            const copyPara = document.createElement("p");
+            const copyButton = document.createElement("button");
+            copyButton.type = "button";
+            copyButton.className = "info_window_copy_link";
+            copyButton.textContent = "Kopieer link";
+            copyButton.addEventListener("click", function () {
+                // Make sure the URL reflects the currently shown publication
+                // before copying (in case the user clicked very quickly).
+                updateUrlForPublication(licenseId);
+                const url = globalThis.location.href;
+                const showCopied = function () {
+                    const original = copyButton.textContent;
+                    copyButton.textContent = "Gekopieerd";
+                    globalThis.setTimeout(function () {
+                        copyButton.textContent = original;
+                    }, 1500);
+                };
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(url).then(showCopied, function (err) {
+                        console.error("Clipboard write failed", err);
+                        globalThis.prompt("Kopieer deze link:", url);
+                    });
+                } else {
+                    globalThis.prompt("Kopieer deze link:", url);
+                }
+            });
+            copyPara.appendChild(copyButton);
+            body.appendChild(copyPara);
+        }
+
         container.appendChild(body);
         appState.infoWindow.setContent(container);
+        // Reflect the currently open publication in the URL, so it can be shared.
+        appState.openedPublicationLicenseId = licenseId || null;
+        updateUrlForPublication(licenseId || null);
         if (appState.map.getStreetView().getVisible()) {
             console.log("Streetview is visible. Showing infoWindow there.");
             map = appState.map.getStreetView();
@@ -1086,7 +1125,50 @@ async function initMap() {
             if (!appState.isHistoryActive) {
                 appState.isFullyLoaded = true;
             }
+            tryOpenPublicationFromUrl();
         }
+    }
+
+    /**
+     * If the URL contains ?pub=<licenseId>, locate the matching marker and
+     * synthesize a click on it so the deep-linked info-window opens.
+     * Idempotent: does nothing if no parameter is present or no match is found.
+     * @return {void}
+     */
+    function tryOpenPublicationFromUrl() {
+        if (!globalThis.URLSearchParams) {
+            return;
+        }
+        const urlSearchParams = new globalThis.URLSearchParams(globalThis.location.search);
+        const wantedLicenseId = urlSearchParams.get("pub");
+        if (!wantedLicenseId) {
+            return;
+        }
+        if (appState.openedPublicationLicenseId === wantedLicenseId) {
+            return;  // Already open
+        }
+        // 1. Look on the map first (markers currently rendered).
+        const match = appState.markersArray.find(function (markerObject) {
+            return getLicenseIdFromUrl(markerObject.url) === wantedLicenseId;
+        });
+        if (match) {
+            console.log("Opening info-window for ?pub=" + wantedLicenseId);
+            appState.openedPublicationLicenseId = wantedLicenseId;
+            google.maps.event.trigger(match.marker, "click");
+            return;
+        }
+        // 2. Not yet on the map: maybe it's in the delayed (off-screen) queue.
+        //    Pan to its position so the "idle" handler will materialize it,
+        //    then we run again on the next addMarkers/idle cycle.
+        const delayed = appState.delayedMarkersArray.find(function (item) {
+            return getLicenseIdFromUrl(item.publication.urlDoc) === wantedLicenseId;
+        });
+        if (delayed) {
+            console.log("Panning to off-screen ?pub=" + wantedLicenseId);
+            appState.map.panTo(delayed.position);
+            return;
+        }
+        console.log("No marker (yet) for ?pub=" + wantedLicenseId);
     }
 
     /**
@@ -1181,6 +1263,36 @@ async function initMap() {
             console.log("Updated URL for period " + period);
             globalThis.history.replaceState(null, "", globalThis.location.pathname + "?" + urlSearchParams.toString());
         }
+    }
+
+    /**
+     * Add or remove the publication (pub) parameter to the URL, so the deep
+     * link to a single info-window can be shared.
+     * @param {?string} licenseId License id, or null/false to remove the parameter.
+     * @return {void}
+     */
+    function updateUrlForPublication(licenseId) {
+        if (!globalThis.URLSearchParams) {
+            return;
+        }
+        const urlSearchParams = new globalThis.URLSearchParams(globalThis.location.search);
+        if (licenseId) {
+            if (urlSearchParams.get("pub") === licenseId) {
+                return;  // No change needed
+            }
+            urlSearchParams.set("pub", licenseId);
+        } else {
+            if (!urlSearchParams.has("pub")) {
+                return;
+            }
+            urlSearchParams.delete("pub");
+        }
+        const search = urlSearchParams.toString();
+        globalThis.history.replaceState(null, "", globalThis.location.pathname + (
+            search
+            ? "?" + search
+            : ""
+        ));
     }
 
     /**
@@ -1393,8 +1505,9 @@ async function initMap() {
         const periodId = appState.periods.findIndex(function (period) {
             return period.key === previousMonthString;
         });
+        const WEEKS_BACK = 6;
         appState.requestPeriod.startDate = new Date();
-        appState.requestPeriod.startDate.setDate(appState.requestPeriod.startDate.getDate() - 42);  // Substract 6 weeks
+        appState.requestPeriod.startDate.setDate(appState.requestPeriod.startDate.getDate() - WEEKS_BACK * 7);
         if (periodId >= 0) {
             appState.requestPeriod.historyFile = previousMonthString;
             appState.requestPeriod.startDateString = currentDate.getFullYear() + "-" + addLeadingZero(currentDate.getMonth() + 1) + "-" + "01";  // Start of current month, because history is already available in a faster to retrieve format
@@ -1417,6 +1530,8 @@ async function initMap() {
          */
         function closeInfoWindow() {
             appState.infoWindow.close();  // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.close
+            appState.openedPublicationLicenseId = null;
+            updateUrlForPublication(null);
         }
 
         const containerElm = document.getElementById("map");
@@ -1427,6 +1542,12 @@ async function initMap() {
         appState.loadingIndicator.src = "img/ajax-loader.gif";  // ConnectedWizard, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
         // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindowOptions
         appState.infoWindow = new google.maps.InfoWindow();
+        // When the user closes the info-window via the built-in [x], drop the
+        // ?pub= parameter from the URL.
+        appState.infoWindow.addListener("closeclick", function () {
+            appState.openedPublicationLicenseId = null;
+            updateUrlForPublication(null);
+        });
         // https://developers.google.com/maps/documentation/javascript/overview#MapOptions
         appState.map = new google.maps.Map(
             containerElm,
@@ -1487,6 +1608,8 @@ async function initMap() {
             }
             updateUrlForLocation(appState.map.getZoom(), appState.map.getCenter());
             console.log("Remaining items to add to the map: " + appState.delayedMarkersArray.length);
+            // After delayed markers became real markers, retry deep-link.
+            tryOpenPublicationFromUrl();
         });
         loadData(true);
         console.log("Using Maps version " + google.maps.version);  // https://developers.google.com/maps/documentation/javascript/releases
@@ -1723,7 +1846,7 @@ async function initMap() {
                  * @return {!Object} Object with numeric "lat" and "lng".
                  */
                 function convertRijksdriehoekToLatLng(x, y) {
-                    // The city "Amsterfoort" is used as reference "Rijksdriehoek" coordinate.
+                    // The city "Amersfoort" is used as reference "Rijksdriehoek" coordinate.
                     const referenceRdX = 155000;
                     const referenceRdY = 463000;
                     const dX = (x - referenceRdX) * (Math.pow(10, -5));

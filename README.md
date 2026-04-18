@@ -2,6 +2,17 @@
 
 Bekijk vergunningen aangevraagd en verleend in uw omgeving. Demo op <https://bouwmelding.nl/>.
 
+## Permalinks
+
+De weergave kan via URL-parameters gedeeld worden:
+
+- `?in=<gemeente>` – geselecteerde gemeente, bijv. `?in=Hoorn`.
+- `?period=<3d|7d|14d|all|YYYY-MM>` – geselecteerde periode.
+- `?zoom=<getal>&center=<lat>,<lng>` – kaartpositie.
+- `?pub=<licenseId>` – open direct het info-window van een specifieke publicatie, bijv. `?pub=gmb-2023-56454`.
+
+Klik op de knop **Kopieer link** in een info-window om de huidige URL (inclusief `?pub=…`) naar het klembord te kopiëren.
+
 ## Legenda
 
 - <img src="img/aanvraag.svg" alt="Aanvraag" width="40"/> Aangevraagde vergunning, of aankondiging uitstel besluit.
