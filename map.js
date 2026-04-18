@@ -619,32 +619,51 @@ async function initMap() {
 
     /**
      * Create the drop down with all municipalities of The Netherlands.
+     * Uses an input + datalist so the user can type to filter the list.
      * @return {void}
      */
     function createMapsControlMunicipalities() {
-
-        /**
-         * Creates an option element with the specified value. The active municipality is selected by default.
-         * @param {string} value The value of the option.
-         * @return {!HTMLOptionElement} The created option element.
-         */
-        function createOptionEx(value) {
-            return createOption(value, value, value === appState.activeMunicipality);
-        }
-
         const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
-        const combobox = document.createElement("select");
+        const combobox = document.createElement("input");
+        const datalist = document.createElement("datalist");
         const municipalityNames = Object.keys(appState.municipalities);
+        const datalistId = "idDlMunicipality";
         combobox.id = "idCbxMunicipality";
         combobox.title = "Gemeente selecteren";
+        combobox.type = "text";
+        combobox.setAttribute("list", datalistId);
+        combobox.setAttribute("autocomplete", "off");
+        combobox.setAttribute("spellcheck", "false");
+        combobox.placeholder = "Zoek gemeente\u2026";
+        combobox.value = appState.activeMunicipality;
+        datalist.id = datalistId;
         municipalityNames.forEach(function (municipalityName) {
-            combobox.add(createOptionEx(municipalityName));
+            const option = document.createElement("option");
+            option.value = municipalityName;
+            datalist.appendChild(option);
         });
         combobox.addEventListener("change", function () {
-            loadData(true);
+            // Only act on a valid municipality; otherwise revert.
+            if (appState.municipalities[combobox.value] !== undefined) {
+                loadData(true);
+            } else {
+                combobox.value = appState.activeMunicipality;
+            }
+        });
+        // Clear the field on focus so the full list is shown again (Chrome/Edge).
+        combobox.addEventListener("focus", function () {
+            combobox.dataset.previousValue = combobox.value;
+            combobox.value = "";
+        });
+        combobox.addEventListener("blur", function () {
+            if (combobox.value === "" || appState.municipalities[combobox.value] === undefined) {
+                combobox.value = combobox.dataset.previousValue || appState.activeMunicipality;
+            }
         });
         combobox.classList.add("controlStyle");
+        combobox.classList.add("municipalityCombo");
         controlDiv.appendChild(combobox);
+        controlDiv.appendChild(datalist);
         appState.map.controls[google.maps.ControlPosition.TOP_CENTER].push(controlDiv);
     }
 
