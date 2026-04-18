@@ -873,6 +873,19 @@ async function initMap() {
                     break;
                 }
             }
+            if (isAvailable) {
+                // Off-screen markers are queued in delayedMarkersArray with
+                // their already-resolved positions; they must also count as
+                // occupied so that further publications at the same base
+                // coordinate get fanned out instead of stacking on top.
+                for (i = 0; i < appState.delayedMarkersArray.length; i += 1) {
+                    marker = appState.delayedMarkersArray[i];
+                    if (marker.position.lat === coordinate.lat && marker.position.lng === coordinate.lng) {
+                        isAvailable = false;
+                        break;
+                    }
+                }
+            }
             return isAvailable;
         }
 
@@ -884,9 +897,10 @@ async function initMap() {
         const latShift = 0.000017;
         const lngShift = 0.000016;
         // Pigeonhole bound: along a strictly monotonic shift sequence, an
-        // unoccupied coordinate must be reached within markersArray.length + 1
-        // iterations. The +1 covers the initial check at the proposed point.
-        const maxIterations = appState.markersArray.length + 1;
+        // unoccupied coordinate must be reached within
+        // markersArray.length + delayedMarkersArray.length + 1 iterations.
+        // The +1 covers the initial check at the proposed point.
+        const maxIterations = appState.markersArray.length + appState.delayedMarkersArray.length + 1;
         let iterations = 0;
         while (!isCoordinateAvailable(destinationCoordinate)) {
             destinationCoordinate.lat = destinationCoordinate.lat + latShift;
