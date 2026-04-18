@@ -36,8 +36,6 @@ async function initMap() {
         "isHistoryActive": false,
         // Indicates if all parts are loaded:
         "isFullyLoaded": false,
-        // Order of different license markers, newest on top. Set to some high number:
-        "zIndex": 2147483647,
         // Wait cursor when loading data:
         "loadingIndicator": document.createElement("img"),
         // The info window shown when clicking on a marker:
@@ -859,6 +857,12 @@ async function initMap() {
         // https://developers.google.com/maps/documentation/javascript/reference/advanced-markers#AdvancedMarkerElementOptions
         const age = getDaysPassed(publication.date);
         const iconName = getIconName(publication.title, publication.type);
+        // Use the publication's modification date (in Unix seconds) as zIndex so
+        // that newer markers are always on top of older ones, regardless of when
+        // they happen to be added (e.g. delayed off-screen markers added later
+        // via the "idle" handler, or historical data appended after live data).
+        // Unix seconds (~1.77e9 in 2026) fit comfortably within 32-bit int range.
+        const markerZIndex = Math.floor(publication.date.getTime() / 1000);
         const marker = new AdvancedMarkerElement({
             "map": (
                 isMarkerVisible(age, periodToShow)
@@ -867,7 +871,7 @@ async function initMap() {
             ),
             "position": position,
             "content": createMarkerIcon("img/" + iconName + ".png", 35, 45),
-            "zIndex": appState.zIndex,
+            "zIndex": markerZIndex,
             "title": publication.title
         });
         const markerObject = {
@@ -877,7 +881,6 @@ async function initMap() {
             "isSvg": true,
             "marker": marker
         };
-        appState.zIndex -= 1;  // Input is sorted by modification date - most recent first. Give them a higher zIndex, so Besluit is in front of Verlenging (which is in front of Aanvraag)
         appState.markersArray.push(markerObject);
         marker.addListener("click", onClick);
         // Highlight the icon (and related icons) on hover
@@ -1434,12 +1437,51 @@ async function initMap() {
      */
     function addPublications(responseJson) {
 
-        function sortPublications(a, b) {
-            // Sort by publication date, title and number.
-            if (a.date === b.date) {
-                return String(a.title + a.urlDoc).localeCompare(b.title + b.urlDoc, "nl");
+        /**
+         * Sort raw API records by modification date (newest first), with title
+         * and URL as tiebreakers. Operates on the raw response so the cost is
+         * bounded by the page size, not the growing publicationsArray. Don't
+         * trust the API's claimed sort order.
+         * @param {!Object} a Raw record.
+         * @param {!Object} b Raw record.
+         * @return {number} Comparison result.
+         */
+        function sortRecords(a, b) {
+
+            function getRawDate(record) {
+                const meta = record.recordData.gzd.originalData.meta;
+                if (meta.hasOwnProperty("tpmeta") && meta.tpmeta.hasOwnProperty("datumTijdstipWijzigingWork")) {
+                    return meta.tpmeta.datumTijdstipWijzigingWork;  // ISO-ish string, lexicographically comparable
+                }
+                return "";
             }
-            return a.date - b.date;
+
+            function getRawTitle(record) {
+                const meta = record.recordData.gzd.originalData.meta;
+                if (meta.hasOwnProperty("owmskern") && meta.owmskern.hasOwnProperty("title") && typeof meta.owmskern.title === "string") {
+                    return meta.owmskern.title;
+                }
+                return "";
+            }
+
+            function getRawUrl(record) {
+                const enriched = record.recordData.gzd.enrichedData;
+                if (enriched.hasOwnProperty("preferredUrl") && typeof enriched.preferredUrl === "string") {
+                    return enriched.preferredUrl;
+                }
+                return "";
+            }
+
+            const dateA = getRawDate(a);
+            const dateB = getRawDate(b);
+            if (dateA !== dateB) {
+                return (
+                    dateA < dateB
+                    ? 1
+                    : -1
+                );  // Newest first
+            }
+            return (getRawTitle(a) + getRawUrl(a)).localeCompare(getRawTitle(b) + getRawUrl(b), "nl");
         }
 
         function addPublication(inputRecord) {
@@ -1716,9 +1758,10 @@ async function initMap() {
             // Somehow this is not an array when there is only one.
             addPublication(responseJson.searchRetrieveResponse.records.record);
         } else {
+            // Sort the raw records before pushing them into publicationsArray.
+            responseJson.searchRetrieveResponse.records.record.sort(sortRecords);
             responseJson.searchRetrieveResponse.records.record.forEach(addPublication);
         }
-        appState.publicationsArray.sort(sortPublications);
         return true;
     }
 
