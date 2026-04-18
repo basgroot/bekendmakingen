@@ -23,6 +23,22 @@ h2.info_window_heading {
     color: #4F8053;
 }
 
+.info_window_copy_link {
+    background-color: #FFFFFF;
+    border: 1px solid #9BC8D4;
+    border-radius: 3px;
+    color: #4F8053;
+    cursor: pointer;
+    font-family: Roboto, Arial, sans-serif;
+    font-size: 13px;
+    padding: 4px 10px;
+}
+
+.info_window_copy_link:hover {
+    background-color: #EBEBEB;
+    transition: 0.2s;
+}
+
 .controlStyle {
     background-color: #FFFFFF;
     border: 2px solid #FFFFFF;
