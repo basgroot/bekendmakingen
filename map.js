@@ -2142,20 +2142,28 @@ async function initMap() {
      * Download json from the Github Live Pages.
      * @param {string} path Path and file name to retrieve.
      * @param {function} callback Function when request is successful.
-     * @return {void}
+     * @return {!Promise<*>} Promise that resolves with the parsed JSON, or
+     *     rejects on network error / non-OK response. The optional callback
+     *     is still invoked for backward compatibility.
      */
     function getData(path, callback) {
         const host = "https://basgroot.github.io";
         const url = host + path;
         console.debug("Retrieving " + url + "..");
-        fetch(url, {"method": "GET"}).then(function (response) {
-            if (response.ok) {
-                response.json().then(callback);
-            } else {
+        return fetch(url, {"method": "GET"}).then(function (response) {
+            if (!response.ok) {
                 console.error(response);
+                throw new Error("HTTP " + response.status + " for " + url);
             }
+            return response.json();
+        }).then(function (json) {
+            if (typeof callback === "function") {
+                callback(json);
+            }
+            return json;
         }).catch(function (error) {
             console.error(error);
+            throw error;
         });
     }
 
@@ -2353,17 +2361,24 @@ async function initMap() {
     }
 
     /**
-     * Application entry point. Loads the static periods and municipalities configuration files, then resolves the user's location and kicks off the initial SRU fetch.
+     * Application entry point. Loads the static periods and municipalities
+     * configuration files in parallel, then resolves the user's location and
+     * kicks off the initial SRU fetch.
      * @return {void}
      */
     function init() {
-        getData("/bekendmakingen/periods.json", function (periodsJson) {
+        Promise.all([
+            getData("/bekendmakingen/periods.json"),
+            getData("/bekendmakingen/municipalities.json")
+        ]).then(function (results) {
+            const periodsJson = results[0];
+            const municipalitiesJson = results[1];
             appState.periods = periodsJson.periods;
-            getData("/bekendmakingen/municipalities.json", function (municipalitiesJson) {
-                // Source: https://organisaties.overheid.nl/Gemeenten/
-                appState.municipalities = municipalitiesJson;
-                getLocationAndLoadData();
-            });
+            // Source: https://organisaties.overheid.nl/Gemeenten/
+            appState.municipalities = municipalitiesJson;
+            getLocationAndLoadData();
+        }).catch(function (error) {
+            console.error("Failed to load configuration", error);
         });
     }
 
