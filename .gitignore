@@ -4,3 +4,4 @@
 /.*
 !/.prettierrc
 !/.editorconfig
+/node_modules
