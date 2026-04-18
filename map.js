@@ -2224,7 +2224,14 @@ async function initMap() {
                 appState.publicationsArray = appState.publicationsArray.concat(responseJson.publications);
                 appState.isFullyLoaded = true;
             }
-            addMarkers(startRecord, false);
+            if (responseJson.publications.length > 0 || isNewRequest) {
+                addMarkers(startRecord, false);
+            } else {
+                // Nothing to add (e.g. all historical items were older than
+                // the cutoff date), but loading is complete.
+                setLoadingIndicatorVisibility("hide");
+                tryOpenPublicationFromUrl();
+            }
         });
     }
 
