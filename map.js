@@ -1094,22 +1094,28 @@ async function initMap() {
             return value.length === 7 && value.substring(4, 5) === "-";
         }
 
+        const periodElm = document.getElementById("idCbxPeriod");
+        // Fall back to appState.initialPeriod when the combobox is not yet
+        // in the DOM. The period control is added via map.controls.push(),
+        // which is asynchronous, so during the initial loadData(true) call
+        // the combobox can still be missing - without this fallback we'd
+        // default to "14d" and a historical view (e.g. ?period=2022-10)
+        // would render every marker invisible because the publications are
+        // far older than 14 days.
+        const activePeriod = (
+            periodElm !== null
+            ? periodElm.value
+            : appState.initialPeriod
+        );
         const result = {
-            "elm": document.getElementById("idCbxPeriod"),
-            "period": "14d",
-            "periodToShow": "14d",
+            "elm": periodElm,
+            "period": activePeriod,
+            "periodToShow": activePeriod,
             "isHistory": false
         };
-        if (result.elm === null) {
-            return result;  // Default when loading
-        }
-        // If this is an historical period, default to 'all':
-        result.period = result.elm.value;
-        if (isHistoricalPeriod(result.elm.value)) {
+        if (isHistoricalPeriod(activePeriod)) {
             result.periodToShow = "all";
             result.isHistory = true;
-        } else {
-            result.periodToShow = result.elm.value;
         }
         return result;
     }
@@ -2385,12 +2391,27 @@ async function initMap() {
                 console.log("Navigating to " + appState.activeMunicipality);
                 navigateTo(appState.activeMunicipality);
             }
-            if (appState.isHistoryActive) {
+            if (appState.isHistoryActive && isNavigationNeeded) {
+                // Switching to a different municipality while a historical
+                // period is active: drop the historical view and fall back to
+                // live data for the new municipality.
                 appState.isHistoryActive = false;
                 const periodFilter = getPeriodFilter();
                 periodFilter.elm.value = appState.initialPeriod;
                 updateUrlForPeriod(appState.initialPeriod);
             }
+        }
+        // If the active period is a historical month (e.g. because the
+        // page was loaded with ?period=2022-10), bypass the live SRU fetch
+        // and load that month's static history file directly. Without this,
+        // the initial load would fetch live data for the past 6 weeks and
+        // append "previous month" history, completely ignoring the
+        // requested historical period until the user re-selected it.
+        const periodFilter = getPeriodFilter();
+        if (periodFilter.isHistory) {
+            appState.isFullyLoaded = false;
+            loadHistory(periodFilter.period, true);
+            return;
         }
         appState.isFullyLoaded = false;
         loadDataForMunicipality(appState.activeMunicipality, 1);
