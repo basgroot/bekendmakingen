@@ -1051,7 +1051,7 @@ async function initMap() {
             "marker": marker
         };
         appState.markersArray.push(markerObject);
-        marker.addListener("click", onClick);
+        marker.addListener("gmp-click", onClick);
         // Highlight the icon (and related icons) on hover
         marker.content.addEventListener("mouseover", handleMarkerMouseOver);
         marker.content.addEventListener("mouseout", handleMarkerMouseOut);
@@ -1252,7 +1252,7 @@ async function initMap() {
                 "marker": marker
             });
             marker.addListener(
-                "click",
+                "gmp-click",
                 function () {
                     const municipalityComboElm = document.getElementById("idCbxMunicipality");
                     if (municipalityComboElm !== null) {
