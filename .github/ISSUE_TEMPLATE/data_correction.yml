@@ -30,6 +30,17 @@ body:
     validations:
       required: true
 
+  - type: input
+    id: gmb
+    attributes:
+      label: Gemeenteblad (gmb) reference
+      description: >
+        The gmb publication URL or identifier from repository.overheid.nl
+        that shows the correct data.
+      placeholder: "e.g. https://repository.overheid.nl/frbr/officielepublicaties/gmb/..."
+    validations:
+      required: false
+
   - type: textarea
     id: current
     attributes:
