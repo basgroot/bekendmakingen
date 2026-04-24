@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this software or its data, please cite it as below."
+title: "Bouwmelding.nl"
+abstract: >
+  A client-side web application that displays Dutch government publications
+  (bekendmakingen) — including building permits, environmental permits, event
+  permits, and other municipal decisions — on an interactive map. Data is
+  sourced from the official Dutch government publication repository
+  (repository.overheid.nl).
+authors:
+  - family-names: Groot
+    given-names: B
+    alias: basgroot
+
+version: "0.1.0"
+date-released: "2026-04-24"
+license: GPL-3.0-only
+url: "https://bouwmelding.nl/"
+repository-code: "https://github.com/basgroot/bekendmakingen"
+keywords:
+  - netherlands
+  - dutch
+  - open-data
+  - government
+  - permits
+  - bekendmakingen
+  - vergunningen
+  - maps
+  - google-maps
+  - pwa
+  - javascript
