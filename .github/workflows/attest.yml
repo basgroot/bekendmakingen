@@ -1,0 +1,39 @@
+﻿# Build provenance attestation for bouwmelding.nl.
+# On every push to main, the site files are archived and a signed
+# attestation is generated so consumers can verify the artifact was
+# produced by this repository and workflow.
+# Docs: https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds
+name: "Attest build provenance"
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  attest:
+    name: Attest site artifact
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write      # required to mint the OIDC token used for signing
+      attestations: write  # required to persist the attestation
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Archive site files
+        run: |
+          tar -czf bouwmelding-site.tar.gz \
+            index.html \
+            map.js \
+            map.css \
+            manifest.json \
+            municipalities.json \
+            periods.json \
+            img/
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: bouwmelding-site.tar.gz
