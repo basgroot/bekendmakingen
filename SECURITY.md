@@ -2,8 +2,8 @@
 
 ## Supported Versions
 
-| Version | Supported          |
-| ------- | ------------------ |
+| Version          | Supported          |
+| ---------------- | ------------------ |
 | latest on `main` | :white_check_mark: |
 
 Only the latest version deployed from the `main` branch is actively maintained and receives security fixes.
