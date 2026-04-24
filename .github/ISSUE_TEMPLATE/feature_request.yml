@@ -1,0 +1,44 @@
+name: Feature request
+description: Suggest an improvement or new feature for bouwmelding.nl.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea to make the map more useful? Describe it below.
+        Please check existing issues first to avoid duplicates.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Is your feature request related to a problem or limitation you experience?
+      placeholder: "Example: I can't easily compare permits across two municipalities side by side."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe the feature you would like to see.
+      placeholder: "Example: Add a split-screen mode that shows two municipalities simultaneously."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Have you considered any alternative approaches or workarounds?
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Mockups, screenshots, links, or anything else that helps explain the idea.
+    validations:
+      required: false
