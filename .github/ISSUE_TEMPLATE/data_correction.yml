@@ -1,0 +1,56 @@
+name: Data correction
+description: A municipality name, identifier, or period entry in the data files is wrong or outdated.
+title: "[Data]: "
+labels: ["data"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to report incorrect or missing entries in
+        `municipalities.json` or `periods.json`.
+        If you know the fix, a pull request is the fastest route.
+
+  - type: dropdown
+    id: file
+    attributes:
+      label: Affected file
+      options:
+        - municipalities.json
+        - periods.json
+        - Both
+    validations:
+      required: true
+
+  - type: input
+    id: entry
+    attributes:
+      label: Affected entry
+      description: The municipality name or period value that is wrong.
+      placeholder: "e.g. 'Nuenen, Gerwen en Nederwetten' or period '2024-13'"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current (incorrect) value
+      description: Paste the relevant line(s) from the JSON file as they are now.
+      render: json
+    validations:
+      required: true
+
+  - type: textarea
+    id: correct
+    attributes:
+      label: Correct value
+      description: What should it be? Include a source or reference if possible.
+    validations:
+      required: true
+
+  - type: input
+    id: source
+    attributes:
+      label: Source / reference
+      placeholder: "e.g. https://www.overheid.nl/..."
+    validations:
+      required: false
