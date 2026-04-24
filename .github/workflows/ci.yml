@@ -1,0 +1,33 @@
+# Lint and format check for every push and pull request to main.
+# Runs ESLint and Prettier via `npm run check`.
+# Docs: https://docs.github.com/en/actions/automating-builds-and-tests
+name: "CI"
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  lint:
+    name: Lint & format
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint and format check
+        run: npm run check
