@@ -3,238 +3,316 @@
         {
             "key": "3d",
             "val": "Publicaties laatste drie dagen"
-        }, {
+        },
+        {
             "key": "7d",
             "val": "Publicaties laatste week"
-        }, {
+        },
+        {
             "key": "14d",
             "val": "Publicaties laatste twee weken"
-        }, {
+        },
+        {
             "key": "all",
             "val": "Alle recente publicaties"
-        }, {
+        },
+        {
             "key": "2026-03",
             "val": "Maart 2026"
-        }, {
+        },
+        {
             "key": "2026-02",
             "val": "Februari 2026"
-        }, {
+        },
+        {
             "key": "2026-01",
             "val": "Januari 2026"
-        }, {
+        },
+        {
             "key": "2025-12",
             "val": "December 2025"
-        }, {
+        },
+        {
             "key": "2025-11",
             "val": "November 2025"
-        }, {
+        },
+        {
             "key": "2025-10",
             "val": "Oktober 2025"
-        }, {
+        },
+        {
             "key": "2025-09",
             "val": "September 2025"
-        }, {
+        },
+        {
             "key": "2025-08",
             "val": "Augustus 2025"
-        }, {
+        },
+        {
             "key": "2025-07",
             "val": "Juli 2025"
-        }, {
+        },
+        {
             "key": "2025-06",
             "val": "Juni 2025"
-        }, {
+        },
+        {
             "key": "2025-05",
             "val": "Mei 2025"
-        }, {
+        },
+        {
             "key": "2025-04",
             "val": "April 2025"
-        }, {
+        },
+        {
             "key": "2025-03",
             "val": "Maart 2025"
-        }, {
+        },
+        {
             "key": "2025-02",
             "val": "Februari 2025"
-        }, {
+        },
+        {
             "key": "2025-01",
             "val": "Januari 2025"
-        }, {
+        },
+        {
             "key": "2024-12",
             "val": "December 2024"
-        }, {
+        },
+        {
             "key": "2024-11",
             "val": "November 2024"
-        }, {
+        },
+        {
             "key": "2024-10",
             "val": "Oktober 2024"
-        }, {
+        },
+        {
             "key": "2024-09",
             "val": "September 2024"
-        }, {
+        },
+        {
             "key": "2024-08",
             "val": "Augustus 2024"
-        }, {
+        },
+        {
             "key": "2024-07",
             "val": "Juli 2024"
-        }, {
+        },
+        {
             "key": "2024-06",
             "val": "Juni 2024"
-        }, {
+        },
+        {
             "key": "2024-05",
             "val": "Mei 2024"
-        }, {
+        },
+        {
             "key": "2024-04",
             "val": "April 2024"
-        }, {
+        },
+        {
             "key": "2024-03",
             "val": "Maart 2024"
-        }, {
+        },
+        {
             "key": "2024-02",
             "val": "Februari 2024"
-        }, {
+        },
+        {
             "key": "2024-01",
             "val": "Januari 2024"
-        }, {
+        },
+        {
             "key": "2023-12",
             "val": "December 2023"
-        }, {
+        },
+        {
             "key": "2023-11",
             "val": "November 2023"
-        }, {
+        },
+        {
             "key": "2023-10",
             "val": "Oktober 2023"
-        }, {
+        },
+        {
             "key": "2023-09",
             "val": "September 2023"
-        }, {
+        },
+        {
             "key": "2023-08",
             "val": "Augustus 2023"
-        }, {
+        },
+        {
             "key": "2023-07",
             "val": "Juli 2023"
-        }, {
+        },
+        {
             "key": "2023-06",
             "val": "Juni 2023"
-        }, {
+        },
+        {
             "key": "2023-05",
             "val": "Mei 2023"
-        }, {
+        },
+        {
             "key": "2023-04",
             "val": "April 2023"
-        }, {
+        },
+        {
             "key": "2023-03",
             "val": "Maart 2023"
-        }, {
+        },
+        {
             "key": "2023-02",
             "val": "Februari 2023"
-        }, {
+        },
+        {
             "key": "2023-01",
             "val": "Januari 2023"
-        }, {
+        },
+        {
             "key": "2022-12",
             "val": "December 2022"
-        }, {
+        },
+        {
             "key": "2022-11",
             "val": "November 2022"
-        }, {
+        },
+        {
             "key": "2022-10",
             "val": "Oktober 2022"
-        }, {
+        },
+        {
             "key": "2022-09",
             "val": "September 2022"
-        }, {
+        },
+        {
             "key": "2022-08",
             "val": "Augustus 2022"
-        }, {
+        },
+        {
             "key": "2022-07",
             "val": "Juli 2022"
-        }, {
+        },
+        {
             "key": "2022-06",
             "val": "Juni 2022"
-        }, {
+        },
+        {
             "key": "2022-05",
             "val": "Mei 2022"
-        }, {
+        },
+        {
             "key": "2022-04",
             "val": "April 2022"
-        }, {
+        },
+        {
             "key": "2022-03",
             "val": "Maart 2022"
-        }, {
+        },
+        {
             "key": "2022-02",
             "val": "Februari 2022"
-        }, {
+        },
+        {
             "key": "2022-01",
             "val": "Januari 2022"
-        }, {
+        },
+        {
             "key": "2021-12",
             "val": "December 2021"
-        }, {
+        },
+        {
             "key": "2021-11",
             "val": "November 2021"
-        }, {
+        },
+        {
             "key": "2021-10",
             "val": "Oktober 2021"
-        }, {
+        },
+        {
             "key": "2021-09",
             "val": "September 2021"
-        }, {
+        },
+        {
             "key": "2021-08",
             "val": "Augustus 2021"
-        }, {
+        },
+        {
             "key": "2021-07",
             "val": "Juli 2021"
-        }, {
+        },
+        {
             "key": "2021-06",
             "val": "Juni 2021"
-        }, {
+        },
+        {
             "key": "2021-05",
             "val": "Mei 2021"
-        }, {
+        },
+        {
             "key": "2021-04",
             "val": "April 2021"
-        }, {
+        },
+        {
             "key": "2021-03",
             "val": "Maart 2021"
-        }, {
+        },
+        {
             "key": "2021-02",
             "val": "Februari 2021"
-        }, {
+        },
+        {
             "key": "2021-01",
             "val": "Januari 2021"
-        }, {
+        },
+        {
             "key": "2020-12",
             "val": "December 2020"
-        }, {
+        },
+        {
             "key": "2020-11",
             "val": "November 2020"
-        }, {
+        },
+        {
             "key": "2020-10",
             "val": "Oktober 2020"
-        }, {
+        },
+        {
             "key": "2020-09",
             "val": "September 2020"
-        }, {
+        },
+        {
             "key": "2020-08",
             "val": "Augustus 2020"
-        }, {
+        },
+        {
             "key": "2020-07",
             "val": "Juli 2020"
-        }, {
+        },
+        {
             "key": "2020-06",
             "val": "Juni 2020"
-        }, {
+        },
+        {
             "key": "2020-05",
             "val": "Mei 2020"
-        }, {
+        },
+        {
             "key": "2020-04",
             "val": "April 2020"
-        }, {
+        },
+        {
             "key": "2020-03",
             "val": "Maart 2020"
-        }, {
+        },
+        {
             "key": "2020-02",
             "val": "Februari 2020"
-        }, {
+        },
+        {
             "key": "2020-01",
             "val": "Januari 2020"
         }

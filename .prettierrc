@@ -1,21 +1,18 @@
 {
-  "tabWidth": 4,
-  "semi": true,
-  "endOfLine": "lf",
-  "singleQuote": false,
-  "printWidth": 150,
-  "trailingComma": "none",
-  "quoteProps": "consistent",
-  "overrides": [
-    {
-      "files": [
-        "*.md",
-        "*.yml",
-        "*.yaml"
-      ],
-      "options": {
-        "tabWidth": 2
-      }
-    }
-  ]
+    "tabWidth": 4,
+    "semi": true,
+    "endOfLine": "lf",
+    "singleQuote": false,
+    "printWidth": 150,
+    "trailingComma": "none",
+    "quoteProps": "preserve",
+    "experimentalTernaries": true,
+    "overrides": [
+        {
+            "files": ["*.md", "*.yml", "*.yaml"],
+            "options": {
+                "tabWidth": 2
+            }
+        }
+    ]
 }

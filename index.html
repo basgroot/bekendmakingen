@@ -1,37 +1,43 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="nl">
-<head>
-    <link rel="preconnect" href="https://basgroot.github.io">
-    <link rel="preconnect" href="https://repository.overheid.nl">
-    <link rel="stylesheet" href="map.css" defer>
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
-    <link rel="manifest" href="/manifest.json">
-    <meta charset="UTF-8">
-    <meta name="DESCRIPTION" content="Recente bekendmakingen (vergunningen, besluiten) van de Nederlandse gemeenten zoals Hoorn, Zaanstad, Alkmaar en Utrecht, op de kaart.">
-    <meta name="KEYWORDS" content="vergunning, besluit, bezwaar, bekendmaking, wabo, verleend, geweigerd">
-    <meta name="ROBOTS" content="INDEX, FOLLOW">
-    <meta name="VIEWPORT" content="width=device-width, initial-scale=1">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Bekendmakingen op kaart">
-    <meta property="og:description" content="Recente bekendmakingen op de kaart">
-    <meta property="og:image" content="https://basgroot.github.io/bekendmakingen/img/bekendmakingen.jpg">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Bekendmakingen op kaart">
-    <meta name="twitter:description" content="Recente bekendmakingen op de kaart">
-    <meta name="twitter:image" content="https://basgroot.github.io/bekendmakingen/img/bekendmakingen.jpg">
-    <link rel="preload" href="img/ajax-loader.gif" as="image">
-    <link rel="preload" href="img/gemeente.png" as="image">
-    <link rel="preload" href="img/wetboek.png" as="image">
-    <link rel="preload" href="img/aanvraag.png" as="image">
-    <title>Bekendmakingen op kaart</title>
-</head>
-<body>
+    <head>
+        <link rel="preconnect" href="https://basgroot.github.io" />
+        <link rel="preconnect" href="https://repository.overheid.nl" />
+        <link rel="stylesheet" href="map.css" defer />
+        <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta charset="UTF-8" />
+        <meta
+            name="DESCRIPTION"
+            content="Recente bekendmakingen (vergunningen, besluiten) van de Nederlandse gemeenten zoals Hoorn, Zaanstad, Alkmaar en Utrecht, op de kaart."
+        />
+        <meta name="KEYWORDS" content="vergunning, besluit, bezwaar, bekendmaking, wabo, verleend, geweigerd" />
+        <meta name="ROBOTS" content="INDEX, FOLLOW" />
+        <meta name="VIEWPORT" content="width=device-width, initial-scale=1" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Bekendmakingen op kaart" />
+        <meta property="og:description" content="Recente bekendmakingen op de kaart" />
+        <meta property="og:image" content="https://basgroot.github.io/bekendmakingen/img/bekendmakingen.jpg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Bekendmakingen op kaart" />
+        <meta name="twitter:description" content="Recente bekendmakingen op de kaart" />
+        <meta name="twitter:image" content="https://basgroot.github.io/bekendmakingen/img/bekendmakingen.jpg" />
+        <link rel="preload" href="img/ajax-loader.gif" as="image" />
+        <link rel="preload" href="img/gemeente.png" as="image" />
+        <link rel="preload" href="img/wetboek.png" as="image" />
+        <link rel="preload" href="img/aanvraag.png" as="image" />
+        <title>Bekendmakingen op kaart</title>
+    </head>
+    <body>
+        <div id="map"></div>
 
-<div id="map"></div>
-
-<script type="text/javascript" src="map.js" defer></script>
-<!-- Create your own key and white list your website: https://console.cloud.google.com/apis/credentials/ -->
-<!-- View usage: https://console.cloud.google.com/apis/dashboard -->
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=weekly&key=AIzaSyCKZTaMWxCzxnX9ssNSIWYZiAZsI3lJNO0&language=nl&region=nl&callback=initMap" defer></script>
-</body>
+        <script type="text/javascript" src="map.js" defer></script>
+        <!-- Create your own key and white list your website: https://console.cloud.google.com/apis/credentials/ -->
+        <!-- View usage: https://console.cloud.google.com/apis/dashboard -->
+        <script
+            type="text/javascript"
+            src="https://maps.googleapis.com/maps/api/js?v=weekly&key=AIzaSyCKZTaMWxCzxnX9ssNSIWYZiAZsI3lJNO0&language=nl&region=nl&callback=initMap"
+            defer
+        ></script>
+    </body>
 </html>

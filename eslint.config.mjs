@@ -3,25 +3,23 @@ import globals from "globals";
 
 export default [
     {
-        ignores: [
-            "node_modules/**",
-            "history/**",
-            "**/*.min.js"
-        ]
+        "ignores": ["node_modules/**", "history/**", "**/*.min.js"]
     },
     js.configs.recommended,
     {
-        files: ["**/*.{js,mjs,cjs}"],
-        languageOptions: {
-            ecmaVersion: "latest",
-            sourceType: "script",
-            globals: {
+        "files": ["**/*.{js,mjs,cjs}"],
+        "languageOptions": {
+            "ecmaVersion": "latest",
+            "sourceType": "script",
+            "globals": {
                 ...globals.browser,
-                google: "readonly"
+                "google": "readonly"
             }
         },
-        rules: {
+        "rules": {
             "eqeqeq": "error",
+            "quote-props": ["error", "always"],
+            "padding-line-between-statements": ["error", { "blankLine": "always", "prev": "function", "next": "function" }],
             "linebreak-style": ["error", "unix"],
             "quotes": ["error", "double", { "avoidEscape": true }],
             "semi": ["error", "always"],
@@ -30,9 +28,9 @@ export default [
         }
     },
     {
-        files: ["**/*.mjs"],
-        languageOptions: {
-            sourceType: "module"
+        "files": ["**/*.mjs"],
+        "languageOptions": {
+            "sourceType": "module"
         }
     }
 ];
