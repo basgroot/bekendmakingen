@@ -14,8 +14,8 @@ jobs:
     name: Attest site artifact
     runs-on: ubuntu-latest
     permissions:
-      id-token: write      # required to mint the OIDC token used for signing
-      attestations: write  # required to persist the attestation
+      id-token: write # required to mint the OIDC token used for signing
+      attestations: write # required to persist the attestation
       contents: read
 
     steps:
