@@ -28,8 +28,7 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: javascript
-          # Uncomment to enable a broader rule set:
-          # queries: security-extended,security-and-quality
+          queries: security-extended
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3

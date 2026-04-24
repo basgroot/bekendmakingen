@@ -21,6 +21,7 @@ export default [
             }
         },
         rules: {
+            "eqeqeq": "error",
             "linebreak-style": ["error", "unix"],
             "quotes": ["error", "double", { "avoidEscape": true }],
             "semi": ["error", "always"],
