@@ -430,16 +430,16 @@ async function initMap() {
             }
             isNextValueBekendmakingsDate = false;
             // If not found, try the regular way of publishing:
-            if (value.substring(0, identifier.length) !== identifier) {
+            if (!value.startsWith(identifier)) {
                 for (i = 0; i < identifiersStart.length; i += 1) {
-                    if (value.substring(0, identifiersStart[i].length) === identifiersStart[i]) {
+                    if (value.startsWith(identifiersStart[i])) {
                         value = value.replace(identifiersStart[i], identifier);
                         break;
                     }
                 }
             }
             // If not found, try the regular way of publishing objection start date:
-            if (value.substring(0, identifier.length) !== identifier) {
+            if (!value.startsWith(identifier)) {
                 for (i = 0; i < identifiersStartWithObjectionStart.length; i += 1) {
                     pos = value.indexOf(identifiersStartWithObjectionStart[i]);
                     if (pos !== -1) {
@@ -450,7 +450,7 @@ async function initMap() {
                 }
             }
             // If not found, try the Noordoostpolder way of publishing:
-            if (value.substring(0, identifier.length) !== identifier) {
+            if (!value.startsWith(identifier)) {
                 for (i = 0; i < identifiersAfter.length; i += 1) {
                     // Noordoostpolder has this in the title: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-93843/1/xml/gmb-2023-93843.xml
                     pos = value.indexOf(identifiersAfter[i]);
@@ -461,9 +461,9 @@ async function initMap() {
                 }
             }
             // If not found, try the Alkmaar way of publishing:
-            if (value.substring(0, identifier.length) !== identifier) {
+            if (!value.startsWith(identifier)) {
                 for (i = 0; i < identifiersWithDeadline.length; i += 1) {
-                    if (value.substring(0, identifiersWithDeadline[i].length) === identifiersWithDeadline[i]) {
+                    if (value.startsWith(identifiersWithDeadline[i])) {
                         value = value.replace(identifiersWithDeadline[i], identifier);
                         isDateOfDeadline = true;
                         break;
@@ -471,7 +471,7 @@ async function initMap() {
                 }
             }
             // If not found, try the Texel way of publishing:
-            if (value.substring(0, identifier.length) !== identifier) {
+            if (!value.startsWith(identifier)) {
                 // Velsen repeats part of title (Zeeweg 343, interne constructiewijziging (07/02/2022) 143528-2022):
                 identifiersMiddle.push(publication.title.substring(publication.title.length - 4).toLowerCase() + " ("); // Velsen https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-69953/1/xml/gmb-2023-69953.xml
                 for (i = 0; i < identifiersMiddle.length; i += 1) {
@@ -489,7 +489,7 @@ async function initMap() {
                     }
                 }
             }
-            if (value.substring(0, identifier.length) === identifier) {
+            if (value.startsWith(identifier)) {
                 value = value.substring(identifier.length);
                 if (value.substring(1, 2) === " " || value.substring(1, 2) === "-") {
                     value = "0" + value;
