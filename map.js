@@ -686,12 +686,12 @@ async function initMap() {
                     const periodKeys = appState.periods.map(function (period) {
                         return period.key;
                     });
-                    if (periodKeys.indexOf(periodParam) === -1) {
-                        updateUrlForPeriod(appState.initialPeriod);
-                        console.error("Invalid period in URL");
-                    } else {
+                    if (periodKeys.includes(periodParam)) {
                         appState.initialPeriod = periodParam;
                         console.log("Adjusted period from URL: " + periodParam);
+                    } else {
+                        updateUrlForPeriod(appState.initialPeriod);
+                        console.error("Invalid period in URL");
                     }
                 }
             }
@@ -794,49 +794,49 @@ async function initMap() {
         const verkeersvergunningen = ["uitweg en inrit"];
         const bouwvergunningen = ["bouwen", "slopen"];
         title = title.toLowerCase();
-        if (title.indexOf("aanvraag") !== -1 || title.indexOf("verlenging") !== -1) {
+        if (title.includes("aanvraag") || title.includes("verlenging")) {
             return "aanvraag"; // Halfwitty, CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0, via Wikimedia Commons
         }
         if (
-            exploitatievergunningen.indexOf(type) !== -1 ||
-            title.indexOf("exploitatievergunning") !== -1 ||
-            title.indexOf("alcoholwetvergunning") !== -1
+            exploitatievergunningen.includes(type) ||
+            title.includes("exploitatievergunning") ||
+            title.includes("alcoholwetvergunning")
         ) {
             return "bar";
         }
-        if (title.indexOf("evenement") !== -1 || title.indexOf("loterij") !== -1) {
+        if (title.includes("evenement") || title.includes("loterij")) {
             return "evenement";
         }
-        if (title.indexOf("bed & breakfast") !== -1 || title.indexOf("vakantieverhuur") !== -1) {
+        if (title.includes("bed & breakfast") || title.includes("vakantieverhuur")) {
             return "hotel";
         }
-        if (type === "kappen" || title.indexOf("houtopstand") !== -1 || title.indexOf("(kap)") !== -1) {
+        if (type === "kappen" || title.includes("houtopstand") || title.includes("(kap)")) {
             return "boomkap";
         }
-        if (title.indexOf("oplaadplaats") !== -1 || title.indexOf("opladen") !== -1 || title.indexOf("laadpaal") !== -1) {
+        if (title.includes("oplaadplaats") || title.includes("opladen") || title.includes("laadpaal")) {
             return "laadpaal";
         }
-        if (title.indexOf("apv vergunning") !== -1 || title.indexOf("parkeervakken") !== -1 || title.indexOf("tvm") !== -1) {
+        if (title.includes("apv vergunning") || title.includes("parkeervakken") || title.includes("tvm")) {
             // Verify this after 'laadpaal':
             return "tvm";
         }
-        if (verkeersvergunningen.indexOf(type) !== -1) {
+        if (verkeersvergunningen.includes(type)) {
             // Verify this after 'parkeervakken/tvm':
             return "verkeer";
         }
-        if (title.indexOf("onttrekkingsvergunning") !== -1 || title.indexOf("omzettingsvergunning") !== -1) {
+        if (title.includes("onttrekkingsvergunning") || title.includes("omzettingsvergunning")) {
             return "kamerverhuur"; // EpicPupper, CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0, via Wikimedia Commons
         }
-        if (title.indexOf("water") !== -1) {
+        if (title.includes("water")) {
             return "boot"; // Barbetorte, CC BY-SA 3.0 https://creativecommons.org/licenses/by-sa/3.0, via Wikimedia Commons
         }
         if (type === "reclame") {
             return "reclame"; // Verdy_p (complete construction and vectorisation, based on mathematical properties of the symbol, and not drawn manually, and then manually edited without using any SVG editor)., Public domain, via Wikimedia Commons
         }
-        if (milieuvergunningen.indexOf(type) !== -1) {
+        if (milieuvergunningen.includes(type)) {
             return "milieu";
         }
-        if (bouwvergunningen.indexOf(type) !== -1) {
+        if (bouwvergunningen.includes(type)) {
             return "constructie";
         }
         return "wetboek"; // By No machine-readable author provided. Chris-martin assumed (based on copyright claims). Own work assumed (based on copyright claims)., CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=1010176
@@ -1341,7 +1341,7 @@ async function initMap() {
          * @returns {string} Value without trailing zeros.
          */
         function removeTrailingZeros(value) {
-            if (value.indexOf(".") === -1) {
+            if (!value.includes(".")) {
                 return value; // Prevent removing zeros from integers
             }
             while (value.endsWith("0")) {
@@ -1888,10 +1888,10 @@ async function initMap() {
                  */
                 function addCoordinateToList(coordinate) {
                     // Prevent duplicates:
-                    if (list.indexOf(coordinate) === -1) {
-                        list.push(coordinate);
-                    } else {
+                    if (list.includes(coordinate)) {
                         console.debug("Coordinate already added: " + coordinate);
+                    } else {
+                        list.push(coordinate);
                     }
                 }
 
@@ -2010,7 +2010,7 @@ async function initMap() {
                     } else if (locatiegebied.startsWith("LINESTRING")) {
                         console.log("Found LINESTRING in locatiegebied, calling processLine() for " + locatiegebied);
                         processLine(locatiegebied);
-                    } else if (locatiegebied.indexOf(" ") > 0) {
+                    } else if (locatiegebied.includes(" ")) {
                         // "51.976387,4.6128864 51.976192,4.6125665 51.976078,4.6127763 51.976124,4.6128507 51.976143,4.6128216 51.976276,4.6130733 51.976387,4.6128864"
                         locatiegebied.split(" ").forEach(function (coordinate) {
                             console.log("Adding splitted locatiegebied " + coordinate);
