@@ -1,4 +1,4 @@
-﻿# Build provenance attestation for bouwmelding.nl.
+# Build provenance attestation for bouwmelding.nl.
 # On every push to main, the site files are archived and a signed
 # attestation is generated so consumers can verify the artifact was
 # produced by this repository and workflow.
@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Archive site files
         run: |
