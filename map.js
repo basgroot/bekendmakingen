@@ -1202,7 +1202,7 @@ async function initMap() {
         if (match) {
             console.log("Opening info-window for ?pub=" + wantedLicenseId);
             appState.openedPublicationLicenseId = wantedLicenseId;
-            google.maps.event.trigger(match.marker, "click");
+            google.maps.event.trigger(match.marker, "gmp-click");
             return;
         }
         // 2. Not yet on the map: maybe it's in the delayed (off-screen) queue.

@@ -1,8 +1,5 @@
 ﻿/.vs
 /img/*.pdn
 *.min.js
-/.*
-!/.prettierrc
-!/.editorconfig
-!/.github
 /node_modules
+/.htaccess
