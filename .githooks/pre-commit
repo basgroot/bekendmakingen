@@ -1,0 +1,13 @@
+#!/bin/sh
+# Auto-format staged files with Prettier and re-stage them,
+# then abort if ESLint finds violations.
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
+if [ -z "$STAGED" ]; then
+    exit 0
+fi
+
+node node_modules/prettier/bin/prettier.cjs --write $STAGED
+git add $STAGED
+
+node node_modules/eslint/bin/eslint.js $STAGED
