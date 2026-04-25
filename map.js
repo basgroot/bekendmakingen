@@ -82,7 +82,7 @@ async function initMap() {
      */
     function getInitialMapSettings() {
         let zoomLevel = appState.initialZoomLevel;
-        let center = Object.assign({}, appState.municipalities[appState.activeMunicipality].center);  // Create new copy
+        let center = Object.assign({}, appState.municipalities[appState.activeMunicipality].center); // Create new copy
         let lat;
         let lng;
         if (globalThis.URLSearchParams) {
@@ -152,7 +152,7 @@ async function initMap() {
         // Placeholder element that parseBekendmaking() locates via getElementById
         // and fills with the bezwaartermijn details. Setting .id as a property
         // is safe regardless of what characters licenseId contains.
-        if (licenseId !== null && licenseId !== false) {
+        if (licenseId !== null) {
             const placeholder = document.createElement("div");
             placeholder.id = licenseId;
             // Reserve some vertical space (matches previous layout).
@@ -174,7 +174,7 @@ async function initMap() {
         if (urlDoc) {
             let parsedUrl = null;
             try {
-                parsedUrl = new URL(urlDoc, window.location.href);
+                parsedUrl = new URL(urlDoc, globalThis.location.href);
             } catch (ignore) {
                 // parsedUrl remains null
             }
@@ -244,7 +244,7 @@ async function initMap() {
             "map": map,
             "shouldFocus": true
         });
-        appState.infoWindow.setMap(map);  // Workaround for issue with infoWindow not showing in Street View: https://issuetracker.google.com/issues/35828818?pli=1
+        appState.infoWindow.setMap(map); // Workaround for issue with infoWindow not showing in Street View: https://issuetracker.google.com/issues/35828818?pli=1
     }
 
     /**
@@ -253,7 +253,6 @@ async function initMap() {
      * @return {!Array<?>|!NodeList<!Element>} Alineas.
      */
     function getAlineas(responseXml) {
-
         /**
          * Replaces tags in the given value.
          * @param {string} value The value to replace tags in.
@@ -261,14 +260,17 @@ async function initMap() {
          */
         function replaceTags(value) {
             const tags = [
-                ["<extref doc=\"https://www.alkmaar.nl/bestuur-en-organisatie/het-ergens-niet-mee-eens-zijn/bezwaar-en-beroep\">website</extref>", "website"],  // Alkmaar https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-77888/1/xml/gmb-2023-77888.xml
-                ["<extref doc=\"https://www.alkmaar.nl/direct-regelen/wonen-verhuizen-en-verbouwen/bezwaar-en-beroep\">website</extref>", "website"],  // Alkmaar https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-23049/1/xml/gmb-2023-23049.xml
-                ["<!--Element br verwijderd -->", ""],  // Zaanstad https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-77748/1/xml/gmb-2023-77748.xml
-                ["<nadruk type=\"vet\">", ""],  // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-74922/1/xml/gmb-2023-74922.xml
-                ["<nadruk type=\"cur\">", ""],  // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-577976/1/xml/gmb-2022-577976.xml
-                ["<nadruk type=\"ondlijn\">", ""],  // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-32648/1/xml/gmb-2023-32648.xml
-                ["</nadruk>", ""],  // Hoorn
-                [" :", ":"]  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-81009/1/xml/gmb-2023-81009.xml
+                [
+                    '<extref doc="https://www.alkmaar.nl/bestuur-en-organisatie/het-ergens-niet-mee-eens-zijn/bezwaar-en-beroep">website</extref>',
+                    "website"
+                ], // Alkmaar https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-77888/1/xml/gmb-2023-77888.xml
+                ['<extref doc="https://www.alkmaar.nl/direct-regelen/wonen-verhuizen-en-verbouwen/bezwaar-en-beroep">website</extref>', "website"], // Alkmaar https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-23049/1/xml/gmb-2023-23049.xml
+                ["<!--Element br verwijderd -->", ""], // Zaanstad https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-77748/1/xml/gmb-2023-77748.xml
+                ['<nadruk type="vet">', ""], // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-74922/1/xml/gmb-2023-74922.xml
+                ['<nadruk type="cur">', ""], // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-577976/1/xml/gmb-2022-577976.xml
+                ['<nadruk type="ondlijn">', ""], // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-32648/1/xml/gmb-2023-32648.xml
+                ["</nadruk>", ""], // Hoorn
+                [" :", ":"] // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-81009/1/xml/gmb-2023-81009.xml
             ];
             let result = value;
             // Remove all double spaces in all forms: Landsmeer https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-74508/1/xml/gmb-2023-74508.xml
@@ -290,11 +292,7 @@ async function initMap() {
         }
         // gemeenteblad / zakelijke-mededeling / zakelijke-mededeling-tekst / tekst / <al>Verzonden naar aanvrager op: 20-09-2022</al>
         const zakelijkeMededeling = xmlDoc.getElementsByTagName("zakelijke-mededeling-tekst");
-        return (
-            zakelijkeMededeling.length === 0
-            ? []
-            : zakelijkeMededeling[0].querySelectorAll("al,tussenkop")  // Tussenkop is required for Den Haag https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-78971/1/xml/gmb-2023-78971.xml
-        );
+        return zakelijkeMededeling.length === 0 ? [] : zakelijkeMededeling[0].querySelectorAll("al,tussenkop"); // Tussenkop is required for Den Haag https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-78971/1/xml/gmb-2023-78971.xml
     }
 
     /**
@@ -303,7 +301,7 @@ async function initMap() {
      * @return {number} Number of days passed.
      */
     function getDaysPassed(date) {
-        const today = new Date(new Date().toDateString());  // Rounded date
+        const today = new Date(new Date().toDateString()); // Rounded date
         const dateFrom = new Date(date.toDateString());
         return Math.round((today.getTime() - dateFrom.getTime()) / (1000 * 60 * 60 * 24));
     }
@@ -316,7 +314,6 @@ async function initMap() {
      * @return {void}
      */
     function parseBekendmaking(responseXml, publication, licenseId) {
-
         /**
          * Converts month names to their corresponding numeric values.
          * @param {string} value The month name to convert.
@@ -355,7 +352,7 @@ async function initMap() {
                 return result;
             }
             const datumBekendgemaakt = new Date(year + "-" + month + "-" + day);
-            result.date = new Date(datumBekendgemaakt.toDateString());  // Rounded date
+            result.date = new Date(datumBekendgemaakt.toDateString()); // Rounded date
             result.isValid = true;
             return result;
         }
@@ -374,45 +371,45 @@ async function initMap() {
             const identifiersStart = [
                 "verzonden naar aanvrager op: ",
                 "de gemeente heeft op ",
-                "de gemeente opmeer heeft op ",  // Opmeer https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-79622/1/xml/gmb-2023-79622.xml
-                "besluit verzonden: ",  // Zaandam https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-580371/1/xml/gmb-2022-580371.xml
-                "besluitdatum: ",  // Landsmeer https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-74508/1/xml/gmb-2023-74508.xml
-                "gemeente amstelveen heeft op ",  // Amstelveen https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-95322/1/xml/gmb-2023-95322.xml
-                "verzonden op: ",  // Dijk en Waard https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-85385/1/xml/gmb-2023-85385.xml
-                "(verzonden ",  // Waterland https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-67428/1/xml/gmb-2023-67428.xml
-                "verzonden ",  // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-86314/1/xml/gmb-2023-86314.xml
-                "verleende omgevingsvergunning is verzonden op ",  // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-84721/1/xml/gmb-2023-84721.xml
-                "verleende omgevingsvergunning is verzonden ",  // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-29091/1/xml/gmb-2023-29091.xml
-                "verzenddatum besluit: ",  // Koggenland https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-68991/1/xml/gmb-2023-68991.xml
-                "verzenddatum: ",  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-2603/1/xml/gmb-2023-2603.xml
-                "verzendatum: ",  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-59281/1/xml/gmb-2023-59281.xml
-                "bekendmakingsdatum: ",  // Heemskerk https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-67866/1/xml/gmb-2023-67866.xml
-                "datum besluit: ",  // Edam-Volendam https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-74723/1/xml/gmb-2023-74723.xml
-                "datum verzending besluit: ",  // Almere https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-31954/1/xml/gmb-2023-31954.xml
-                "de burgemeester van den helder maakt bekend, dat hij op "  // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-20399/1/xml/gmb-2023-20399.xml
+                "de gemeente opmeer heeft op ", // Opmeer https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-79622/1/xml/gmb-2023-79622.xml
+                "besluit verzonden: ", // Zaandam https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-580371/1/xml/gmb-2022-580371.xml
+                "besluitdatum: ", // Landsmeer https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-74508/1/xml/gmb-2023-74508.xml
+                "gemeente amstelveen heeft op ", // Amstelveen https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-95322/1/xml/gmb-2023-95322.xml
+                "verzonden op: ", // Dijk en Waard https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-85385/1/xml/gmb-2023-85385.xml
+                "(verzonden ", // Waterland https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-67428/1/xml/gmb-2023-67428.xml
+                "verzonden ", // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-86314/1/xml/gmb-2023-86314.xml
+                "verleende omgevingsvergunning is verzonden op ", // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-84721/1/xml/gmb-2023-84721.xml
+                "verleende omgevingsvergunning is verzonden ", // Hoorn https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-29091/1/xml/gmb-2023-29091.xml
+                "verzenddatum besluit: ", // Koggenland https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-68991/1/xml/gmb-2023-68991.xml
+                "verzenddatum: ", // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-2603/1/xml/gmb-2023-2603.xml
+                "verzendatum: ", // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-59281/1/xml/gmb-2023-59281.xml
+                "bekendmakingsdatum: ", // Heemskerk https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-67866/1/xml/gmb-2023-67866.xml
+                "datum besluit: ", // Edam-Volendam https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-74723/1/xml/gmb-2023-74723.xml
+                "datum verzending besluit: ", // Almere https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-31954/1/xml/gmb-2023-31954.xml
+                "de burgemeester van den helder maakt bekend, dat hij op " // Den Helder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-20399/1/xml/gmb-2023-20399.xml
             ];
             const identifiersStartWithObjectionStart = [
-                "de termijn voor het indienen van een bezwaar start op "  // Gouda https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-37420/1/xml/gmb-2023-37420.xml
+                "de termijn voor het indienen van een bezwaar start op " // Gouda https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-37420/1/xml/gmb-2023-37420.xml
             ];
             const identifiersWithDeadline = [
-                "als u het niet eens bent met dit besluit dan kunt u binnen zes weken na de verzenddatum bezwaar maken. op onze website kunt u lezen hoe u online of per post uw bezwaar kunt indienen. uw bezwaarschrift moet vóór ",  // Alkmaar
-                "u kunt het college van de gemeente heemstede tot en met ",  // Heemstede https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-77700/1/xml/gmb-2023-77700.xml
-                "u kunt de gemeente tot "  // Dijk en Waard https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-76678/1/xml/gmb-2023-76678.xml
+                "als u het niet eens bent met dit besluit dan kunt u binnen zes weken na de verzenddatum bezwaar maken. op onze website kunt u lezen hoe u online of per post uw bezwaar kunt indienen. uw bezwaarschrift moet vóór ", // Alkmaar
+                "u kunt het college van de gemeente heemstede tot en met ", // Heemstede https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-77700/1/xml/gmb-2023-77700.xml
+                "u kunt de gemeente tot " // Dijk en Waard https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-76678/1/xml/gmb-2023-76678.xml
             ];
             const identifiersMiddle = [
-                " het besluit is verzonden op ",  // Bloemendaal https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-94061/1/xml/gmb-2023-94061.xml
-                " (verzonden ",  // Texel
-                ", verzonden ",  // Haarlem https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-31494/1/xml/gmb-2023-31494.xml
-                ", verzenddatum ",  // Bergen NH https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-76348/1/xml/gmb-2023-76348.xml
-                " (verzenddatum ",  // Groningen https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-79536/1/xml/gmb-2023-79536.xml
-                ", verleend op ",  // Beverwijk https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-81123/1/xml/gmb-2023-81123.xml
+                " het besluit is verzonden op ", // Bloemendaal https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-94061/1/xml/gmb-2023-94061.xml
+                " (verzonden ", // Texel
+                ", verzonden ", // Haarlem https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-31494/1/xml/gmb-2023-31494.xml
+                ", verzenddatum ", // Bergen NH https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-76348/1/xml/gmb-2023-76348.xml
+                " (verzenddatum ", // Groningen https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-79536/1/xml/gmb-2023-79536.xml
+                ", verleend op ", // Beverwijk https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-81123/1/xml/gmb-2023-81123.xml
                 " (datum besluit ", // Rotterdam https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-92486/1/xml/gmb-2023-92486.xml
-                "de termijn voor het indienen van een bezwaarschrift start op "  // Aalsmeer https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-63996/1/xml/gmb-2023-63996.xml
+                "de termijn voor het indienen van een bezwaarschrift start op " // Aalsmeer https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-63996/1/xml/gmb-2023-63996.xml
             ];
             const identifiersAfter = [
-                " is een omgevingsvergunning verleend"  // Noordoostpolder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-93843/1/xml/gmb-2023-93843.xml
+                " is een omgevingsvergunning verleend" // Noordoostpolder https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-93843/1/xml/gmb-2023-93843.xml
             ];
-            const identifierNextValueIsDate = "datum bekendmaking besluit:";  // Den Haag https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-79557/1/xml/gmb-2023-79557.xml
+            const identifierNextValueIsDate = "datum bekendmaking besluit:"; // Den Haag https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-79557/1/xml/gmb-2023-79557.xml
             let i;
             let pos;
             let isDateOfDeadline = false;
@@ -476,7 +473,7 @@ async function initMap() {
             // If not found, try the Texel way of publishing:
             if (value.substring(0, identifier.length) !== identifier) {
                 // Velsen repeats part of title (Zeeweg 343, interne constructiewijziging (07/02/2022) 143528-2022):
-                identifiersMiddle.push(publication.title.substring(publication.title.length - 4).toLowerCase() + " (");  // Velsen https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-69953/1/xml/gmb-2023-69953.xml
+                identifiersMiddle.push(publication.title.substring(publication.title.length - 4).toLowerCase() + " ("); // Velsen https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-69953/1/xml/gmb-2023-69953.xml
                 for (i = 0; i < identifiersMiddle.length; i += 1) {
                     // Bergen, Castricum etc. have this in the title: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-76348/1/xml/gmb-2023-76348.xml
                     pos = publication.title.indexOf(identifiersMiddle[i]);
@@ -502,9 +499,9 @@ async function initMap() {
                 if (result.isValid) {
                     if (isDateOfDeadline) {
                         // This is the last date you can object to a decision. Extract 6 weeks.
-                        result.date.setDate(result.date.getDate() - (7 * 6));
+                        result.date.setDate(result.date.getDate() - 7 * 6);
                     } else if (isObjectionStartDate) {
-                        result.date.setDate(result.date.getDate() - 1);  // Objection period starts one day after date 'verzonden'
+                        result.date.setDate(result.date.getDate() - 1); // Objection period starts one day after date 'verzonden'
                     }
                     result.isNextValueBekendmakingsDate = isNextValueBekendmakingsDate;
                     return result;
@@ -517,9 +514,9 @@ async function initMap() {
         }
 
         const alineas = getAlineas(responseXml);
-        const maxLooptijd = (6 * 7) + 1;  // 6 weken de tijd om bezwaar te maken
-        const dateFormatOptions = {"weekday": "long", "year": "numeric", "month": "long", "day": "numeric"};
-        let datumBekendgemaakt;  // Datum verzonden aan belanghebbende(n)
+        const maxLooptijd = 6 * 7 + 1; // 6 weken de tijd om bezwaar te maken
+        const dateFormatOptions = { "weekday": "long", "year": "numeric", "month": "long", "day": "numeric" };
+        let datumBekendgemaakt; // Datum verzonden aan belanghebbende(n)
         let looptijd;
         let resterendAantalDagenBezwaartermijn;
         let i;
@@ -539,11 +536,16 @@ async function initMap() {
                             isBezwaartermijnFound = true;
                             looptijd = getDaysPassed(datumBekendgemaakt.date);
                             resterendAantalDagenBezwaartermijn = maxLooptijd - looptijd;
-                            textToShow = "Gepubliceerd: " + publication.date.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />Bekendgemaakt aan belanghebbende: " + datumBekendgemaakt.date.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br />" + (
-                                resterendAantalDagenBezwaartermijn > 0
-                                ? "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
-                                : "<b>Geen bezwaar meer mogelijk.</b>"
-                            ) + "<br /><br />";
+                            textToShow =
+                                "Gepubliceerd: " +
+                                publication.date.toLocaleDateString("nl-NL", dateFormatOptions) +
+                                ".<br />Bekendgemaakt aan belanghebbende: " +
+                                datumBekendgemaakt.date.toLocaleDateString("nl-NL", dateFormatOptions) +
+                                ".<br />" +
+                                (resterendAantalDagenBezwaartermijn > 0 ?
+                                    "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
+                                :   "<b>Geen bezwaar meer mogelijk.</b>") +
+                                "<br /><br />";
                         }
                         break;
                     }
@@ -572,22 +574,21 @@ async function initMap() {
         }
         // Endpoint: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-425209/1/xml/gmb-2022-425209.xml
         console.debug("Retrieving " + publication.urlApi + "..");
-        fetch(
-            publication.urlApi,
-            {
-                "method": "GET"
-            }
-        ).then(function (response) {
-            if (response.ok) {
-                response.text().then(function (xml) {
-                    parseBekendmaking(xml, publication, licenseId);
-                });
-            } else {
-                console.error(response);
-            }
-        }).catch(function (error) {
-            console.error(error);
-        });
+        fetch(publication.urlApi, {
+            "method": "GET"
+        })
+            .then(function (response) {
+                if (response.ok) {
+                    response.text().then(function (xml) {
+                        parseBekendmaking(xml, publication, licenseId);
+                    });
+                } else {
+                    console.error(response);
+                }
+            })
+            .catch(function (error) {
+                console.error(error);
+            });
     }
 
     /**
@@ -612,7 +613,7 @@ async function initMap() {
      * @return {void}
      */
     function createMapsControlLoadingIndicator() {
-        const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
+        const controlDiv = document.createElement("div"); // Create a DIV to attach the control UI to the Map.
         controlDiv.appendChild(appState.loadingIndicator);
         appState.map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(controlDiv);
     }
@@ -623,7 +624,7 @@ async function initMap() {
      * @return {void}
      */
     function createMapsControlMunicipalities() {
-        const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
+        const controlDiv = document.createElement("div"); // Create a DIV to attach the control UI to the Map.
         const combobox = document.createElement("input");
         const datalist = document.createElement("datalist");
         const municipalityNames = Object.keys(appState.municipalities);
@@ -644,10 +645,10 @@ async function initMap() {
         });
         combobox.addEventListener("change", function () {
             // Only act on a valid municipality; otherwise revert.
-            if (appState.municipalities[combobox.value] !== undefined) {
-                loadData(true);
-            } else {
+            if (appState.municipalities[combobox.value] === undefined) {
                 combobox.value = appState.activeMunicipality;
+            } else {
+                loadData(true);
             }
         });
         // Clear the field on focus so the full list is shown again (Chrome/Edge).
@@ -672,11 +673,10 @@ async function initMap() {
      * @return {void}
      */
     function createMapsControlPeriods() {
-
         /**
          * Get the period to select based on the URL parameter or the default value.
          * @return {string} Period key.
-        */
+         */
         function getPeriodToSelect() {
             if (globalThis.URLSearchParams) {
                 const urlSearchParams = new globalThis.URLSearchParams(globalThis.location.search);
@@ -698,13 +698,13 @@ async function initMap() {
             return appState.initialPeriod;
         }
 
-         /**
-          * Creates an option element with the specified value. Period 14d is selected by default.
-          * @param {string} value The value of the option.
-          * @param {string} displayValue The value of the option to display.
-          * @param {string} defaultValue The default value to select.
-          * @return {!HTMLOptionElement} The created option element.
-          */
+        /**
+         * Creates an option element with the specified value. Period 14d is selected by default.
+         * @param {string} value The value of the option.
+         * @param {string} displayValue The value of the option to display.
+         * @param {string} defaultValue The default value to select.
+         * @return {!HTMLOptionElement} The created option element.
+         */
         function createOptionEx(value, displayValue, defaultValue) {
             return createOption(value, displayValue, value === defaultValue);
         }
@@ -712,7 +712,7 @@ async function initMap() {
         // Get the period from the URL parameter or default to 2weeks:
         let selectedPeriod = getPeriodToSelect();
 
-        const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
+        const controlDiv = document.createElement("div"); // Create a DIV to attach the control UI to the Map.
         const combobox = document.createElement("select");
         combobox.id = "idCbxPeriod";
         combobox.title = "Periode van de bekendmaking selecteren";
@@ -730,7 +730,7 @@ async function initMap() {
      * @return {void}
      */
     function createMapsControlSource() {
-        const controlDiv = document.createElement("div");  // Create a DIV to attach the control UI to the Map.
+        const controlDiv = document.createElement("div"); // Create a DIV to attach the control UI to the Map.
         const button = document.createElement("button");
         button.id = "idBtnSource";
         button.textContent = "Broncode";
@@ -789,25 +789,19 @@ async function initMap() {
      * @return {string} Icon file name without extension.
      */
     function getIconName(title, type) {
-        const exploitatievergunningen = [
-            "brandveilig gebruik"
-        ];
-        const milieuvergunningen = [
-            "milieu",
-            "natuur"
-        ];
-        const verkeersvergunningen = [
-            "uitweg en inrit"
-        ];
-        const bouwvergunningen = [
-            "bouwen",
-            "slopen"
-        ];
+        const exploitatievergunningen = ["brandveilig gebruik"];
+        const milieuvergunningen = ["milieu", "natuur"];
+        const verkeersvergunningen = ["uitweg en inrit"];
+        const bouwvergunningen = ["bouwen", "slopen"];
         title = title.toLowerCase();
         if (title.indexOf("aanvraag") !== -1 || title.indexOf("verlenging") !== -1) {
-            return "aanvraag";  // Halfwitty, CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0, via Wikimedia Commons
+            return "aanvraag"; // Halfwitty, CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0, via Wikimedia Commons
         }
-        if (exploitatievergunningen.indexOf(type) !== -1 || title.indexOf("exploitatievergunning") !== -1 || title.indexOf("alcoholwetvergunning") !== -1) {
+        if (
+            exploitatievergunningen.indexOf(type) !== -1 ||
+            title.indexOf("exploitatievergunning") !== -1 ||
+            title.indexOf("alcoholwetvergunning") !== -1
+        ) {
             return "bar";
         }
         if (title.indexOf("evenement") !== -1 || title.indexOf("loterij") !== -1) {
@@ -831,13 +825,13 @@ async function initMap() {
             return "verkeer";
         }
         if (title.indexOf("onttrekkingsvergunning") !== -1 || title.indexOf("omzettingsvergunning") !== -1) {
-            return "kamerverhuur";  // EpicPupper, CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0, via Wikimedia Commons
+            return "kamerverhuur"; // EpicPupper, CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0, via Wikimedia Commons
         }
         if (title.indexOf("water") !== -1) {
-            return "boot";  // Barbetorte, CC BY-SA 3.0 https://creativecommons.org/licenses/by-sa/3.0, via Wikimedia Commons
+            return "boot"; // Barbetorte, CC BY-SA 3.0 https://creativecommons.org/licenses/by-sa/3.0, via Wikimedia Commons
         }
         if (type === "reclame") {
-            return "reclame";  // Verdy_p (complete construction and vectorisation, based on mathematical properties of the symbol, and not drawn manually, and then manually edited without using any SVG editor)., Public domain, via Wikimedia Commons
+            return "reclame"; // Verdy_p (complete construction and vectorisation, based on mathematical properties of the symbol, and not drawn manually, and then manually edited without using any SVG editor)., Public domain, via Wikimedia Commons
         }
         if (milieuvergunningen.indexOf(type) !== -1) {
             return "milieu";
@@ -845,7 +839,7 @@ async function initMap() {
         if (bouwvergunningen.indexOf(type) !== -1) {
             return "constructie";
         }
-        return "wetboek";  // By No machine-readable author provided. Chris-martin assumed (based on copyright claims). Own work assumed (based on copyright claims)., CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=1010176
+        return "wetboek"; // By No machine-readable author provided. Chris-martin assumed (based on copyright claims). Own work assumed (based on copyright claims)., CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=1010176
         // "ruimtelijke ordening",
     }
 
@@ -855,14 +849,13 @@ async function initMap() {
      * @return {!Object} Coordinate to place marker.
      */
     function findUniquePosition(proposedCoordinate) {
-
         /**
          * Checks if a coordinate is available.
          * @param {!Object} coordinate The coordinate to check.
          * @return {boolean} True if the coordinate is available, false otherwise.
          */
         function isCoordinateAvailable(coordinate) {
-            let isAvailable = true;  // Be positive
+            let isAvailable = true; // Be positive
             let i;
             let marker;
             for (i = 0; i < appState.markersArray.length; i += 1) {
@@ -925,14 +918,14 @@ async function initMap() {
      */
     function isMarkerVisible(age, periodToShow) {
         switch (periodToShow) {
-        case "3d":
-            return age <= 3;
-        case "7d":
-            return age <= 7;
-        case "14d":
-            return age <= 14;
-        default:
-            return true;
+            case "3d":
+                return age <= 3;
+            case "7d":
+                return age <= 7;
+            case "14d":
+                return age <= 14;
+            default:
+                return true;
         }
     }
 
@@ -971,7 +964,6 @@ async function initMap() {
      * @return {!Object} Marker object. This is used to remove the marker later.
      */
     function addMarker(publication, periodToShow, position) {
-
         /**
          * Handles the click event. Show the info window.
          */
@@ -1033,11 +1025,7 @@ async function initMap() {
         // Unix seconds (~1.77e9 in 2026) fit comfortably within 32-bit int range.
         const markerZIndex = Math.floor(publication.date.getTime() / 1000);
         const marker = new AdvancedMarkerElement({
-            "map": (
-                isMarkerVisible(age, periodToShow)
-                ? appState.map
-                : null
-            ),
+            "map": isMarkerVisible(age, periodToShow) ? appState.map : null,
             "position": position,
             "content": createMarkerIcon("img/" + iconName + ".png", 35, 45),
             "zIndex": markerZIndex,
@@ -1083,7 +1071,6 @@ async function initMap() {
      * @return {!Object} Time filter.
      */
     function getPeriodFilter() {
-
         /**
          * Checks if a value represents a historical period. Historical periods are noted like '2023-11'.
          * @param {string} value The value to check.
@@ -1102,11 +1089,7 @@ async function initMap() {
         // default to "14d" and a historical view (e.g. ?period=2022-10)
         // would render every marker invisible because the publications are
         // far older than 14 days.
-        const activePeriod = (
-            periodElm !== null
-            ? periodElm.value
-            : appState.initialPeriod
-        );
+        const activePeriod = periodElm === null ? appState.initialPeriod : periodElm.value;
         const result = {
             "elm": periodElm,
             "period": activePeriod,
@@ -1127,7 +1110,9 @@ async function initMap() {
      */
     function createCoordinate(locatiepunt) {
         // Tolerate "lat lng", "lat,lng", or any mix of whitespace/comma separators.
-        const coordinate = String(locatiepunt).split(/[\s,]+/).filter(Boolean);
+        const coordinate = String(locatiepunt)
+            .split(/[\s,]+/)
+            .filter(Boolean);
         const lat = parseFloat(coordinate[0]);
         const lng = parseFloat(coordinate[1]);
         if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
@@ -1166,7 +1151,12 @@ async function initMap() {
                     publication.location.forEach(function (locatiepunt) {
                         const baseCoordinate = createCoordinate(locatiepunt);
                         if (baseCoordinate === null) {
-                            console.warn("addMarkers: skipping publication " + (publication.urlDoc || publication.id || "?") + " due to unparseable location " + JSON.stringify(locatiepunt));
+                            console.warn(
+                                "addMarkers: skipping publication " +
+                                    (publication.urlDoc || publication.id || "?") +
+                                    " due to unparseable location " +
+                                    JSON.stringify(locatiepunt)
+                            );
                             return;
                         }
                         position = findUniquePosition(baseCoordinate);
@@ -1203,7 +1193,7 @@ async function initMap() {
             return;
         }
         if (appState.openedPublicationLicenseId === wantedLicenseId) {
-            return;  // Already open
+            return; // Already open
         }
         // 1. Look on the map first (markers currently rendered).
         const match = appState.markersArray.find(function (markerObject) {
@@ -1238,11 +1228,7 @@ async function initMap() {
         municipalityNames.forEach(function (municipalityName) {
             const municipalityObject = appState.municipalities[municipalityName];
             const marker = new AdvancedMarkerElement({
-                "map": (
-                    municipalityName === appState.activeMunicipality
-                    ? null
-                    : appState.map
-                ),
+                "map": municipalityName === appState.activeMunicipality ? null : appState.map,
                 "position": municipalityObject.center,
                 "content": createMarkerIcon("img/gemeente.png", 50, 61, municipalityName),
                 "title": municipalityName
@@ -1251,17 +1237,14 @@ async function initMap() {
                 "municipalityName": municipalityName,
                 "marker": marker
             });
-            marker.addListener(
-                "gmp-click",
-                function () {
-                    const municipalityComboElm = document.getElementById("idCbxMunicipality");
-                    if (municipalityComboElm !== null) {
-                        municipalityComboElm.value = municipalityName;
-                    }
-                    appState.activeMunicipality = municipalityName;
-                    loadData(true);
+            marker.addListener("gmp-click", function () {
+                const municipalityComboElm = document.getElementById("idCbxMunicipality");
+                if (municipalityComboElm !== null) {
+                    municipalityComboElm.value = municipalityName;
                 }
-            );
+                appState.activeMunicipality = municipalityName;
+                loadData(true);
+            });
         });
     }
 
@@ -1272,11 +1255,7 @@ async function initMap() {
      * @return {void}
      */
     function setMarkerVisibility(marker, isVisible) {
-        marker.setMap(
-            isVisible
-            ? appState.map
-            : null
-        );
+        marker.setMap(isVisible ? appState.map : null);
     }
 
     /**
@@ -1336,7 +1315,7 @@ async function initMap() {
         const urlSearchParams = new globalThis.URLSearchParams(globalThis.location.search);
         if (licenseId) {
             if (urlSearchParams.get("pub") === licenseId) {
-                return;  // No change needed
+                return; // No change needed
             }
             urlSearchParams.set("pub", licenseId);
         } else {
@@ -1346,11 +1325,7 @@ async function initMap() {
             urlSearchParams.delete("pub");
         }
         const search = urlSearchParams.toString();
-        globalThis.history.replaceState(null, "", globalThis.location.pathname + (
-            search
-            ? "?" + search
-            : ""
-        ));
+        globalThis.history.replaceState(null, "", globalThis.location.pathname + (search ? "?" + search : ""));
     }
 
     /**
@@ -1360,7 +1335,6 @@ async function initMap() {
      * @return {void}
      */
     function updateUrlForLocation(zoom, center) {
-
         /**
          * Remove trailing zeros from a number represented as a string.
          * @param {string} value
@@ -1368,7 +1342,7 @@ async function initMap() {
          */
         function removeTrailingZeros(value) {
             if (value.indexOf(".") === -1) {
-                return value;  // Prevent removing zeros from integers
+                return value; // Prevent removing zeros from integers
             }
             while (value.endsWith("0")) {
                 value = value.slice(0, -1);
@@ -1414,14 +1388,14 @@ async function initMap() {
         // Source: http://www.movable-type.co.uk/scripts/latlong.html
         // Maps API covers this function as well:
         // https://developers.google.com/maps/documentation/javascript/reference/geometry#spherical.computeDistanceBetween
-        const radius = 6371e3;  // metres
-        const a1 = from.lat * Math.PI / 180;  // φ1: φ, λ in radians
-        const a2 = to.lat * Math.PI / 180;  // φ2
-        const latDelta = (to.lat - from.lat) * Math.PI / 180;  // Δφ
-        const lngDelta = (to.lng - from.lng) * Math.PI / 180;  // Δλ
+        const radius = 6371e3; // metres
+        const a1 = (from.lat * Math.PI) / 180; // φ1: φ, λ in radians
+        const a2 = (to.lat * Math.PI) / 180; // φ2
+        const latDelta = ((to.lat - from.lat) * Math.PI) / 180; // Δφ
+        const lngDelta = ((to.lng - from.lng) * Math.PI) / 180; // Δλ
         const a = Math.sin(latDelta / 2) * Math.sin(latDelta / 2) + Math.cos(a1) * Math.cos(a2) * Math.sin(lngDelta / 2) * Math.sin(lngDelta / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return radius * c;  // Distance in meters
+        return radius * c; // Distance in meters
     }
 
     /**
@@ -1465,35 +1439,34 @@ async function initMap() {
     function getLocationByIp() {
         const url = "https://basement.nl/proxy-server/location.php";
         console.debug("Retrieving " + url + "..");
-        fetch(
-            url,
-            {
-                "method": "GET"
-            }
-        ).then(function (response) {
-            if (response.ok) {
-                response.json().then(function (responseJson) {
-                    if (appState.municipalities[responseJson.city] === undefined) {
-                        // Try to locate the closest municipality:
-                        activateClosestMunicipality({
-                            "lat": responseJson.lat,
-                            "lng": responseJson.lng
-                        });
-                    } else {
-                        // Name of the city is the same as the municipality.
-                        console.log("Client location in municipality " + responseJson.city);
-                        appState.activeMunicipality = responseJson.city;
-                    }
+        fetch(url, {
+            "method": "GET"
+        })
+            .then(function (response) {
+                if (response.ok) {
+                    response.json().then(function (responseJson) {
+                        if (appState.municipalities[responseJson.city] === undefined) {
+                            // Try to locate the closest municipality:
+                            activateClosestMunicipality({
+                                "lat": responseJson.lat,
+                                "lng": responseJson.lng
+                            });
+                        } else {
+                            // Name of the city is the same as the municipality.
+                            console.log("Client location in municipality " + responseJson.city);
+                            appState.activeMunicipality = responseJson.city;
+                        }
+                        internalInitMap();
+                    });
+                } else {
+                    console.error(response);
                     internalInitMap();
-                });
-            } else {
-                console.error(response);
+                }
+            })
+            .catch(function (error) {
+                console.error(error);
                 internalInitMap();
-            }
-        }).catch(function (error) {
-            console.error(error);
-            internalInitMap();
-        });
+            });
     }
 
     /**
@@ -1501,7 +1474,6 @@ async function initMap() {
      * @return {void}
      */
     function getLocationAndLoadData() {
-
         /**
          * Callback function for when the device's location is found.
          * @param {!Object} position The position object containing the device's coordinates.
@@ -1525,7 +1497,7 @@ async function initMap() {
 
         if (isLocationInUrl()) {
             internalInitMap();
-            return;  // The location is explicitly requested. Don't adapt location based on visitors IP address.
+            return; // The location is explicitly requested. Don't adapt location based on visitors IP address.
         }
         // Try to get the location of the device:
         if (!navigator.geolocation) {
@@ -1542,23 +1514,18 @@ async function initMap() {
      * @return {void}
      */
     function determineRequestPeriod() {
-
         /**
          * Prefix number with zero, if it has one digit.
          * @param {number} n The one or two digit number representing day or month.
          * @return {string} The formatted number.
          */
         function addLeadingZero(n) {
-            return (
-                n > 9
-                ? String(n)
-                : "0" + n
-            );
+            return n > 9 ? String(n) : "0" + n;
         }
 
         const currentDate = new Date();
         const previousMonth = new Date();
-        previousMonth.setDate(0);  // Set to last day of previous month
+        previousMonth.setDate(0); // Set to last day of previous month
         const previousMonthString = previousMonth.getFullYear() + "-" + addLeadingZero(previousMonth.getMonth() + 1);
         const periodId = appState.periods.findIndex(function (period) {
             return period.key === previousMonthString;
@@ -1568,10 +1535,15 @@ async function initMap() {
         appState.requestPeriod.startDate.setDate(appState.requestPeriod.startDate.getDate() - WEEKS_BACK * 7);
         if (periodId >= 0) {
             appState.requestPeriod.historyFile = previousMonthString;
-            appState.requestPeriod.startDateString = currentDate.getFullYear() + "-" + addLeadingZero(currentDate.getMonth() + 1) + "-" + "01";  // Start of current month, because history is already available in a faster to retrieve format
+            appState.requestPeriod.startDateString = currentDate.getFullYear() + "-" + addLeadingZero(currentDate.getMonth() + 1) + "-" + "01"; // Start of current month, because history is already available in a faster to retrieve format
             console.log("Historical file to add to view: " + appState.requestPeriod.historyFile);
         } else {
-            appState.requestPeriod.startDateString = appState.requestPeriod.startDate.getFullYear() + "-" + addLeadingZero(appState.requestPeriod.startDate.getMonth() + 1) + "-" + addLeadingZero(appState.requestPeriod.startDate.getDate());
+            appState.requestPeriod.startDateString =
+                appState.requestPeriod.startDate.getFullYear() +
+                "-" +
+                addLeadingZero(appState.requestPeriod.startDate.getMonth() + 1) +
+                "-" +
+                addLeadingZero(appState.requestPeriod.startDate.getDate());
         }
         console.log("StartDate: " + appState.requestPeriod.startDateString);
     }
@@ -1581,13 +1553,12 @@ async function initMap() {
      * @return {void}
      */
     function internalInitMap() {
-
         /**
          * Close the shared info window.
          * @return {void}
          */
         function closeInfoWindow() {
-            appState.infoWindow.close();  // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.close
+            appState.infoWindow.close(); // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.close
             appState.openedPublicationLicenseId = null;
             updateUrlForPublication(null);
         }
@@ -1597,7 +1568,7 @@ async function initMap() {
         const screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
         appState.loadingIndicator.id = "idLoadingIndicator";
         appState.loadingIndicator.style.width = Math.max((screenWidth / 100) * 12, 70) + "px";
-        appState.loadingIndicator.src = "img/ajax-loader.gif";  // ConnectedWizard, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
+        appState.loadingIndicator.src = "img/ajax-loader.gif"; // ConnectedWizard, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
         // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindowOptions
         appState.infoWindow = new google.maps.InfoWindow();
         // When the user closes the info-window via the built-in [x], drop the
@@ -1607,21 +1578,18 @@ async function initMap() {
             updateUrlForPublication(null);
         });
         // https://developers.google.com/maps/documentation/javascript/overview#MapOptions
-        appState.map = new google.maps.Map(
-            containerElm,
-            {
-                "backgroundColor": "#9CC0F9",  // https://developers.google.com/maps/documentation/javascript/reference/map#MapOptions.backgroundColor
-                "clickableIcons": false,  // https://developers.google.com/maps/documentation/javascript/reference/map#MapOptions.clickableIcons
-                "center": new google.maps.LatLng(mapSettings.center.lat, mapSettings.center.lng),
-                "mapTypeId": google.maps.MapTypeId.ROADMAP,  // https://developers.google.com/maps/documentation/javascript/reference/map#MapTypeId
-                "gestureHandling": "greedy",  // When scrolling, keep scrolling
-                "zoom": mapSettings.zoomLevel,
-                "isFractionalZoomEnabled": true,  // https://developers.google.com/maps/documentation/javascript/reference/map#MapOptions.isFractionalZoomEnabled
-                // If VECTOR, the map freezes sometimes when a lot of markers are added. RASTER seems more stable.
-                "renderingType": google.maps.RenderingType.RASTER,  // https://developers.google.com/maps/documentation/javascript/map-rendering-type#rendering-type
-                "mapId": "9913fa533c4bf328"
-            }
-        );
+        appState.map = new google.maps.Map(containerElm, {
+            "backgroundColor": "#9CC0F9", // https://developers.google.com/maps/documentation/javascript/reference/map#MapOptions.backgroundColor
+            "clickableIcons": false, // https://developers.google.com/maps/documentation/javascript/reference/map#MapOptions.clickableIcons
+            "center": new google.maps.LatLng(mapSettings.center.lat, mapSettings.center.lng),
+            "mapTypeId": google.maps.MapTypeId.ROADMAP, // https://developers.google.com/maps/documentation/javascript/reference/map#MapTypeId
+            "gestureHandling": "greedy", // When scrolling, keep scrolling
+            "zoom": mapSettings.zoomLevel,
+            "isFractionalZoomEnabled": true, // https://developers.google.com/maps/documentation/javascript/reference/map#MapOptions.isFractionalZoomEnabled
+            // If VECTOR, the map freezes sometimes when a lot of markers are added. RASTER seems more stable.
+            "renderingType": google.maps.RenderingType.RASTER, // https://developers.google.com/maps/documentation/javascript/map-rendering-type#rendering-type
+            "mapId": "9913fa533c4bf328"
+        });
         determineRequestPeriod();
         createMapsControls();
         addMunicipalitiyMarkers();
@@ -1647,7 +1615,14 @@ async function initMap() {
         containerElm.addEventListener("dblclick", markUserZooming);
         containerElm.addEventListener("keydown", function (event) {
             // Arrow keys, +, -, PageUp/PageDown all manipulate the map.
-            if (event.key === "+" || event.key === "-" || event.key === "=" || event.key.startsWith("Arrow") || event.key === "PageUp" || event.key === "PageDown") {
+            if (
+                event.key === "+" ||
+                event.key === "-" ||
+                event.key === "=" ||
+                event.key.startsWith("Arrow") ||
+                event.key === "PageUp" ||
+                event.key === "PageDown"
+            ) {
                 markUserZooming();
             }
         });
@@ -1668,7 +1643,7 @@ async function initMap() {
                     // Set to 7 days
                     periodFilter.elm.value = "7d";
                     updatePeriodFilter();
-                } else if (zoom <= 15 && (periodFilter.period === "all")) {
+                } else if (zoom <= 15 && periodFilter.period === "all") {
                     // Set to 14 days
                     periodFilter.elm.value = "14d";
                     updatePeriodFilter();
@@ -1696,7 +1671,7 @@ async function initMap() {
             tryOpenPublicationFromUrl();
         });
         loadData(true);
-        console.log("Using Maps version " + google.maps.version);  // https://developers.google.com/maps/documentation/javascript/releases
+        console.log("Using Maps version " + google.maps.version); // https://developers.google.com/maps/documentation/javascript/releases
         console.log("Map renderingType " + appState.map.renderingType);
     }
 
@@ -1728,7 +1703,17 @@ async function initMap() {
         //          gmb-2023-56454
         //          wsb-2023-801
         //          stcrt-2023-128
-        return "https://repository.overheid.nl/frbr/officielepublicaties/" + licenseIdArray[0] + "/" + licenseIdArray[1] + "/" + licenseId + "/1/xml/" + licenseId + ".xml";
+        return (
+            "https://repository.overheid.nl/frbr/officielepublicaties/" +
+            licenseIdArray[0] +
+            "/" +
+            licenseIdArray[1] +
+            "/" +
+            licenseId +
+            "/1/xml/" +
+            licenseId +
+            ".xml"
+        );
     }
 
     /**
@@ -1737,7 +1722,6 @@ async function initMap() {
      * @return {boolean} True if records are found.
      */
     function addPublications(responseJson) {
-
         /**
          * Sort raw API records by modification date (newest first), with title
          * and URL as tiebreakers. Operates on the raw response so the cost is
@@ -1748,7 +1732,6 @@ async function initMap() {
          * @return {number} Comparison result.
          */
         function sortRecords(a, b) {
-
             /**
              * Extract the modification-date string from a raw SRU record.
              * @param {!Object} record Raw SRU record.
@@ -1757,7 +1740,7 @@ async function initMap() {
             function getRawDate(record) {
                 const meta = record.recordData.gzd.originalData.meta;
                 if (meta.hasOwnProperty("tpmeta") && meta.tpmeta.hasOwnProperty("datumTijdstipWijzigingWork")) {
-                    return meta.tpmeta.datumTijdstipWijzigingWork;  // ISO-ish string, lexicographically comparable
+                    return meta.tpmeta.datumTijdstipWijzigingWork; // ISO-ish string, lexicographically comparable
                 }
                 return "";
             }
@@ -1791,11 +1774,7 @@ async function initMap() {
             const dateA = getRawDate(a);
             const dateB = getRawDate(b);
             if (dateA !== dateB) {
-                return (
-                    dateA < dateB
-                    ? 1
-                    : -1
-                );  // Newest first
+                return dateA < dateB ? 1 : -1; // Newest first
             }
             return (getRawTitle(a) + getRawUrl(a)).localeCompare(getRawTitle(b) + getRawUrl(b), "nl");
         }
@@ -1806,7 +1785,6 @@ async function initMap() {
          * @return {void}
          */
         function addPublication(inputRecord) {
-
             /**
              * Determine the publication type from the record's metadata.
              * Prefers the fine-grained tpmeta.activiteit when present, falls back to the generic owmskern.type, and finally to "onbekend".
@@ -1820,26 +1798,22 @@ async function initMap() {
                         meta.tpmeta.activiteit = meta.tpmeta.activiteit[0];
                     }
                     switch (meta.tpmeta.activiteit.$) {
-                    case "bouwen":
-                    case "slopen":
-                    case "uitweg en inrit":
-                    case "kappen":
-                    case "milieu":
-                    case "natuur":
-                    case "reclame":
-                    case "brandveilig gebruik":
-                    case "ruimtelijke ordening":
-                        return meta.tpmeta.activiteit.$;
-                    default:
-                        console.error("Unexpected activiteit: '" + meta.tpmeta.activiteit.$ + "' " + JSON.stringify(meta, null, 4));
+                        case "bouwen":
+                        case "slopen":
+                        case "uitweg en inrit":
+                        case "kappen":
+                        case "milieu":
+                        case "natuur":
+                        case "reclame":
+                        case "brandveilig gebruik":
+                        case "ruimtelijke ordening":
+                            return meta.tpmeta.activiteit.$;
+                        default:
+                            console.error("Unexpected activiteit: '" + meta.tpmeta.activiteit.$ + "' " + JSON.stringify(meta, null, 4));
                     }
                 }
                 if (meta.hasOwnProperty("owmskern") && meta.owmskern.hasOwnProperty("type")) {
-                    return (
-                        Array.isArray(meta.owmskern.type)
-                        ? meta.owmskern.type[0].$.trim()
-                        : meta.owmskern.type.$.trim()
-                    );
+                    return Array.isArray(meta.owmskern.type) ? meta.owmskern.type[0].$.trim() : meta.owmskern.type.$.trim();
                 }
                 console.warn("Type fallback to 'onbekend' because no better available: " + JSON.stringify(meta, null, 4));
                 return "onbekend";
@@ -1907,7 +1881,6 @@ async function initMap() {
              * @return {void}
              */
             function processCoordinate(list, gebiedsmarkering) {
-
                 /**
                  * Append a "lat lng" coordinate to the outer list, skipping exact duplicates (common when the same point appears as both the first and last vertex of a closed polygon).
                  * @param {string} coordinate "lat lng" coordinate string.
@@ -1933,15 +1906,38 @@ async function initMap() {
                     // The city "Amersfoort" is used as reference "Rijksdriehoek" coordinate.
                     const referenceRdX = 155000;
                     const referenceRdY = 463000;
-                    const dX = (x - referenceRdX) * (Math.pow(10, -5));
-                    const dY = (y - referenceRdY) * (Math.pow(10, -5));
-                    const sumN = (3235.65389 * dY) + (-32.58297 * Math.pow(dX, 2)) + (-0.2475 * Math.pow(dY, 2)) + (-0.84978 * Math.pow(dX, 2) * dY) + (-0.0655 * Math.pow(dY, 3)) + (-0.01709 * Math.pow(dX, 2) * Math.pow(dY, 2)) + (-0.00738 * dX) + (0.0053 * Math.pow(dX, 4)) + (-0.00039 * Math.pow(dX, 2) * Math.pow(dY, 3)) + (0.00033 * Math.pow(dX, 4) * dY) + (-0.00012 * dX * dY);
-                    const sumE = (5260.52916 * dX) + (105.94684 * dX * dY) + (2.45656 * dX * Math.pow(dY, 2)) + (-0.81885 * Math.pow(dX, 3)) + (0.05594 * dX * Math.pow(dY, 3)) + (-0.05607 * Math.pow(dX, 3) * dY) + (0.01199 * dY) + (-0.00256 * Math.pow(dX, 3) * Math.pow(dY, 2)) + (0.00128 * dX * Math.pow(dY, 4)) + (0.00022 * Math.pow(dY, 2)) + (-0.00022 * Math.pow(dX, 2)) + (0.00026 * Math.pow(dX, 5));
+                    const dX = (x - referenceRdX) * Math.pow(10, -5);
+                    const dY = (y - referenceRdY) * Math.pow(10, -5);
+                    const sumN =
+                        3235.65389 * dY +
+                        -32.58297 * Math.pow(dX, 2) +
+                        -0.2475 * Math.pow(dY, 2) +
+                        -0.84978 * Math.pow(dX, 2) * dY +
+                        -0.0655 * Math.pow(dY, 3) +
+                        -0.01709 * Math.pow(dX, 2) * Math.pow(dY, 2) +
+                        -0.00738 * dX +
+                        0.0053 * Math.pow(dX, 4) +
+                        -0.00039 * Math.pow(dX, 2) * Math.pow(dY, 3) +
+                        0.00033 * Math.pow(dX, 4) * dY +
+                        -0.00012 * dX * dY;
+                    const sumE =
+                        5260.52916 * dX +
+                        105.94684 * dX * dY +
+                        2.45656 * dX * Math.pow(dY, 2) +
+                        -0.81885 * Math.pow(dX, 3) +
+                        0.05594 * dX * Math.pow(dY, 3) +
+                        -0.05607 * Math.pow(dX, 3) * dY +
+                        0.01199 * dY +
+                        -0.00256 * Math.pow(dX, 3) * Math.pow(dY, 2) +
+                        0.00128 * dX * Math.pow(dY, 4) +
+                        0.00022 * Math.pow(dY, 2) +
+                        -0.00022 * Math.pow(dX, 2) +
+                        0.00026 * Math.pow(dX, 5);
                     // The city "Amersfoort" is used as reference "WGS84" coordinate.
                     const referenceWgs84X = 52.15517;
                     const referenceWgs84Y = 5.387206;
-                    const latitude = referenceWgs84X + (sumN / 3600);
-                    const longitude = referenceWgs84Y + (sumE / 3600);
+                    const latitude = referenceWgs84X + sumN / 3600;
+                    const longitude = referenceWgs84Y + sumE / 3600;
                     // Input
                     // x = 122202
                     // y = 487250
@@ -1997,13 +1993,18 @@ async function initMap() {
                     // Multi-ring (donut/island): POLYGON((outer...),(inner1...),(inner2...))
                     // We render every vertex regardless of which ring it belongs to, so flatten all rings by stripping every "(" and ")".
                     if (locatiegebied.startsWith("POLYGON")) {
-                        const coordinates = locatiegebied.replace(/^POLYGON\s*/, "").replace(/[()]/g, "").split(",");
+                        const coordinates = locatiegebied
+                            .replace(/^POLYGON\s*/, "")
+                            .replace(/[()]/g, "")
+                            .split(",");
                         coordinates.forEach(function (coordinate) {
                             const latLng = coordinate.trim().split(" ");
                             if (latLng.length === 2) {
                                 addCoordinateToList(latLng[1] + " " + latLng[0]);
                             } else {
-                                console.error("Unable to convert polygon coordinate " + locatiegebied + " " + JSON.stringify(gebiedsmarkering, null, 4));
+                                console.error(
+                                    "Unable to convert polygon coordinate " + locatiegebied + " " + JSON.stringify(gebiedsmarkering, null, 4)
+                                );
                             }
                         });
                     } else if (locatiegebied.startsWith("LINESTRING")) {
@@ -2031,7 +2032,10 @@ async function initMap() {
                     // Single-ring: POLYGON ((177456.11 361401.39, 177459.78 361374.02, ..., 177456.11 361401.39))
                     // Multi-ring is also possible; flatten all rings by stripping every "(" and ")".
                     if (geometrie.startsWith("POLYGON")) {
-                        const coordinates = geometrie.replace(/^POLYGON\s*/, "").replace(/[()]/g, "").split(",");
+                        const coordinates = geometrie
+                            .replace(/^POLYGON\s*/, "")
+                            .replace(/[()]/g, "")
+                            .split(",");
                         coordinates.forEach(function (coordinate) {
                             const latLngRijksdriehoek = coordinate.trim().split(/\s+/);
                             if (latLngRijksdriehoek.length === 2) {
@@ -2039,7 +2043,12 @@ async function initMap() {
                                 addCoordinateToList(latLng.lat + " " + latLng.lng);
                                 console.log("Converted " + geometrie + " to " + latLng.lat + " " + latLng.lng);
                             } else {
-                                console.error("Unable to convert legacy point as polygon coordinate " + geometrie + " " + JSON.stringify(gebiedsmarkering, null, 4));
+                                console.error(
+                                    "Unable to convert legacy point as polygon coordinate " +
+                                        geometrie +
+                                        " " +
+                                        JSON.stringify(gebiedsmarkering, null, 4)
+                                );
                             }
                         });
                     } else {
@@ -2056,11 +2065,11 @@ async function initMap() {
                 }
 
                 if (gebiedsmarkering.hasOwnProperty("Punt") && gebiedsmarkering.Punt.hasOwnProperty("locatiepunt")) {
-                    addCoordinateToList(gebiedsmarkering.Punt.locatiepunt);  // "51.5153294378518 4.6993593555447"
+                    addCoordinateToList(gebiedsmarkering.Punt.locatiepunt); // "51.5153294378518 4.6993593555447"
                 } else if (gebiedsmarkering.hasOwnProperty("Punt") && gebiedsmarkering.Punt.hasOwnProperty("geometrie")) {
-                    processPointLegacy(gebiedsmarkering.Punt.geometrie);  // "POINT(120097.26  488031.32)"
+                    processPointLegacy(gebiedsmarkering.Punt.geometrie); // "POINT(120097.26  488031.32)"
                 } else if (gebiedsmarkering.hasOwnProperty("Adres") && gebiedsmarkering.Adres.hasOwnProperty("locatiepunt")) {
-                    addCoordinateToList(gebiedsmarkering.Adres.locatiepunt);  // "51.5153294378518 4.6993593555447"
+                    addCoordinateToList(gebiedsmarkering.Adres.locatiepunt); // "51.5153294378518 4.6993593555447"
                 } else if (gebiedsmarkering.hasOwnProperty("Vlak") && gebiedsmarkering.Vlak.hasOwnProperty("locatiegebied")) {
                     // POLYGON((4.6486927 51.821361,4.6486994 51.821359,4.6490134 51.821248,4.6493861 51.82149,4.6493794 51.821528,4.6491439 51.821666,4.6490908 51.82163,4.6488611 51.821475,4.6486927 51.821361))
                     processPolygon(gebiedsmarkering.Vlak.locatiegebied);
@@ -2076,10 +2085,12 @@ async function initMap() {
                     processLine(gebiedsmarkering.Weg.locatiegebied);
                 } else if (gebiedsmarkering.hasOwnProperty("Lijn") && gebiedsmarkering.Lijn.hasOwnProperty("locatiegebied")) {
                     processLine(gebiedsmarkering.Lijn.locatiegebied);
-                } else if (gebiedsmarkering.hasOwnProperty("Gemeente") ||
+                } else if (
+                    gebiedsmarkering.hasOwnProperty("Gemeente") ||
                     gebiedsmarkering.hasOwnProperty("Woonplaats") ||
                     gebiedsmarkering.hasOwnProperty("Waterschap") ||
-                    gebiedsmarkering.hasOwnProperty("Provincie")) {
+                    gebiedsmarkering.hasOwnProperty("Provincie")
+                ) {
                     // Ignore this.
                 } else {
                     console.error("Format of gebiedsmarkering not supported: " + JSON.stringify(gebiedsmarkering, null, 4));
@@ -2087,11 +2098,13 @@ async function initMap() {
             }
 
             try {
-                const urlDoc = (
-                    inputRecord.recordData.gzd.enrichedData.hasOwnProperty("preferredUrl") && typeof inputRecord.recordData.gzd.enrichedData.preferredUrl === "string"
-                    ? inputRecord.recordData.gzd.enrichedData.preferredUrl.trim()
-                    : ""
-                );
+                const urlDoc =
+                    (
+                        inputRecord.recordData.gzd.enrichedData.hasOwnProperty("preferredUrl") &&
+                        typeof inputRecord.recordData.gzd.enrichedData.preferredUrl === "string"
+                    ) ?
+                        inputRecord.recordData.gzd.enrichedData.preferredUrl.trim()
+                    :   "";
 
                 const description = getDescription(inputRecord.recordData.gzd.originalData.meta);
                 const type = getType(inputRecord.recordData.gzd.originalData.meta);
@@ -2110,7 +2123,10 @@ async function initMap() {
                     "description": description
                 };
                 publication.location = [];
-                if (inputRecord.recordData.gzd.originalData.meta.hasOwnProperty("tpmeta") && inputRecord.recordData.gzd.originalData.meta.tpmeta.hasOwnProperty("gebiedsmarkering")) {
+                if (
+                    inputRecord.recordData.gzd.originalData.meta.hasOwnProperty("tpmeta") &&
+                    inputRecord.recordData.gzd.originalData.meta.tpmeta.hasOwnProperty("gebiedsmarkering")
+                ) {
                     if (Array.isArray(inputRecord.recordData.gzd.originalData.meta.tpmeta.gebiedsmarkering)) {
                         // Process one by one.
                         inputRecord.recordData.gzd.originalData.meta.tpmeta.gebiedsmarkering.forEach(function (gebiedsmarkering) {
@@ -2185,21 +2201,24 @@ async function initMap() {
         const host = "https://basgroot.github.io";
         const url = host + path;
         console.debug("Retrieving " + url + "..");
-        return fetch(url, {"method": "GET"}).then(function (response) {
-            if (!response.ok) {
-                console.error(response);
-                throw new Error("HTTP " + response.status + " for " + url);
-            }
-            return response.json();
-        }).then(function (json) {
-            if (typeof callback === "function") {
-                callback(json);
-            }
-            return json;
-        }).catch(function (error) {
-            console.error(error);
-            throw error;
-        });
+        return fetch(url, { "method": "GET" })
+            .then(function (response) {
+                if (!response.ok) {
+                    console.error(response);
+                    throw new Error("HTTP " + response.status + " for " + url);
+                }
+                return response.json();
+            })
+            .then(function (json) {
+                if (typeof callback === "function") {
+                    callback(json);
+                }
+                return json;
+            })
+            .catch(function (error) {
+                console.error(error);
+                throw error;
+            });
     }
 
     /**
@@ -2213,16 +2232,22 @@ async function initMap() {
      * @return {void}
      */
     function loadHistory(period, isNewRequest) {
-        const lookupMunicipality = (
-            appState.municipalities[appState.activeMunicipality].hasOwnProperty("lookupName")
-            ? appState.municipalities[appState.activeMunicipality].lookupName
-            : appState.activeMunicipality
-        );
+        const lookupMunicipality =
+            appState.municipalities[appState.activeMunicipality].hasOwnProperty("lookupName") ?
+                appState.municipalities[appState.activeMunicipality].lookupName
+            :   appState.activeMunicipality;
         const periodArray = period.split("-");
         if (periodArray.length !== 2) {
             throw new Error("Invalid period: " + period);
         }
-        const url = "/bekendmakingen/history/" + periodArray[0] + "/" + encodeURIComponent(lookupMunicipality.toLowerCase().replace(/\s/g, "-")) + "-" + period + ".json";
+        const url =
+            "/bekendmakingen/history/" +
+            periodArray[0] +
+            "/" +
+            encodeURIComponent(lookupMunicipality.toLowerCase().replace(/\s/g, "-")) +
+            "-" +
+            period +
+            ".json";
         if (isNewRequest) {
             setLoadingIndicatorVisibility("show");
             clearMarkers(appState.activeMunicipality);
@@ -2253,7 +2278,12 @@ async function initMap() {
                     return publication.date < appState.requestPeriod.startDate;
                 });
                 if (publicationIndex >= 0) {
-                    console.log("Deleting " + (responseJson.publications.length - publicationIndex) + " historical items from before " + appState.requestPeriod.startDate.toDateString());
+                    console.log(
+                        "Deleting " +
+                            (responseJson.publications.length - publicationIndex) +
+                            " historical items from before " +
+                            appState.requestPeriod.startDate.toDateString()
+                    );
                     responseJson.publications = responseJson.publications.slice(0, publicationIndex);
                 }
                 appState.publicationsArray = appState.publicationsArray.concat(responseJson.publications);
@@ -2277,7 +2307,6 @@ async function initMap() {
      * @return {void}
      */
     function loadDataForMunicipality(municipality, startRecord) {
-
         /**
          * Process the API response.
          * @param {Object} responseJson
@@ -2295,7 +2324,14 @@ async function initMap() {
                 hideActiveMunicipalityMarker();
             }
             if (addPublications(responseJson)) {
-                console.log("Found " + responseJson.searchRetrieveResponse.records.record.length + " bekendmakingen of " + responseJson.searchRetrieveResponse.numberOfRecords + " in " + municipality);
+                console.log(
+                    "Found " +
+                        responseJson.searchRetrieveResponse.records.record.length +
+                        " bekendmakingen of " +
+                        responseJson.searchRetrieveResponse.numberOfRecords +
+                        " in " +
+                        municipality
+                );
             } else {
                 console.log("No new bekendmakingen found in " + municipality);
             }
@@ -2324,7 +2360,9 @@ async function initMap() {
         function loadDataWithRetries(url, retriesLeft) {
             if (retriesLeft <= 0) {
                 console.error("Giving up loading " + url + " after multiple retries.");
-                globalThis.alert("Er is een probleem opgetreden bij het laden van de bekendmakingen van " + municipality + ".\nProbeer het later nogmaals.");
+                globalThis.alert(
+                    "Er is een probleem opgetreden bij het laden van de bekendmakingen van " + municipality + ".\nProbeer het later nogmaals."
+                );
                 setLoadingIndicatorVisibility("hide");
                 return;
             }
@@ -2335,27 +2373,33 @@ async function initMap() {
                 {
                     "method": "GET"
                 }
-            ).then(function (response) {
-                if (response.ok) {
-                    response.json().then(processResponse);
-                } else {
-                    console.error(response);
-                    // This happens when response is 503 Service Unavailable, for example.
+            )
+                .then(function (response) {
+                    if (response.ok) {
+                        response.json().then(processResponse);
+                    } else {
+                        console.error(response);
+                        // This happens when response is 503 Service Unavailable, for example.
+                        loadDataWithRetries(url, retriesLeft - 1);
+                    }
+                })
+                .catch(function (error) {
+                    console.error(error);
                     loadDataWithRetries(url, retriesLeft - 1);
-                }
-            }).catch(function (error) {
-                console.error(error);
-                loadDataWithRetries(url, retriesLeft - 1);
-            });
+                });
         }
 
-        const lookupMunicipality = (
-            appState.municipalities[municipality].hasOwnProperty("lookupName")
-            ? appState.municipalities[municipality].lookupName
-            : municipality
-        );
+        const lookupMunicipality =
+            appState.municipalities[municipality].hasOwnProperty("lookupName") ? appState.municipalities[municipality].lookupName : municipality;
         setLoadingIndicatorVisibility("show");
-        const url = "https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.modified%3E=" + appState.requestPeriod.startDateString + "%20AND%20dt.creator=%22" + encodeURIComponent(lookupMunicipality) + "%22%20sortBy%20dt.modified%20/sort.descending&maximumRecords=500&startRecord=" + startRecord + "&httpAccept=application/json";
+        const url =
+            "https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.modified%3E=" +
+            appState.requestPeriod.startDateString +
+            "%20AND%20dt.creator=%22" +
+            encodeURIComponent(lookupMunicipality) +
+            "%22%20sortBy%20dt.modified%20/sort.descending&maximumRecords=500&startRecord=" +
+            startRecord +
+            "&httpAccept=application/json";
         loadDataWithRetries(url, 3);
     }
 
@@ -2424,19 +2468,18 @@ async function initMap() {
      * @return {void}
      */
     function init() {
-        Promise.all([
-            getData("/bekendmakingen/periods.json"),
-            getData("/bekendmakingen/municipalities.json")
-        ]).then(function (results) {
-            const periodsJson = results[0];
-            const municipalitiesJson = results[1];
-            appState.periods = periodsJson.periods;
-            // Source: https://organisaties.overheid.nl/Gemeenten/
-            appState.municipalities = municipalitiesJson;
-            getLocationAndLoadData();
-        }).catch(function (error) {
-            console.error("Failed to load configuration", error);
-        });
+        Promise.all([getData("/bekendmakingen/periods.json"), getData("/bekendmakingen/municipalities.json")])
+            .then(function (results) {
+                const periodsJson = results[0];
+                const municipalitiesJson = results[1];
+                appState.periods = periodsJson.periods;
+                // Source: https://organisaties.overheid.nl/Gemeenten/
+                appState.municipalities = municipalitiesJson;
+                getLocationAndLoadData();
+            })
+            .catch(function (error) {
+                console.error("Failed to load configuration", error);
+            });
     }
 
     init();
