@@ -797,11 +797,7 @@ async function initMap() {
         if (title.includes("aanvraag") || title.includes("verlenging")) {
             return "aanvraag"; // Halfwitty, CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0, via Wikimedia Commons
         }
-        if (
-            exploitatievergunningen.includes(type) ||
-            title.includes("exploitatievergunning") ||
-            title.includes("alcoholwetvergunning")
-        ) {
+        if (exploitatievergunningen.includes(type) || title.includes("exploitatievergunning") || title.includes("alcoholwetvergunning")) {
             return "bar";
         }
         if (title.includes("evenement") || title.includes("loterij")) {
