@@ -71,6 +71,13 @@ h2.info_window_heading {
     box-shadow: 0 0 0 4px #5a01a7;
 }
 
+@media (forced-colors: active) {
+    .controlStyle:focus {
+        outline: 3px solid ButtonText;
+        box-shadow: none;
+    }
+}
+
 .municipalityCombo {
     min-width: 220px;
     text-align: left;
