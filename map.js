@@ -2229,6 +2229,8 @@ async function initMap() {
     function showToast(message) {
         const toast = document.createElement("div");
         toast.className = "toastNotification";
+        toast.setAttribute("role", "status");
+        toast.setAttribute("aria-live", "polite");
         toast.textContent = message;
         const container = document.getElementById("map") || document.body;
         container.appendChild(toast);
