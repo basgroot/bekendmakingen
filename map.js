@@ -989,11 +989,23 @@ async function initMap() {
         /**
          * Handles the hover event. Highlight the icon (and related icons) on hover.
          */
+        let relatedMarkerImgs = null;
+        function getRelatedMarkerImgs() {
+            if (relatedMarkerImgs === null) {
+                relatedMarkerImgs = appState.markersArray
+                    .filter(function (markerObject) {
+                        return markerObject.url === publication.urlDoc;
+                    })
+                    .map(function (markerObject) {
+                        return markerObject.marker.content.getElementsByTagName("img")[0];
+                    });
+            }
+            return relatedMarkerImgs;
+        }
+
         function handleMarkerMouseOver() {
-            appState.markersArray.forEach(function (markerObject) {
-                if (markerObject.url === publication.urlDoc) {
-                    markerObject.marker.content.getElementsByTagName("img")[0].src = "img/" + iconName + "-highlight.png";
-                }
+            getRelatedMarkerImgs().forEach(function (img) {
+                img.src = "img/" + iconName + "-highlight.png";
             });
         }
 
@@ -1001,10 +1013,8 @@ async function initMap() {
          * Handles the mouse out event. Remove the highlight.
          */
         function handleMarkerMouseOut() {
-            appState.markersArray.forEach(function (markerObject) {
-                if (markerObject.url === publication.urlDoc) {
-                    markerObject.marker.content.getElementsByTagName("img")[0].src = "img/" + iconName + ".png";
-                }
+            getRelatedMarkerImgs().forEach(function (img) {
+                img.src = "img/" + iconName + ".png";
             });
         }
 
