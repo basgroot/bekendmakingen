@@ -135,8 +135,6 @@ async function initMap() {
 
         const img = document.createElement("img");
         img.src = "img/" + iconName + ".svg";
-        img.width = 105;
-        img.height = 135;
         img.className = "info_window_image";
         img.alt = "";
         container.appendChild(img);
