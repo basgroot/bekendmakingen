@@ -747,10 +747,7 @@ async function initMap() {
         button.type = "button";
         button.addEventListener("click", function () {
             const url = "https://github.com/basgroot/bekendmakingen";
-            if (globalThis.open(url, "_blank", "noopener,noreferrer") === null) {
-                // Popup blocker or something preventing a new tab
-                globalThis.location.href = url;
-            }
+            globalThis.open(url, "_blank", "noopener,noreferrer");
         });
         button.classList.add("controlStyle");
         controlDiv.appendChild(button);
