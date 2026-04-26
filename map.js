@@ -201,6 +201,7 @@ async function initMap() {
             copyButton.type = "button";
             copyButton.className = "info_window_copy_link";
             copyButton.textContent = "Kopieer link";
+            copyButton.setAttribute("aria-live", "polite");
             copyButton.addEventListener("click", function () {
                 // Make sure the URL reflects the currently shown publication
                 // before copying (in case the user clicked very quickly).
