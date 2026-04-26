@@ -1563,6 +1563,7 @@ async function initMap() {
         const mapSettings = getInitialMapSettings();
         const screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
         appState.loadingIndicator.id = "idLoadingIndicator";
+        appState.loadingIndicator.alt = "";
         appState.loadingIndicator.style.width = Math.max((screenWidth / 100) * 12, 70) + "px";
         appState.loadingIndicator.src = "img/ajax-loader.gif"; // ConnectedWizard, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
         // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindowOptions
@@ -1635,17 +1636,17 @@ async function initMap() {
                     // Set to 3 days
                     periodFilter.elm.value = "3d";
                     updatePeriodFilter();
-                    showToast("Periode verkleind naar 3 dagen");
+                    showToast("Periode verkleind naar laatste 3 dagen");
                 } else if (zoom <= 14 && (periodFilter.period === "14d" || periodFilter.period === "all")) {
                     // Set to 7 days
                     periodFilter.elm.value = "7d";
                     updatePeriodFilter();
-                    showToast("Periode verkleind naar 7 dagen");
+                    showToast("Periode verkleind naar laatste week");
                 } else if (zoom <= 15 && periodFilter.period === "all") {
                     // Set to 14 days
                     periodFilter.elm.value = "14d";
                     updatePeriodFilter();
-                    showToast("Periode verkleind naar 14 dagen");
+                    showToast("Periode verkleind naar laatste twee weken");
                 }
             }
             closeInfoWindow();
