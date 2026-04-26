@@ -1635,14 +1635,17 @@ async function initMap() {
                     // Set to 3 days
                     periodFilter.elm.value = "3d";
                     updatePeriodFilter();
+                    showToast("Periode verkleind naar 3 dagen");
                 } else if (zoom <= 14 && (periodFilter.period === "14d" || periodFilter.period === "all")) {
                     // Set to 7 days
                     periodFilter.elm.value = "7d";
                     updatePeriodFilter();
+                    showToast("Periode verkleind naar 7 dagen");
                 } else if (zoom <= 15 && periodFilter.period === "all") {
                     // Set to 14 days
                     periodFilter.elm.value = "14d";
                     updatePeriodFilter();
+                    showToast("Periode verkleind naar 14 dagen");
                 }
             }
             closeInfoWindow();
@@ -2194,19 +2197,32 @@ async function initMap() {
     function showError(message) {
         const banner = document.createElement("div");
         banner.setAttribute("role", "alert");
+        banner.className = "errorBanner";
         banner.textContent = message;
-        banner.style.cssText =
-            "position:absolute;top:10px;left:50%;transform:translateX(-50%);" +
-            "background:#b00020;color:#fff;padding:12px 20px;border-radius:6px;" +
-            "font-size:14px;max-width:80%;text-align:center;cursor:pointer;z-index:9999;box-shadow:0 2px 6px rgba(0,0,0,.4);";
         const container = document.getElementById("map") || document.body;
         container.appendChild(banner);
-        const remove = function () {
-            if (banner.parentNode) {
-                banner.parentNode.removeChild(banner);
+        banner.addEventListener("click", function () {
+            globalThis.location.reload();
+        });
+    }
+
+    /**
+     * Show a brief toast notification at the bottom of the map.
+     * Disappears automatically after 3 seconds.
+     * @param {string} message Message to display.
+     * @return {void}
+     */
+    function showToast(message) {
+        const toast = document.createElement("div");
+        toast.className = "toastNotification";
+        toast.textContent = message;
+        const container = document.getElementById("map") || document.body;
+        container.appendChild(toast);
+        globalThis.setTimeout(function () {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
             }
-        };
-        banner.addEventListener("click", remove);
+        }, 3000);
     }
 
     /**

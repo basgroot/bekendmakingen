@@ -74,6 +74,35 @@ h2.info_window_heading {
     padding: 0 10px;
 }
 
+.municipalityContainer {
+    position: relative;
+    text-align: center;
+    color: black;
+    font-size: 15px;
+}
+
+.municipalityLabel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.toastNotification {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-family: Roboto, Arial, sans-serif;
+    font-size: 13px;
+    pointer-events: none;
+    z-index: 9999;
+}
+
 .errorBanner {
     position: absolute;
     top: 10px;
@@ -91,18 +120,4 @@ h2.info_window_heading {
     z-index: 9999;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
     white-space: pre-line;
-}
-
-.municipalityContainer {
-    position: relative;
-    text-align: center;
-    color: black;
-    font-size: 15px;
-}
-
-.municipalityLabel {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
 }
