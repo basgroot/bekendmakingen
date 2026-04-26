@@ -523,6 +523,7 @@ async function initMap() {
         let j;
         let alinea;
         let textToShow = "";
+        let textToShowBold = "";
         let isNextValueBekendmakingsDate = false;
         let isBezwaartermijnFound = false;
         for (i = 0; i < alineas.length; i += 1) {
@@ -539,13 +540,13 @@ async function initMap() {
                             textToShow =
                                 "Gepubliceerd: " +
                                 publication.date.toLocaleDateString("nl-NL", dateFormatOptions) +
-                                ".<br />Bekendgemaakt aan belanghebbende: " +
+                                ".\nBekendgemaakt aan belanghebbende: " +
                                 datumBekendgemaakt.date.toLocaleDateString("nl-NL", dateFormatOptions) +
-                                ".<br />" +
-                                (resterendAantalDagenBezwaartermijn > 0 ?
+                                ".";
+                            textToShowBold =
+                                resterendAantalDagenBezwaartermijn > 0 ?
                                     "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
-                                :   "<b>Geen bezwaar meer mogelijk.</b>") +
-                                "<br /><br />";
+                                :   "Geen bezwaar meer mogelijk.";
                         }
                         break;
                     }
@@ -553,11 +554,21 @@ async function initMap() {
             }
         }
         if (!isBezwaartermijnFound) {
-            textToShow = "Gepubliceerd: " + publication.date.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br /><br />";
+            textToShow = "Gepubliceerd: " + publication.date.toLocaleDateString("nl-NL", dateFormatOptions) + ".";
         }
         const licenseIdElm = document.getElementById(licenseId);
         if (licenseIdElm !== null) {
-            licenseIdElm.innerHTML = textToShow;
+            licenseIdElm.textContent = "";
+            const textNode = document.createTextNode(textToShow);
+            licenseIdElm.appendChild(textNode);
+            if (textToShowBold) {
+                licenseIdElm.appendChild(document.createElement("br"));
+                const bold = document.createElement("b");
+                bold.textContent = textToShowBold;
+                licenseIdElm.appendChild(bold);
+            }
+            licenseIdElm.appendChild(document.createElement("br"));
+            licenseIdElm.appendChild(document.createElement("br"));
         }
     }
 
