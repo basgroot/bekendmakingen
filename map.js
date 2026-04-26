@@ -709,25 +709,6 @@ async function initMap() {
             return appState.initialPeriod;
         }
 
-        /**
-         * Show an error banner inside the map container. Unlike globalThis.alert(),
-         * this works in iframes, can be styled, and does not block the UI thread.
-         * The banner stays visible until the user clicks it, which reloads the page.
-         * @param {string} message Error message to display.
-         * @return {void}
-         */
-        function showError(message) {
-            const banner = document.createElement("div");
-            banner.setAttribute("role", "alert");
-            banner.className = "errorBanner";
-            banner.textContent = message;
-            banner.addEventListener("click", function () {
-                globalThis.location.reload();
-            });
-            const container = document.getElementById("map") || document.body;
-            container.appendChild(banner);
-        }
-
         // Get the period from the URL parameter or default to 2weeks:
         let selectedPeriod = getPeriodToSelect();
 
