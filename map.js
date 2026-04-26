@@ -717,7 +717,7 @@ async function initMap() {
         combobox.id = "idCbxPeriod";
         combobox.title = "Periode van de bekendmaking selecteren";
         appState.periods.forEach(function (period) {
-            combobox.add(createOption(period.key, period.val, selectedPeriod));
+            combobox.add(createOption(period.key, period.val, period.key === selectedPeriod));
         });
         combobox.addEventListener("change", updatePeriodFilter);
         combobox.classList.add("controlStyle");
