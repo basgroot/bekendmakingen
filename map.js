@@ -710,14 +710,22 @@ async function initMap() {
         }
 
         /**
-         * Creates an option element with the specified value. Period 14d is selected by default.
-         * @param {string} value The value of the option.
-         * @param {string} displayValue The value of the option to display.
-         * @param {string} defaultValue The default value to select.
-         * @return {!HTMLOptionElement} The created option element.
+         * Show an error banner inside the map container. Unlike globalThis.alert(),
+         * this works in iframes, can be styled, and does not block the UI thread.
+         * The banner stays visible until the user clicks it, which reloads the page.
+         * @param {string} message Error message to display.
+         * @return {void}
          */
-        function createOptionEx(value, displayValue, defaultValue) {
-            return createOption(value, displayValue, value === defaultValue);
+        function showError(message) {
+            const banner = document.createElement("div");
+            banner.setAttribute("role", "alert");
+            banner.className = "errorBanner";
+            banner.textContent = message;
+            banner.addEventListener("click", function () {
+                globalThis.location.reload();
+            });
+            const container = document.getElementById("map") || document.body;
+            container.appendChild(banner);
         }
 
         // Get the period from the URL parameter or default to 2weeks:
@@ -728,7 +736,7 @@ async function initMap() {
         combobox.id = "idCbxPeriod";
         combobox.title = "Periode van de bekendmaking selecteren";
         appState.periods.forEach(function (period) {
-            combobox.add(createOptionEx(period.key, period.val, selectedPeriod));
+            combobox.add(createOption(period.key, period.val, selectedPeriod));
         });
         combobox.addEventListener("change", updatePeriodFilter);
         combobox.classList.add("controlStyle");
@@ -2197,6 +2205,30 @@ async function initMap() {
     }
 
     /**
+     * Show an error banner inside the map container. Unlike globalThis.alert(),
+     * this works in iframes, can be styled, and does not block the UI thread.
+     * @param {string} message Error message to display.
+     * @return {void}
+     */
+    function showError(message) {
+        const banner = document.createElement("div");
+        banner.setAttribute("role", "alert");
+        banner.textContent = message;
+        banner.style.cssText =
+            "position:absolute;top:10px;left:50%;transform:translateX(-50%);" +
+            "background:#b00020;color:#fff;padding:12px 20px;border-radius:6px;" +
+            "font-size:14px;max-width:80%;text-align:center;cursor:pointer;z-index:9999;box-shadow:0 2px 6px rgba(0,0,0,.4);";
+        const container = document.getElementById("map") || document.body;
+        container.appendChild(banner);
+        const remove = function () {
+            if (banner.parentNode) {
+                banner.parentNode.removeChild(banner);
+            }
+        };
+        banner.addEventListener("click", remove);
+    }
+
+    /**
      * Download json from the Github Live Pages.
      * @param {string} path Path and file name to retrieve.
      * @param {function} callback Function when request is successful.
@@ -2308,7 +2340,7 @@ async function initMap() {
             console.error("Failed to load history " + url, error);
             setLoadingIndicatorVisibility("hide");
             if (isNewRequest) {
-                globalThis.alert("Er is een probleem opgetreden bij het laden van de historische bekendmakingen.\nProbeer het later nogmaals.");
+                showError("Er is een probleem opgetreden bij het laden van de historische bekendmakingen.\nProbeer het later nogmaals.");
             }
         });
     }
@@ -2370,9 +2402,7 @@ async function initMap() {
         function loadDataWithRetries(url, retriesLeft) {
             if (retriesLeft <= 0) {
                 console.error("Giving up loading " + url + " after multiple retries.");
-                globalThis.alert(
-                    "Er is een probleem opgetreden bij het laden van de bekendmakingen van " + municipality + ".\nProbeer het later nogmaals."
-                );
+                showError("Er is een probleem opgetreden bij het laden van de bekendmakingen van " + municipality + ".\nProbeer het later nogmaals.");
                 setLoadingIndicatorVisibility("hide");
                 return;
             }
@@ -2490,7 +2520,7 @@ async function initMap() {
             .catch(function (error) {
                 console.error("Failed to load configuration", error);
                 setLoadingIndicatorVisibility("hide");
-                globalThis.alert("Er is een probleem opgetreden bij het laden van de configuratie.\nProbeer het later nogmaals.");
+                showError("Er is een probleem opgetreden bij het laden van de configuratie.\nProbeer het later nogmaals.");
             });
     }
 

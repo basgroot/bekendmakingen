@@ -3,7 +3,7 @@ import globals from "globals";
 
 export default [
     {
-        "ignores": ["node_modules/**", "history/**", "**/*.min.js"]
+        "ignores": ["node_modules/**", "history/**", "**/*.min.js", "**/*.css"]
     },
     js.configs.recommended,
     {
