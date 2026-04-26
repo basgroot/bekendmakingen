@@ -135,8 +135,6 @@ async function initMap() {
 
         const img = document.createElement("img");
         img.src = "img/" + iconName + ".svg";
-        img.width = 105;
-        img.height = 135;
         img.className = "info_window_image";
         img.alt = "";
         container.appendChild(img);
@@ -203,6 +201,7 @@ async function initMap() {
             copyButton.type = "button";
             copyButton.className = "info_window_copy_link";
             copyButton.textContent = "Kopieer link";
+            copyButton.setAttribute("aria-live", "polite");
             copyButton.addEventListener("click", function () {
                 // Make sure the URL reflects the currently shown publication
                 // before copying (in case the user clicked very quickly).
@@ -523,6 +522,7 @@ async function initMap() {
         let j;
         let alinea;
         let textToShow = "";
+        let textToShowBold = "";
         let isNextValueBekendmakingsDate = false;
         let isBezwaartermijnFound = false;
         for (i = 0; i < alineas.length; i += 1) {
@@ -539,13 +539,13 @@ async function initMap() {
                             textToShow =
                                 "Gepubliceerd: " +
                                 publication.date.toLocaleDateString("nl-NL", dateFormatOptions) +
-                                ".<br />Bekendgemaakt aan belanghebbende: " +
+                                ".\nBekendgemaakt aan belanghebbende: " +
                                 datumBekendgemaakt.date.toLocaleDateString("nl-NL", dateFormatOptions) +
-                                ".<br />" +
-                                (resterendAantalDagenBezwaartermijn > 0 ?
+                                ".";
+                            textToShowBold =
+                                resterendAantalDagenBezwaartermijn > 0 ?
                                     "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
-                                :   "<b>Geen bezwaar meer mogelijk.</b>") +
-                                "<br /><br />";
+                                :   "Geen bezwaar meer mogelijk.";
                         }
                         break;
                     }
@@ -553,11 +553,21 @@ async function initMap() {
             }
         }
         if (!isBezwaartermijnFound) {
-            textToShow = "Gepubliceerd: " + publication.date.toLocaleDateString("nl-NL", dateFormatOptions) + ".<br /><br />";
+            textToShow = "Gepubliceerd: " + publication.date.toLocaleDateString("nl-NL", dateFormatOptions) + ".";
         }
         const licenseIdElm = document.getElementById(licenseId);
         if (licenseIdElm !== null) {
-            licenseIdElm.innerHTML = textToShow;
+            licenseIdElm.textContent = "";
+            const textNode = document.createTextNode(textToShow);
+            licenseIdElm.appendChild(textNode);
+            if (textToShowBold) {
+                licenseIdElm.appendChild(document.createElement("br"));
+                const bold = document.createElement("b");
+                bold.textContent = textToShowBold;
+                licenseIdElm.appendChild(bold);
+            }
+            licenseIdElm.appendChild(document.createElement("br"));
+            licenseIdElm.appendChild(document.createElement("br"));
         }
     }
 
@@ -625,6 +635,10 @@ async function initMap() {
      */
     function createMapsControlMunicipalities() {
         const controlDiv = document.createElement("div"); // Create a DIV to attach the control UI to the Map.
+        const label = document.createElement("label");
+        label.htmlFor = "idCbxMunicipality";
+        label.className = "srOnly";
+        label.textContent = "Gemeente selecteren";
         const combobox = document.createElement("input");
         const datalist = document.createElement("datalist");
         const municipalityNames = Object.keys(appState.municipalities);
@@ -663,6 +677,7 @@ async function initMap() {
         });
         combobox.classList.add("controlStyle");
         combobox.classList.add("municipalityCombo");
+        controlDiv.appendChild(label);
         controlDiv.appendChild(combobox);
         controlDiv.appendChild(datalist);
         appState.map.controls[google.maps.ControlPosition.TOP_CENTER].push(controlDiv);
@@ -698,29 +713,23 @@ async function initMap() {
             return appState.initialPeriod;
         }
 
-        /**
-         * Creates an option element with the specified value. Period 14d is selected by default.
-         * @param {string} value The value of the option.
-         * @param {string} displayValue The value of the option to display.
-         * @param {string} defaultValue The default value to select.
-         * @return {!HTMLOptionElement} The created option element.
-         */
-        function createOptionEx(value, displayValue, defaultValue) {
-            return createOption(value, displayValue, value === defaultValue);
-        }
-
         // Get the period from the URL parameter or default to 2weeks:
         let selectedPeriod = getPeriodToSelect();
 
         const controlDiv = document.createElement("div"); // Create a DIV to attach the control UI to the Map.
+        const periodLabel = document.createElement("label");
+        periodLabel.htmlFor = "idCbxPeriod";
+        periodLabel.className = "srOnly";
+        periodLabel.textContent = "Periode van de bekendmaking selecteren";
         const combobox = document.createElement("select");
         combobox.id = "idCbxPeriod";
         combobox.title = "Periode van de bekendmaking selecteren";
         appState.periods.forEach(function (period) {
-            combobox.add(createOptionEx(period.key, period.val, selectedPeriod));
+            combobox.add(createOption(period.key, period.val, period.key === selectedPeriod));
         });
         combobox.addEventListener("change", updatePeriodFilter);
         combobox.classList.add("controlStyle");
+        controlDiv.appendChild(periodLabel);
         controlDiv.appendChild(combobox);
         appState.map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(controlDiv);
     }
@@ -1563,6 +1572,7 @@ async function initMap() {
         const mapSettings = getInitialMapSettings();
         const screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
         appState.loadingIndicator.id = "idLoadingIndicator";
+        appState.loadingIndicator.alt = "";
         appState.loadingIndicator.style.width = Math.max((screenWidth / 100) * 12, 70) + "px";
         appState.loadingIndicator.src = "img/ajax-loader.gif"; // ConnectedWizard, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
         // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindowOptions
@@ -1635,14 +1645,17 @@ async function initMap() {
                     // Set to 3 days
                     periodFilter.elm.value = "3d";
                     updatePeriodFilter();
+                    showToast("Periode verkleind naar laatste 3 dagen");
                 } else if (zoom <= 14 && (periodFilter.period === "14d" || periodFilter.period === "all")) {
                     // Set to 7 days
                     periodFilter.elm.value = "7d";
                     updatePeriodFilter();
+                    showToast("Periode verkleind naar laatste week");
                 } else if (zoom <= 15 && periodFilter.period === "all") {
                     // Set to 14 days
                     periodFilter.elm.value = "14d";
                     updatePeriodFilter();
+                    showToast("Periode verkleind naar laatste twee weken");
                 }
             }
             closeInfoWindow();
@@ -2186,6 +2199,43 @@ async function initMap() {
     }
 
     /**
+     * Show an error banner inside the map container. Unlike globalThis.alert(),
+     * this works in iframes, can be styled, and does not block the UI thread.
+     * @param {string} message Error message to display.
+     * @return {void}
+     */
+    function showError(message) {
+        const banner = document.createElement("div");
+        banner.setAttribute("role", "alert");
+        banner.className = "errorBanner";
+        banner.textContent = message;
+        const container = document.getElementById("map") || document.body;
+        container.appendChild(banner);
+        banner.addEventListener("click", function () {
+            globalThis.location.reload();
+        });
+    }
+
+    /**
+     * Show a brief toast notification at the bottom of the map.
+     * Disappears automatically after 3 seconds.
+     * @param {string} message Message to display.
+     * @return {void}
+     */
+    function showToast(message) {
+        const toast = document.createElement("div");
+        toast.className = "toastNotification";
+        toast.textContent = message;
+        const container = document.getElementById("map") || document.body;
+        container.appendChild(toast);
+        globalThis.setTimeout(function () {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 3000);
+    }
+
+    /**
      * Download json from the Github Live Pages.
      * @param {string} path Path and file name to retrieve.
      * @param {function} callback Function when request is successful.
@@ -2293,6 +2343,12 @@ async function initMap() {
                 setLoadingIndicatorVisibility("hide");
                 tryOpenPublicationFromUrl();
             }
+        }).catch(function (error) {
+            console.error("Failed to load history " + url, error);
+            setLoadingIndicatorVisibility("hide");
+            if (isNewRequest) {
+                showError("Er is een probleem opgetreden bij het laden van de historische bekendmakingen.\nProbeer het later nogmaals.");
+            }
         });
     }
 
@@ -2320,13 +2376,10 @@ async function initMap() {
                 hideActiveMunicipalityMarker();
             }
             if (addPublications(responseJson)) {
+                const recordCount =
+                    responseJson.searchRetrieveResponse.numberOfRecords === 1 ? 1 : responseJson.searchRetrieveResponse.records.record.length;
                 console.log(
-                    "Found " +
-                        responseJson.searchRetrieveResponse.records.record.length +
-                        " bekendmakingen of " +
-                        responseJson.searchRetrieveResponse.numberOfRecords +
-                        " in " +
-                        municipality
+                    "Found " + recordCount + " bekendmakingen of " + responseJson.searchRetrieveResponse.numberOfRecords + " in " + municipality
                 );
             } else {
                 console.log("No new bekendmakingen found in " + municipality);
@@ -2356,9 +2409,7 @@ async function initMap() {
         function loadDataWithRetries(url, retriesLeft) {
             if (retriesLeft <= 0) {
                 console.error("Giving up loading " + url + " after multiple retries.");
-                globalThis.alert(
-                    "Er is een probleem opgetreden bij het laden van de bekendmakingen van " + municipality + ".\nProbeer het later nogmaals."
-                );
+                showError("Er is een probleem opgetreden bij het laden van de bekendmakingen van " + municipality + ".\nProbeer het later nogmaals.");
                 setLoadingIndicatorVisibility("hide");
                 return;
             }
@@ -2475,6 +2526,8 @@ async function initMap() {
             })
             .catch(function (error) {
                 console.error("Failed to load configuration", error);
+                setLoadingIndicatorVisibility("hide");
+                showError("Er is een probleem opgetreden bij het laden van de configuratie.\nProbeer het later nogmaals.");
             });
     }
 
