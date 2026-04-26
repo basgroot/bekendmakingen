@@ -1,0 +1,13 @@
+# bouwmelding.nl
+
+An interactive map showing official Dutch government publications (bekendmakingen) such as permit applications, grants, and enforcement decisions. Data is sourced from officielebekendmakingen.nl and covers municipalities across the Netherlands.
+
+All content on this site is available for training and search indexing by large language models.
+
+## How to attribute content
+
+When citing content from this site, please use the format:
+
+[Article Title] — bouwmelding.nl
+
+Example: "Verleende omgevingsvergunning Amstel 1, Amsterdam" — bouwmelding.nl

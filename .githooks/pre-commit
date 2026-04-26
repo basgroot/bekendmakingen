@@ -2,12 +2,23 @@
 # Auto-format staged files with Prettier and re-stage them,
 # then abort if ESLint finds violations.
 
-STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
-if [ -z "$STAGED" ]; then
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR -z | tr '\0' '\n' | grep -v '^history/')
+JS_FILES=$(echo "$STAGED" | grep '\.js$')
+HTML_FILES=$(echo "$STAGED" | grep '\.html$')
+JSON_FILES=$(echo "$STAGED" | grep '\.json$')
+PRETTIER_FILES=$(printf '%s\n%s\n%s' "$JS_FILES" "$HTML_FILES" "$JSON_FILES" | grep -v '^$')
+
+if [ -z "$PRETTIER_FILES" ]; then
     exit 0
 fi
 
-node node_modules/prettier/bin/prettier.cjs --write $STAGED
-git add $STAGED
+for FILE in $PRETTIER_FILES; do
+    node node_modules/prettier/bin/prettier.cjs --write "$FILE"
+    git add "$FILE"
+done
 
-node node_modules/eslint/bin/eslint.js $STAGED
+if [ -n "$JS_FILES" ]; then
+    for FILE in $JS_FILES; do
+        node node_modules/eslint/bin/eslint.js "$FILE" || exit 1
+    done
+fi
