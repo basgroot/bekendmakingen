@@ -634,6 +634,10 @@ async function initMap() {
      */
     function createMapsControlMunicipalities() {
         const controlDiv = document.createElement("div"); // Create a DIV to attach the control UI to the Map.
+        const label = document.createElement("label");
+        label.htmlFor = "idCbxMunicipality";
+        label.className = "srOnly";
+        label.textContent = "Gemeente selecteren";
         const combobox = document.createElement("input");
         const datalist = document.createElement("datalist");
         const municipalityNames = Object.keys(appState.municipalities);
@@ -672,6 +676,7 @@ async function initMap() {
         });
         combobox.classList.add("controlStyle");
         combobox.classList.add("municipalityCombo");
+        controlDiv.appendChild(label);
         controlDiv.appendChild(combobox);
         controlDiv.appendChild(datalist);
         appState.map.controls[google.maps.ControlPosition.TOP_CENTER].push(controlDiv);
@@ -711,6 +716,10 @@ async function initMap() {
         let selectedPeriod = getPeriodToSelect();
 
         const controlDiv = document.createElement("div"); // Create a DIV to attach the control UI to the Map.
+        const periodLabel = document.createElement("label");
+        periodLabel.htmlFor = "idCbxPeriod";
+        periodLabel.className = "srOnly";
+        periodLabel.textContent = "Periode van de bekendmaking selecteren";
         const combobox = document.createElement("select");
         combobox.id = "idCbxPeriod";
         combobox.title = "Periode van de bekendmaking selecteren";
@@ -719,6 +728,7 @@ async function initMap() {
         });
         combobox.addEventListener("change", updatePeriodFilter);
         combobox.classList.add("controlStyle");
+        controlDiv.appendChild(periodLabel);
         controlDiv.appendChild(combobox);
         appState.map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(controlDiv);
     }
