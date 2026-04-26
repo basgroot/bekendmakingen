@@ -3,7 +3,7 @@
     <head>
         <link rel="preconnect" href="https://basgroot.github.io" />
         <link rel="preconnect" href="https://repository.overheid.nl" />
-        <link rel="stylesheet" href="map.css" defer />
+        <link rel="stylesheet" href="map.css" />
         <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
         <link rel="manifest" href="/manifest.json" />
         <meta charset="UTF-8" />
@@ -26,17 +26,34 @@
         <link rel="preload" href="img/gemeente.png" as="image" />
         <link rel="preload" href="img/wetboek.png" as="image" />
         <link rel="preload" href="img/aanvraag.png" as="image" />
+        <script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4225848132552453"
+            crossorigin="anonymous"
+        ></script>
         <title>Bekendmakingen op kaart</title>
     </head>
     <body>
         <div id="map"></div>
-
+        <div id="adOverlay">
+            <ins
+                class="adsbygoogle"
+                style="display: block"
+                data-ad-client="ca-pub-4225848132552453"
+                data-ad-slot="6172638630"
+                data-ad-format="auto"
+                data-full-width-responsive="true"
+            ></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
         <script type="text/javascript" src="map.js" defer></script>
         <!-- Create your own key and white list your website: https://console.cloud.google.com/apis/credentials/ -->
         <!-- View usage: https://console.cloud.google.com/apis/dashboard -->
         <script
             type="text/javascript"
-            src="https://maps.googleapis.com/maps/api/js?v=weekly&key=AIzaSyCKZTaMWxCzxnX9ssNSIWYZiAZsI3lJNO0&language=nl&region=nl&callback=initMap"
+            src="https://maps.googleapis.com/maps/api/js?v=weekly&key=AIzaSyCKZTaMWxCzxnX9ssNSIWYZiAZsI3lJNO0&language=nl&region=nl&callback=initMap&loading=async"
             defer
         ></script>
     </body>
