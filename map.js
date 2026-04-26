@@ -747,7 +747,7 @@ async function initMap() {
         button.type = "button";
         button.addEventListener("click", function () {
             const url = "https://github.com/basgroot/bekendmakingen";
-            if (globalThis.open(url) === null) {
+            if (globalThis.open(url, "_blank", "noopener,noreferrer") === null) {
                 // Popup blocker or something preventing a new tab
                 globalThis.location.href = url;
             }
