@@ -2337,13 +2337,10 @@ async function initMap() {
                 hideActiveMunicipalityMarker();
             }
             if (addPublications(responseJson)) {
+                const recordCount =
+                    responseJson.searchRetrieveResponse.numberOfRecords === 1 ? 1 : responseJson.searchRetrieveResponse.records.record.length;
                 console.log(
-                    "Found " +
-                        responseJson.searchRetrieveResponse.records.record.length +
-                        " bekendmakingen of " +
-                        responseJson.searchRetrieveResponse.numberOfRecords +
-                        " in " +
-                        municipality
+                    "Found " + recordCount + " bekendmakingen of " + responseJson.searchRetrieveResponse.numberOfRecords + " in " + municipality
                 );
             } else {
                 console.log("No new bekendmakingen found in " + municipality);
