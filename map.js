@@ -130,7 +130,6 @@ async function initMap() {
      * @return {void}
      */
     function showInfoWindow(marker, iconName, title, description, urlDoc, licenseId) {
-        let map;
         const container = document.createElement("div");
 
         const img = document.createElement("img");
@@ -232,12 +231,10 @@ async function initMap() {
         // Reflect the currently open publication in the URL, so it can be shared.
         appState.openedPublicationLicenseId = licenseId || null;
         updateUrlForPublication(licenseId || null);
-        if (appState.map.getStreetView().getVisible()) {
-            console.log("Streetview is visible. Showing infoWindow there.");
-            map = appState.map.getStreetView();
-        } else {
-            map = appState.map;
-        }
+        const map =
+            appState.map.getStreetView().getVisible() ?
+                (console.log("Streetview is visible. Showing infoWindow there."), appState.map.getStreetView())
+            :   appState.map;
         appState.infoWindow.open({
             "anchor": marker,
             "map": map,
@@ -613,7 +610,7 @@ async function initMap() {
         option.text = displayValue;
         option.value = value;
         if (isSelected) {
-            option.setAttribute("selected", true);
+            option.selected = true;
         }
         return option;
     }
@@ -747,10 +744,7 @@ async function initMap() {
         button.type = "button";
         button.addEventListener("click", function () {
             const url = "https://github.com/basgroot/bekendmakingen";
-            if (globalThis.open(url) === null) {
-                // Popup blocker or something preventing a new tab
-                globalThis.location.href = url;
-            }
+            globalThis.open(url, "_blank", "noopener,noreferrer");
         });
         button.classList.add("controlStyle");
         controlDiv.appendChild(button);
@@ -792,7 +786,7 @@ async function initMap() {
      * Text mining to get distinguish the different license states and types
      * Images are converted to SVG using https://png2svg.com/
      * Resized to 35x45 using https://www.iloveimg.com/resize-image/resize-svg#resize-options,pixels
-     * Optmized using https://svgoptimizer.com/
+     * Optimized using https://svgoptimizer.com/
      * @param {string} title Name of permit.
      * @param {string} type Permit type.
      * @return {string} Icon file name without extension.
@@ -995,11 +989,23 @@ async function initMap() {
         /**
          * Handles the hover event. Highlight the icon (and related icons) on hover.
          */
+        let relatedMarkerImgs = null;
+        function getRelatedMarkerImgs() {
+            if (relatedMarkerImgs === null) {
+                relatedMarkerImgs = appState.markersArray
+                    .filter(function (markerObject) {
+                        return markerObject.url === publication.urlDoc;
+                    })
+                    .map(function (markerObject) {
+                        return markerObject.marker.content.getElementsByTagName("img")[0];
+                    });
+            }
+            return relatedMarkerImgs;
+        }
+
         function handleMarkerMouseOver() {
-            appState.markersArray.forEach(function (markerObject) {
-                if (markerObject.url === publication.urlDoc) {
-                    markerObject.marker.content.getElementsByTagName("img")[0].src = "img/" + iconName + "-highlight.png";
-                }
+            getRelatedMarkerImgs().forEach(function (img) {
+                img.src = "img/" + iconName + "-highlight.png";
             });
         }
 
@@ -1007,10 +1013,8 @@ async function initMap() {
          * Handles the mouse out event. Remove the highlight.
          */
         function handleMarkerMouseOut() {
-            appState.markersArray.forEach(function (markerObject) {
-                if (markerObject.url === publication.urlDoc) {
-                    markerObject.marker.content.getElementsByTagName("img")[0].src = "img/" + iconName + ".png";
-                }
+            getRelatedMarkerImgs().forEach(function (img) {
+                img.src = "img/" + iconName + ".png";
             });
         }
 
@@ -1228,7 +1232,7 @@ async function initMap() {
      * Add municipality markers to the map. This is done in batches, to improve performance.
      * @return {void}
      */
-    function addMunicipalitiyMarkers() {
+    function addMunicipalityMarkers() {
         const municipalityNames = Object.keys(appState.municipalities);
         municipalityNames.forEach(function (municipalityName) {
             const municipalityObject = appState.municipalities[municipalityName];
@@ -1598,7 +1602,7 @@ async function initMap() {
         });
         determineRequestPeriod();
         createMapsControls();
-        addMunicipalitiyMarkers();
+        addMunicipalityMarkers();
         // Maps events: https://developers.google.com/maps/documentation/javascript/events
         appState.map.addListener("dragend", closeInfoWindow);
         appState.map.addListener("click", closeInfoWindow);
@@ -2022,7 +2026,7 @@ async function initMap() {
                     } else if (locatiegebied.includes(" ")) {
                         // "51.976387,4.6128864 51.976192,4.6125665 51.976078,4.6127763 51.976124,4.6128507 51.976143,4.6128216 51.976276,4.6130733 51.976387,4.6128864"
                         locatiegebied.split(" ").forEach(function (coordinate) {
-                            console.log("Adding splitted locatiegebied " + coordinate);
+                            console.log("Adding split locatiegebied " + coordinate);
                             addCoordinateToList(coordinate.replace(",", " "));
                         });
                     } else {
@@ -2236,7 +2240,7 @@ async function initMap() {
     }
 
     /**
-     * Download json from the Github Live Pages.
+     * Download json from the GitHub Live Pages.
      * @param {string} path Path and file name to retrieve.
      * @param {function} callback Function when request is successful.
      * @return {!Promise<*>} Promise that resolves with the parsed JSON, or

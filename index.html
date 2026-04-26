@@ -25,10 +25,19 @@
         <link rel="preload" href="img/ajax-loader.gif" as="image" />
         <link rel="preload" href="img/gemeente.png" as="image" />
         <link rel="preload" href="img/wetboek.png" as="image" />
+        <link rel="preload" href="img/constructie.png" as="image" />
         <link rel="preload" href="img/aanvraag.png" as="image" />
+        <link rel="preload" href="img/verkeer.png" as="image" />
+        <link rel="preload" href="img/evenement.png" as="image" />
+        <script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4225848132552453"
+            crossorigin="anonymous"
+        ></script>
         <title>Bekendmakingen op kaart</title>
     </head>
     <body>
+        <h1 class="srOnly">Bekendmakingen op kaart</h1>
         <div id="map"></div>
         <div id="adOverlay">
             <ins
@@ -43,17 +52,12 @@
                 (adsbygoogle = window.adsbygoogle || []).push({});
             </script>
         </div>
-        <script
-            async
-            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4225848132552453"
-            crossorigin="anonymous"
-        ></script>
         <script type="text/javascript" src="map.js" defer></script>
         <!-- Create your own key and white list your website: https://console.cloud.google.com/apis/credentials/ -->
         <!-- View usage: https://console.cloud.google.com/apis/dashboard -->
         <script
             type="text/javascript"
-            src="https://maps.googleapis.com/maps/api/js?v=weekly&key=AIzaSyCKZTaMWxCzxnX9ssNSIWYZiAZsI3lJNO0&language=nl&region=nl&callback=initMap"
+            src="https://maps.googleapis.com/maps/api/js?v=weekly&key=AIzaSyCKZTaMWxCzxnX9ssNSIWYZiAZsI3lJNO0&language=nl&region=nl&callback=initMap&loading=async"
             defer
         ></script>
     </body>
