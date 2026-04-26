@@ -2304,6 +2304,12 @@ async function initMap() {
                 setLoadingIndicatorVisibility("hide");
                 tryOpenPublicationFromUrl();
             }
+        }).catch(function (error) {
+            console.error("Failed to load history " + url, error);
+            setLoadingIndicatorVisibility("hide");
+            if (isNewRequest) {
+                globalThis.alert("Er is een probleem opgetreden bij het laden van de historische bekendmakingen.\nProbeer het later nogmaals.");
+            }
         });
     }
 
