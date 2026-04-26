@@ -78,7 +78,16 @@ h2.info_window_heading {
     }
 }
 
-/* Visually hidden but available to screen readers */
+#adOverlay {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 160px;
+    z-index: 1000;
+    pointer-events: auto;
+}
+
 .srOnly {
     position: absolute;
     width: 1px;
