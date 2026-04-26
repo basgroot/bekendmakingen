@@ -1222,7 +1222,7 @@ async function initMap() {
      * Add municipality markers to the map. This is done in batches, to improve performance.
      * @return {void}
      */
-    function addMunicipalitiyMarkers() {
+    function addMunicipalityMarkers() {
         const municipalityNames = Object.keys(appState.municipalities);
         municipalityNames.forEach(function (municipalityName) {
             const municipalityObject = appState.municipalities[municipalityName];
@@ -1592,7 +1592,7 @@ async function initMap() {
         });
         determineRequestPeriod();
         createMapsControls();
-        addMunicipalitiyMarkers();
+        addMunicipalityMarkers();
         // Maps events: https://developers.google.com/maps/documentation/javascript/events
         appState.map.addListener("dragend", closeInfoWindow);
         appState.map.addListener("click", closeInfoWindow);
