@@ -2486,6 +2486,8 @@ async function initMap() {
             })
             .catch(function (error) {
                 console.error("Failed to load configuration", error);
+                setLoadingIndicatorVisibility("hide");
+                globalThis.alert("Er is een probleem opgetreden bij het laden van de configuratie.\nProbeer het later nogmaals.");
             });
     }
 
