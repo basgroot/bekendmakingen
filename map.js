@@ -786,7 +786,7 @@ async function initMap() {
      * Text mining to get distinguish the different license states and types
      * Images are converted to SVG using https://png2svg.com/
      * Resized to 35x45 using https://www.iloveimg.com/resize-image/resize-svg#resize-options,pixels
-     * Optmized using https://svgoptimizer.com/
+     * Optimized using https://svgoptimizer.com/
      * @param {string} title Name of permit.
      * @param {string} type Permit type.
      * @return {string} Icon file name without extension.
@@ -2016,7 +2016,7 @@ async function initMap() {
                     } else if (locatiegebied.includes(" ")) {
                         // "51.976387,4.6128864 51.976192,4.6125665 51.976078,4.6127763 51.976124,4.6128507 51.976143,4.6128216 51.976276,4.6130733 51.976387,4.6128864"
                         locatiegebied.split(" ").forEach(function (coordinate) {
-                            console.log("Adding splitted locatiegebied " + coordinate);
+                            console.log("Adding split locatiegebied " + coordinate);
                             addCoordinateToList(coordinate.replace(",", " "));
                         });
                     } else {
@@ -2230,7 +2230,7 @@ async function initMap() {
     }
 
     /**
-     * Download json from the Github Live Pages.
+     * Download json from the GitHub Live Pages.
      * @param {string} path Path and file name to retrieve.
      * @param {function} callback Function when request is successful.
      * @return {!Promise<*>} Promise that resolves with the parsed JSON, or
