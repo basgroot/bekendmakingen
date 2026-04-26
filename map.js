@@ -130,7 +130,6 @@ async function initMap() {
      * @return {void}
      */
     function showInfoWindow(marker, iconName, title, description, urlDoc, licenseId) {
-        let map;
         const container = document.createElement("div");
 
         const img = document.createElement("img");
@@ -232,12 +231,10 @@ async function initMap() {
         // Reflect the currently open publication in the URL, so it can be shared.
         appState.openedPublicationLicenseId = licenseId || null;
         updateUrlForPublication(licenseId || null);
-        if (appState.map.getStreetView().getVisible()) {
-            console.log("Streetview is visible. Showing infoWindow there.");
-            map = appState.map.getStreetView();
-        } else {
-            map = appState.map;
-        }
+        const map =
+            appState.map.getStreetView().getVisible() ?
+                (console.log("Streetview is visible. Showing infoWindow there."), appState.map.getStreetView())
+            :   appState.map;
         appState.infoWindow.open({
             "anchor": marker,
             "map": map,
@@ -613,7 +610,7 @@ async function initMap() {
         option.text = displayValue;
         option.value = value;
         if (isSelected) {
-            option.setAttribute("selected", true);
+            option.selected = true;
         }
         return option;
     }
