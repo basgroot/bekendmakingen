@@ -777,7 +777,7 @@ async function initMap() {
     function getLicenseIdFromUrl(websiteUrl) {
         const startOfUrl = "https://zoek.officielebekendmakingen.nl/";
         const endOfUrl = ".html";
-        if (websiteUrl.startsWith(startOfUrl)) {
+        if (websiteUrl && websiteUrl.startsWith(startOfUrl)) {
             return websiteUrl.substring(startOfUrl.length, websiteUrl.length - endOfUrl.length);
         }
         return false;
@@ -1005,18 +1005,27 @@ async function initMap() {
             return relatedMarkerImgs;
         }
 
-        function handleMarkerMouseOver() {
-            getRelatedMarkerImgs().forEach(function (img) {
-                img.src = cdnHost + "/img/" + iconName + "-highlight.png";
-            });
-        }
-
         /**
-         * Handles the mouse out event. Remove the highlight.
+         * Handles the mouse over event.
+         * @param {!Event} event Mouse event.
+         * @return {void}
          */
-        function handleMarkerMouseOut() {
+        function handleMarkerMouseMove(event) {
+            let src;
+            // Determine if this is MouseOver, or MouseOut
+            switch (event.type) {
+                case "mouseover":
+                    src = cdnHost + "/img/" + iconName + "-highlight.png";
+                    break;
+                case "mouseout":
+                    src = cdnHost + "/img/" + iconName + ".png";
+                    break;
+                default:
+                    src = "";
+                    console.error("Unexpected event type: " + event.type);
+            }
             getRelatedMarkerImgs().forEach(function (img) {
-                img.src = cdnHost + "/img/" + iconName + ".png";
+                img.src = src;
             });
         }
 
@@ -1052,8 +1061,8 @@ async function initMap() {
         appState.markersArray.push(markerObject);
         marker.addListener("gmp-click", onClick);
         // Highlight the icon (and related icons) on hover
-        marker.content.addEventListener("mouseover", handleMarkerMouseOver);
-        marker.content.addEventListener("mouseout", handleMarkerMouseOut);
+        marker.content.addEventListener("mouseover", handleMarkerMouseMove);
+        marker.content.addEventListener("mouseout", handleMarkerMouseMove);
         return markerObject;
     }
 
