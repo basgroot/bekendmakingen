@@ -22,3 +22,8 @@ if [ -n "$JS_FILES" ]; then
         node node_modules/eslint/bin/eslint.js "$FILE" || exit 1
     done
 fi
+
+if echo "$JS_FILES" | grep -q '^map\.js$'; then
+    node node_modules/terser/bin/terser map.js -o map.min.js --compress --mangle
+    git add map.min.js
+fi

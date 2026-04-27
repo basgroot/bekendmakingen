@@ -15,6 +15,7 @@
     "type": "module",
     "scripts": {
         "prepare": "git config core.hooksPath .githooks",
+        "build": "node node_modules/terser/bin/terser map.js -o map.min.js --compress --mangle",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "format": "prettier --write .",
@@ -25,6 +26,7 @@
         "@eslint/js": "^10.0.1",
         "eslint": "^10.2.1",
         "globals": "^17.5.0",
-        "prettier": "^3.8.3"
+        "prettier": "^3.8.3",
+        "terser": "^5.46.2"
     }
 }

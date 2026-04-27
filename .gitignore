@@ -1,5 +1,4 @@
 ﻿/.vs
 /img/*.pdn
-*.min.js
 /node_modules
 /.htaccess
