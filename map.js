@@ -1763,8 +1763,11 @@ async function initMap() {
              */
             function getRawDate(record) {
                 const meta = record.recordData.gzd.originalData.meta;
+                if (meta.hasOwnProperty("owmsmantel") && meta.owmsmantel.hasOwnProperty("available")) {
+                    return meta.owmsmantel.available; // ISO-ish string, lexicographically comparable
+                }
                 if (meta.hasOwnProperty("tpmeta") && meta.tpmeta.hasOwnProperty("datumTijdstipWijzigingWork")) {
-                    return meta.tpmeta.datumTijdstipWijzigingWork; // ISO-ish string, lexicographically comparable
+                    return meta.tpmeta.datumTijdstipWijzigingWork;
                 }
                 return "";
             }
@@ -1850,17 +1853,26 @@ async function initMap() {
              * @return {!Date} Midnight-aligned publication date.
              */
             function getDate(meta) {
-                if (meta.hasOwnProperty("tpmeta") && meta.tpmeta.hasOwnProperty("datumTijdstipWijzigingWork")) {
-                    const date = new Date(meta.tpmeta.datumTijdstipWijzigingWork);
-                    // Remove the time from the date:
+                /**
+                 * Remove the time component from a Date object, setting it to midnight.
+                 * @param {Date} date
+                 * @returns {Date} Date object with time set to midnight.
+                 */
+                function removeTimeFromDate(date) {
                     date.setHours(0, 0, 0, 0);
                     return date;
                 }
+
+                if (meta.hasOwnProperty("owmsmantel") && meta.owmsmantel.hasOwnProperty("available")) {
+                    return removeTimeFromDate(new Date(meta.owmsmantel.available));
+                }
+                if (meta.hasOwnProperty("tpmeta") && meta.tpmeta.hasOwnProperty("datumTijdstipWijzigingWork")) {
+                    return removeTimeFromDate(new Date(meta.tpmeta.datumTijdstipWijzigingWork));
+                }
                 // Return today as fallback:
                 const today = new Date();
-                today.setHours(0, 0, 0, 0);
                 console.warn("Date fallback to today because no better available: " + JSON.stringify(meta, null, 4));
-                return today;
+                return removeTimeFromDate(today);
             }
 
             /**
@@ -2425,7 +2437,7 @@ async function initMap() {
             }
             console.debug("Retrieving " + url + " (" + retriesLeft + " retries left)..");
             fetch(
-                // Example: https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.modified%3E=2025-05-01%20AND%20dt.creator=%22Amsterdam%22%20sortBy%20dt.modified%20/sort.descending&maximumRecords=1000&startRecord=1&httpAccept=application/json
+                // Example: https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.available%3E=2025-04-01%20AND%20dt.available%3C=2025-05-01%20AND%20dt.creator=%22Amsterdam%22%20sortBy%20dt.available%20/sort.descending&maximumRecords=500&startRecord=1&httpAccept=application/json
                 url,
                 {
                     "method": "GET"
@@ -2450,11 +2462,11 @@ async function initMap() {
             appState.municipalities[municipality].hasOwnProperty("lookupName") ? appState.municipalities[municipality].lookupName : municipality;
         setLoadingIndicatorVisibility("show");
         const url =
-            "https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.modified%3E=" +
+            "https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.available%3E=" +
             appState.requestPeriod.startDateString +
             "%20AND%20dt.creator=%22" +
             encodeURIComponent(lookupMunicipality) +
-            "%22%20sortBy%20dt.modified%20/sort.descending&maximumRecords=500&startRecord=" +
+            "%22%20sortBy%20dt.available%20/sort.descending&maximumRecords=500&startRecord=" +
             startRecord +
             "&httpAccept=application/json";
         loadDataWithRetries(url, 3);
