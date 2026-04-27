@@ -54,6 +54,8 @@ async function initMap() {
         "userZoomingTimeout": null
     };
 
+    const cdnHost = "https://cdn.jsdelivr.net/gh/basgroot/bekendmakingen@main";
+
     /**
      * Find the municipality by name, case insensitive. This must match: ?in=beverwijk
      * @param {string} municipalityName
@@ -1005,7 +1007,7 @@ async function initMap() {
 
         function handleMarkerMouseOver() {
             getRelatedMarkerImgs().forEach(function (img) {
-                img.src = "img/" + iconName + "-highlight.png";
+                img.src = cdnHost + "/img/" + iconName + "-highlight.png";
             });
         }
 
@@ -1014,7 +1016,7 @@ async function initMap() {
          */
         function handleMarkerMouseOut() {
             getRelatedMarkerImgs().forEach(function (img) {
-                img.src = "img/" + iconName + ".png";
+                img.src = cdnHost + "/img/" + iconName + ".png";
             });
         }
 
@@ -1036,7 +1038,7 @@ async function initMap() {
         const marker = new AdvancedMarkerElement({
             "map": isMarkerVisible(age, periodToShow) ? appState.map : null,
             "position": position,
-            "content": createMarkerIcon("img/" + iconName + ".png", 35, 45),
+            "content": createMarkerIcon(cdnHost + "/img/" + iconName + ".png", 35, 45),
             "zIndex": markerZIndex,
             "title": publication.title
         });
@@ -1239,7 +1241,7 @@ async function initMap() {
             const marker = new AdvancedMarkerElement({
                 "map": municipalityName === appState.activeMunicipality ? null : appState.map,
                 "position": municipalityObject.center,
-                "content": createMarkerIcon("img/gemeente.png", 50, 61, municipalityName),
+                "content": createMarkerIcon(cdnHost + "/img/gemeente.png", 50, 61, municipalityName),
                 "title": municipalityName
             });
             appState.municipalityMarkers.push({
@@ -1578,7 +1580,7 @@ async function initMap() {
         appState.loadingIndicator.id = "idLoadingIndicator";
         appState.loadingIndicator.alt = "";
         appState.loadingIndicator.style.width = Math.max((screenWidth / 100) * 12, 70) + "px";
-        appState.loadingIndicator.src = "img/ajax-loader.gif"; // ConnectedWizard, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
+        appState.loadingIndicator.src = cdnHost + "/img/ajax-loader.gif"; // ConnectedWizard, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
         // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindowOptions
         appState.infoWindow = new google.maps.InfoWindow();
         // When the user closes the info-window via the built-in [x], drop the
@@ -2250,8 +2252,7 @@ async function initMap() {
      *     is still invoked for backward compatibility.
      */
     function getData(path, callback) {
-        const host = "https://basgroot.github.io";
-        const url = host + path;
+        const url = cdnHost + path;
         console.debug("Retrieving " + url + "..");
         return fetch(url, { "method": "GET" })
             .then(function (response) {
@@ -2292,20 +2293,14 @@ async function initMap() {
         if (periodArray.length !== 2) {
             throw new Error("Invalid period: " + period);
         }
-        const url =
-            "/bekendmakingen/history/" +
-            periodArray[0] +
-            "/" +
-            encodeURIComponent(lookupMunicipality.toLowerCase().replace(/\s/g, "-")) +
-            "-" +
-            period +
-            ".json";
+        const path =
+            "/history/" + periodArray[0] + "/" + encodeURIComponent(lookupMunicipality.toLowerCase().replace(/\s/g, "-")) + "-" + period + ".json";
         if (isNewRequest) {
             setLoadingIndicatorVisibility("show");
             clearMarkers(appState.activeMunicipality);
         }
         console.log("Loading historical data of municipality " + appState.activeMunicipality);
-        getData(url, function (responseJson) {
+        getData(path, function (responseJson) {
             let startRecord = 1;
             // Preprocess data:
             responseJson.publications.forEach(function (publication) {
@@ -2350,7 +2345,7 @@ async function initMap() {
                 tryOpenPublicationFromUrl();
             }
         }).catch(function (error) {
-            console.error("Failed to load history " + url, error);
+            console.error("Failed to load history " + path, error);
             setLoadingIndicatorVisibility("hide");
             if (isNewRequest) {
                 showError("Er is een probleem opgetreden bij het laden van de historische bekendmakingen.\nProbeer het later nogmaals.");
@@ -2521,7 +2516,7 @@ async function initMap() {
      * @return {void}
      */
     function init() {
-        Promise.all([getData("/bekendmakingen/periods.json"), getData("/bekendmakingen/municipalities.json")])
+        Promise.all([getData("/periods.json"), getData("/municipalities.json")])
             .then(function (results) {
                 const periodsJson = results[0];
                 const municipalitiesJson = results[1];
