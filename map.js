@@ -1640,7 +1640,7 @@ async function initMap() {
                 event.key === "+" ||
                 event.key === "-" ||
                 event.key === "=" ||
-                event.key.startsWith("Arrow") ||
+                event.key?.startsWith("Arrow") ||
                 event.key === "PageUp" ||
                 event.key === "PageDown"
             ) {
