@@ -69,6 +69,10 @@
         "center": {
             "lat": 51.77181134,
             "lng": 4.96046594
+        },
+        "origin": {
+            "year": 2019,
+            "municipalities": ["Aalburg", "Werkendam", "Woudrichem"]
         }
     },
     "Ameland": {
@@ -153,6 +157,10 @@
         "center": {
             "lat": 50.91941187,
             "lng": 5.88674438
+        },
+        "origin": {
+            "year": 2019,
+            "municipalities": ["Onderbanken", "Nuth", "Schinnen"]
         }
     },
     "Beesel": {
@@ -433,6 +441,10 @@
         "center": {
             "lat": 52.67968577,
             "lng": 4.8025466
+        },
+        "origin": {
+            "year": 2022,
+            "municipalities": ["Heerhugowaard", "Langedijk"]
         }
     },
     "Dinkelland": {
@@ -523,6 +535,10 @@
         "center": {
             "lat": 53.334684806,
             "lng": 6.74613854
+        },
+        "origin": {
+            "year": 2021,
+            "municipalities": ["Appingedam", "Delfzijl", "Loppersum"]
         }
     },
     "Eersel": {
@@ -787,6 +803,10 @@
         "center": {
             "lat": 53.33487495,
             "lng": 6.52760487
+        },
+        "origin": {
+            "year": 2019,
+            "municipalities": ["Bedum", "Eemsmond", "De Marne", "Winsum"]
         }
     },
     "Heumen": {
@@ -823,6 +843,10 @@
         "center": {
             "lat": 51.826214,
             "lng": 4.41189526
+        },
+        "origin": {
+            "year": 2019,
+            "municipalities": ["Oud-Beijerland", "Korendijk", "Strijen", "Cromstrijen", "Binnenmaas"]
         }
     },
     "Hof van Twente": {
@@ -937,6 +961,10 @@
         "center": {
             "lat": 51.59628376,
             "lng": 6.01097477
+        },
+        "origin": {
+            "year": 2022,
+            "municipalities": ["Boxmeer", "Cuijk", "Sint Anthonis", "Mill en Sint Hubert", "Grave"]
         }
     },
     "Landgraaf": {
@@ -1057,6 +1085,10 @@
         "center": {
             "lat": 51.659773966,
             "lng": 5.6178492
+        },
+        "origin": {
+            "year": 2022,
+            "municipalities": ["Landerd", "Uden"]
         }
     },
     "Maassluis": {
@@ -1117,6 +1149,10 @@
         "center": {
             "lat": 53.15163665,
             "lng": 6.75532681
+        },
+        "origin": {
+            "year": 2018,
+            "municipalities": ["Hoogezand-Sappemeer", "Menterwolde", "Slochteren"]
         }
     },
     "Moerdijk": {
@@ -1129,6 +1165,10 @@
         "center": {
             "lat": 51.87029722,
             "lng": 4.78967797
+        },
+        "origin": {
+            "year": 2019,
+            "municipalities": ["Molenwaard", "Giessenlanden"]
         }
     },
     "Montferland": {
@@ -1195,6 +1235,10 @@
         "center": {
             "lat": 53.32649414,
             "lng": 5.99877932
+        },
+        "origin": {
+            "year": 2019,
+            "municipalities": ["Dongeradeel", "Ferwerderadeel", "Kollumerland en Nieuwkruisland"]
         }
     },
     "Noord-Beveland": {
@@ -1771,6 +1815,10 @@
         "center": {
             "lat": 51.978791025,
             "lng": 5.0846601
+        },
+        "origin": {
+            "year": 2019,
+            "municipalities": ["Leerdam", "Vianen", "Zederik"]
         }
     },
     "Vlaardingen": {
@@ -1801,6 +1849,10 @@
         "center": {
             "lat": 51.87402635,
             "lng": 4.068982702
+        },
+        "origin": {
+            "year": 2023,
+            "municipalities": ["Brielle", "Hellevoetsluis", "Westvoorne"]
         }
     },
     "Voorschoten": {
@@ -1825,6 +1877,10 @@
         "center": {
             "lat": 53.18590876,
             "lng": 5.5421589
+        },
+        "origin": {
+            "year": 2018,
+            "municipalities": ["Franekeradeel", "het Bildt", "Menaldumadeel"]
         }
     },
     "Waalre": {
@@ -1873,6 +1929,10 @@
         "center": {
             "lat": 51.88792379,
             "lng": 5.19214884
+        },
+        "origin": {
+            "year": 2019,
+            "municipalities": ["Geldermalsen", "Neerijnen", "Lingewaal"]
         }
     },
     "West Maas en Waal": {
@@ -1885,6 +1945,10 @@
         "center": {
             "lat": 53.213081037,
             "lng": 6.27360133
+        },
+        "origin": {
+            "year": 2019,
+            "municipalities": ["Grootegast", "Leek", "Marum", "Zuidhorn"]
         }
     },
     "Westerveld": {
@@ -1903,6 +1967,10 @@
         "center": {
             "lat": 53.02591,
             "lng": 7.1057704
+        },
+        "origin": {
+            "year": 2018,
+            "municipalities": ["Bellingwedde", "Vlagtwedde"]
         }
     },
     "Westland": {
