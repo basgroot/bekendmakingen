@@ -3,10 +3,9 @@
  * Bezoek https://basgroot.github.io/bekendmakingen/?in=Hoorn
  *
  * This function is called by Google Maps API, after loading the library. Function name is sent as query parameter.
- * @return {void}
+ * @returns {void}
  */
-/* eslint-disable no-unused-vars */
-async function initMap() {
+window.initMap = async function initMap() {
     const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
     const appState = {
@@ -58,7 +57,7 @@ async function initMap() {
 
     /**
      * Find the municipality by name, case insensitive. This must match: ?in=beverwijk
-     * @param {string} municipalityName
+     * @param {string} municipalityName Municipality name from the URL query parameter.
      * @returns {string|boolean} Municipality key or false if not found.
      */
     function getMunicipalityFromUrl(municipalityName) {
@@ -80,7 +79,7 @@ async function initMap() {
      * Examples:
      *   ?in=Hoorn&zoom=15.67&center=52.66031%2C5.06090
      *   ?in=Oostzaan
-     * @return {!Object} Map settings.
+     * @returns {!object} Map settings.
      */
     function getInitialMapSettings() {
         let zoomLevel = appState.initialZoomLevel;
@@ -123,13 +122,13 @@ async function initMap() {
     /**
      * Display the popup window.
      * https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.open
-     * @param {!Object} marker Marker showing the popup.
+     * @param {!object} marker Marker showing the popup.
      * @param {string} iconName Icon file name.
      * @param {string} title Title (plain text).
      * @param {string} description Description (plain text).
      * @param {string} urlDoc Link to the official publication.
      * @param {?string} licenseId License id, or null when there is no detail
-     * @return {void}
+     * @returns {void}
      */
     function showInfoWindow(marker, iconName, title, description, urlDoc, licenseId) {
         const container = document.createElement("div");
@@ -174,7 +173,7 @@ async function initMap() {
             let parsedUrl = null;
             try {
                 parsedUrl = new URL(urlDoc, globalThis.location.href);
-            } catch (ignore) {
+            } catch (_ignore) {
                 // parsedUrl remains null
             }
             if (parsedUrl !== null && (parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:")) {
@@ -248,13 +247,13 @@ async function initMap() {
     /**
      * Parse the response of the license document to find the date the license is granted.
      * @param {string} responseXml XML.
-     * @return {!Array<?>|!NodeList<!Element>} Alineas.
+     * @returns {!Array<?>|!NodeList<!Element>} Alineas.
      */
     function getAlineas(responseXml) {
         /**
          * Replaces tags in the given value.
          * @param {string} value The value to replace tags in.
-         * @return {string} The value with tags replaced.
+         * @returns {string} The value with tags replaced.
          */
         function replaceTags(value) {
             const tags = [
@@ -296,7 +295,7 @@ async function initMap() {
     /**
      * Calculate the period since the license was granted, to see if it is applicable for formal objection.
      * @param {!Date} date Decision date.
-     * @return {number} Number of days passed.
+     * @returns {number} Number of days passed.
      */
     function getDaysPassed(date) {
         const today = new Date(new Date().toDateString()); // Rounded date
@@ -307,15 +306,15 @@ async function initMap() {
     /**
      * Parse the response of the license document to find the date the license is granted.
      * @param {string} responseXml XML response.
-     * @param {!Object} publication Publication object.
+     * @param {!object} publication Publication object.
      * @param {string} licenseId License ID.
-     * @return {void}
+     * @returns {void}
      */
     function parseBekendmaking(responseXml, publication, licenseId) {
         /**
          * Converts month names to their corresponding numeric values.
          * @param {string} value The month name to convert.
-         * @return {string} The numeric value of the month.
+         * @returns {string} The numeric value of the month.
          */
         function convertMonthNames(value) {
             return value
@@ -336,7 +335,7 @@ async function initMap() {
         /**
          * Parses a date value.
          * @param {string} value The date value to parse.
-         * @return {!Object} Object with parsed date, if valid.
+         * @returns {!object} Object with parsed date, if valid.
          */
         function parseDate(value) {
             const result = {
@@ -361,7 +360,7 @@ async function initMap() {
          * @param {boolean} isNextValueBekendmakingsDate Whether the previous
          *     text node was the "datum bekendmaking besluit:" marker, meaning
          *     the current value should be interpreted as that date (Den Haag).
-         * @return {!Object} Object with parsed date (when isValid is true) and
+         * @returns {!object} Object with parsed date (when isValid is true) and
          *     the updated isNextValueBekendmakingsDate flag for the next call.
          */
         function getDateFromText(value, isNextValueBekendmakingsDate) {
@@ -573,8 +572,8 @@ async function initMap() {
     /**
      * Call the government API for a specific license, to get more details. This is done to get the date the license is granted.
      * @param {string} licenseId License ID.
-     * @param {!Object} publication Publication object.
-     * @return {void}
+     * @param {!object} publication Publication object.
+     * @returns {void}
      */
     function collectBezwaartermijn(licenseId, publication) {
         if (publication.urlApi === "UNAVAILABLE") {
@@ -605,7 +604,7 @@ async function initMap() {
      * @param {string} value Key.
      * @param {string} displayValue Value.
      * @param {boolean} isSelected Selected or not?
-     * @return {!HTMLOptionElement} Option element.
+     * @returns {!HTMLOptionElement} Option element.
      */
     function createOption(value, displayValue, isSelected) {
         const option = document.createElement("option");
@@ -619,7 +618,7 @@ async function initMap() {
 
     /**
      * Create the spinner shown when retrieving all licenses. This is shown in the center right.
-     * @return {void}
+     * @returns {void}
      */
     function createMapsControlLoadingIndicator() {
         const controlDiv = document.createElement("div"); // Create a DIV to attach the control UI to the Map.
@@ -630,7 +629,7 @@ async function initMap() {
     /**
      * Create the drop down with all municipalities of The Netherlands.
      * Uses an input + datalist so the user can type to filter the list.
-     * @return {void}
+     * @returns {void}
      */
     function createMapsControlMunicipalities() {
         const controlDiv = document.createElement("div"); // Create a DIV to attach the control UI to the Map.
@@ -684,17 +683,17 @@ async function initMap() {
 
     /**
      * Create the drop down with time filter. This is shown in the bottom center.
-     * @return {void}
+     * @returns {void}
      */
     function createMapsControlPeriods() {
         /**
          * Get the period to select based on the URL parameter or the default value.
-         * @return {string} Period key.
+         * @returns {string} Period key.
          */
         function getPeriodToSelect() {
             if (globalThis.URLSearchParams) {
                 const urlSearchParams = new globalThis.URLSearchParams(globalThis.location.search);
-                let periodParam = urlSearchParams.get("period");
+                const periodParam = urlSearchParams.get("period");
                 if (periodParam) {
                     // Verify if the period is valid:
                     const periodKeys = appState.periods.map(function (period) {
@@ -713,7 +712,7 @@ async function initMap() {
         }
 
         // Get the period from the URL parameter or default to 2weeks:
-        let selectedPeriod = getPeriodToSelect();
+        const selectedPeriod = getPeriodToSelect();
 
         const controlDiv = document.createElement("div"); // Create a DIV to attach the control UI to the Map.
         const periodLabel = document.createElement("label");
@@ -735,7 +734,7 @@ async function initMap() {
 
     /**
      * Create the button linking to this source code. This is shown in the bottom left.
-     * @return {void}
+     * @returns {void}
      */
     function createMapsControlSource() {
         const controlDiv = document.createElement("div"); // Create a DIV to attach the control UI to the Map.
@@ -756,7 +755,7 @@ async function initMap() {
     /**
      * Create the elements on the map. This includes the loading indicator, the municipality drop down and the period drop down.
      * https://developers.google.com/maps/documentation/javascript/examples/control-custom
-     * @return {void}
+     * @returns {void}
      */
     function createMapsControls() {
         createMapsControlLoadingIndicator();
@@ -772,7 +771,7 @@ async function initMap() {
      *          https://zoek.officielebekendmakingen.nl/wsb-2023-801.html
      *          https://zoek.officielebekendmakingen.nl/stcrt-2023-128.html
      * @param {string} websiteUrl Link to document.
-     * @return {string|boolean} License ID or false.
+     * @returns {string|boolean} License ID or false.
      */
     function getLicenseIdFromUrl(websiteUrl) {
         const startOfUrl = "https://zoek.officielebekendmakingen.nl/";
@@ -791,7 +790,7 @@ async function initMap() {
      * Optimized using https://svgoptimizer.com/
      * @param {string} title Name of permit.
      * @param {string} type Permit type.
-     * @return {string} Icon file name without extension.
+     * @returns {string} Icon file name without extension.
      */
     function getIconName(title, type) {
         const exploitatievergunningen = ["brandveilig gebruik"];
@@ -846,14 +845,14 @@ async function initMap() {
 
     /**
      * When two licenses are on the same location, move the second, to see them both.
-     * @param {!Object} proposedCoordinate Coordinate to place marker.
-     * @return {!Object} Coordinate to place marker.
+     * @param {!object} proposedCoordinate Coordinate to place marker.
+     * @returns {!object} Coordinate to place marker.
      */
     function findUniquePosition(proposedCoordinate) {
         /**
          * Checks if a coordinate is available.
-         * @param {!Object} coordinate The coordinate to check.
-         * @return {boolean} True if the coordinate is available, false otherwise.
+         * @param {!object} coordinate The coordinate to check.
+         * @returns {boolean} True if the coordinate is available, false otherwise.
          */
         function isCoordinateAvailable(coordinate) {
             let isAvailable = true; // Be positive
@@ -915,7 +914,7 @@ async function initMap() {
      * Set visibility of the markers, based on time filter.
      * @param {number} age Days in the past.
      * @param {string} periodToShow Selected period.
-     * @return {boolean} Is marker visible?
+     * @returns {boolean} Is marker visible?
      */
     function isMarkerVisible(age, periodToShow) {
         switch (periodToShow) {
@@ -936,7 +935,7 @@ async function initMap() {
      * @param {number} width Width of the image.
      * @param {number} height Height of the image.
      * @param {string=} label Optional label.
-     * @return {!HTMLDivElement} Marker node containing the image.
+     * @returns {!HTMLDivElement} Marker node containing the image.
      */
     function createMarkerIcon(sourceUrl, width, height, label) {
         const iconContainer = document.createElement("div");
@@ -959,12 +958,35 @@ async function initMap() {
 
     /**
      * Add a marker to the map.
-     * @param {!Object} publication Publication object.
+     * @param {!object} publication Publication object.
      * @param {string} periodToShow Selected period.
-     * @param {!Object} position Coordinate.
-     * @return {!Object} Marker object. This is used to remove the marker later.
+     * @param {!object} position Coordinate.
+     * @returns {!object} Marker object. This is used to remove the marker later.
      */
     function addMarker(publication, periodToShow, position) {
+        // 2022-09-05T09:04:57.175Z;
+        // https://zoek.officielebekendmakingen.nl/gmb-2022-396401.html;
+        // "Besluit apv vergunning Verleend Monnikendammerweg 27";
+        // "TVM- 7 PV reserveren - Monnikendammerweg 27-37 - 03-07/10/2022, Monnikendammerweg 27";
+        // 125171;
+        // 488983
+        // https://developers.google.com/maps/documentation/javascript/reference/advanced-markers#AdvancedMarkerElementOptions
+        const age = getDaysPassed(publication.date);
+        const iconName = getIconName(publication.title, publication.type);
+        // Use the publication's modification date (in Unix seconds) as zIndex so
+        // that newer markers are always on top of older ones, regardless of when
+        // they happen to be added (e.g. delayed off-screen markers added later
+        // via the "idle" handler, or historical data appended after live data).
+        // Unix seconds (~1.77e9 in 2026) fit comfortably within 32-bit int range.
+        const markerZIndex = Math.floor(publication.date.getTime() / 1000);
+        const marker = new AdvancedMarkerElement({
+            "map": isMarkerVisible(age, periodToShow) ? appState.map : null,
+            "position": position,
+            "content": createMarkerIcon(cdnHost + "/img/" + iconName + ".png", 35, 45),
+            "zIndex": markerZIndex,
+            "title": publication.title
+        });
+
         /**
          * Handles the click event. Show the info window.
          */
@@ -992,6 +1014,10 @@ async function initMap() {
          * Handles the hover event. Highlight the icon (and related icons) on hover.
          */
         let relatedMarkerImgs = null;
+        /**
+         * Get the marker images for all markers sharing the same publication URL.
+         * @returns {Array} Array of img elements for related markers.
+         */
         function getRelatedMarkerImgs() {
             if (relatedMarkerImgs === null) {
                 relatedMarkerImgs = appState.markersArray
@@ -1008,7 +1034,7 @@ async function initMap() {
         /**
          * Handles the mouse over event.
          * @param {!Event} event Mouse event.
-         * @return {void}
+         * @returns {void}
          */
         function handleMarkerMouseMove(event) {
             let src;
@@ -1029,28 +1055,6 @@ async function initMap() {
             });
         }
 
-        // 2022-09-05T09:04:57.175Z;
-        // https://zoek.officielebekendmakingen.nl/gmb-2022-396401.html;
-        // "Besluit apv vergunning Verleend Monnikendammerweg 27";
-        // "TVM- 7 PV reserveren - Monnikendammerweg 27-37 - 03-07/10/2022, Monnikendammerweg 27";
-        // 125171;
-        // 488983
-        // https://developers.google.com/maps/documentation/javascript/reference/advanced-markers#AdvancedMarkerElementOptions
-        const age = getDaysPassed(publication.date);
-        const iconName = getIconName(publication.title, publication.type);
-        // Use the publication's modification date (in Unix seconds) as zIndex so
-        // that newer markers are always on top of older ones, regardless of when
-        // they happen to be added (e.g. delayed off-screen markers added later
-        // via the "idle" handler, or historical data appended after live data).
-        // Unix seconds (~1.77e9 in 2026) fit comfortably within 32-bit int range.
-        const markerZIndex = Math.floor(publication.date.getTime() / 1000);
-        const marker = new AdvancedMarkerElement({
-            "map": isMarkerVisible(age, periodToShow) ? appState.map : null,
-            "position": position,
-            "content": createMarkerIcon(cdnHost + "/img/" + iconName + ".png", 35, 45),
-            "zIndex": markerZIndex,
-            "title": publication.title
-        });
         const markerObject = {
             "url": publication.urlDoc,
             "age": age,
@@ -1069,11 +1073,11 @@ async function initMap() {
     /**
      * If visible, create the marker. Otherwise move it to a list and show it when the map is scrolled.
      * This reduces load in the browser.
-     * @param {!Object} publication Publication object.
+     * @param {!object} publication Publication object.
      * @param {string} periodToShow Selected period.
-     * @param {!Object} position Coordinate.
-     * @param {!Object} bounds Visible map.
-     * @return {void}
+     * @param {!object} position Coordinate.
+     * @param {!object} bounds Visible map.
+     * @returns {void}
      */
     function prepareToAddMarker(publication, periodToShow, position, bounds) {
         if (bounds.contains(position)) {
@@ -1088,13 +1092,13 @@ async function initMap() {
 
     /**
      * Determine what time filter must be used.
-     * @return {!Object} Time filter.
+     * @returns {!object} Time filter.
      */
     function getPeriodFilter() {
         /**
          * Checks if a value represents a historical period. Historical periods are noted like '2023-11'.
          * @param {string} value The value to check.
-         * @return {boolean} Returns true if the value represents a historical period, otherwise returns false.
+         * @returns {boolean} Returns true if the value represents a historical period, otherwise returns false.
          */
         function isHistoricalPeriod(value) {
             // Values of historical periods are notated like '2023-03'
@@ -1126,7 +1130,7 @@ async function initMap() {
     /**
      * Create (new) latitude/longitude object.
      * @param {string} locatiepunt Latitude/longitude. Input example: "52.35933 4.893097".
-     * @return {?Object} Coordinate, or null when input cannot be parsed to two finite numbers.
+     * @returns {?object} Coordinate, or null when input cannot be parsed to two finite numbers.
      */
     function createCoordinate(locatiepunt) {
         // Tolerate "lat lng", "lat,lng", or any mix of whitespace/comma separators.
@@ -1149,7 +1153,7 @@ async function initMap() {
      * Add markers to the map. This is done in batches, to improve performance.
      * @param {number} startRecord Number of record of current batch.
      * @param {boolean} isMoreDataAvailable More to load?
-     * @return {void}
+     * @returns {void}
      */
     function addMarkers(startRecord, isMoreDataAvailable) {
         const periodFilter = getPeriodFilter();
@@ -1201,7 +1205,7 @@ async function initMap() {
      * If the URL contains ?pub=<licenseId>, locate the matching marker and
      * synthesize a click on it so the deep-linked info-window opens.
      * Idempotent: does nothing if no parameter is present or no match is found.
-     * @return {void}
+     * @returns {void}
      */
     function tryOpenPublicationFromUrl() {
         if (!globalThis.URLSearchParams) {
@@ -1241,7 +1245,7 @@ async function initMap() {
 
     /**
      * Add municipality markers to the map. This is done in batches, to improve performance.
-     * @return {void}
+     * @returns {void}
      */
     function addMunicipalityMarkers() {
         const municipalityNames = Object.keys(appState.municipalities);
@@ -1270,9 +1274,9 @@ async function initMap() {
 
     /**
      * Show or hide a marker. This replaces the setVisibility function of the legacy marker element.
-     * @param {!Object} marker Marker object.
+     * @param {!object} marker Marker object.
      * @param {boolean} isVisible Set visibility.
-     * @return {void}
+     * @returns {void}
      */
     function setMarkerVisibility(marker, isVisible) {
         marker.setMap(isVisible ? appState.map : null);
@@ -1280,7 +1284,7 @@ async function initMap() {
 
     /**
      * Reset time filter. This is done when the zoom level is changed, or when a different combo box option is selected.
-     * @return {void}
+     * @returns {void}
      */
     function updatePeriodFilter() {
         const periodFilter = getPeriodFilter();
@@ -1311,7 +1315,7 @@ async function initMap() {
     /**
      * Add the period parameter to the URL, so the view can be shared.
      * @param {string} period Selected period.
-     * @return {void}
+     * @returns {void}
      */
     function updateUrlForPeriod(period) {
         if (globalThis.URLSearchParams) {
@@ -1326,7 +1330,7 @@ async function initMap() {
      * Add or remove the publication (pub) parameter to the URL, so the deep
      * link to a single info-window can be shared.
      * @param {?string} licenseId License id, or null/false to remove the parameter.
-     * @return {void}
+     * @returns {void}
      */
     function updateUrlForPublication(licenseId) {
         if (!globalThis.URLSearchParams) {
@@ -1351,13 +1355,13 @@ async function initMap() {
     /**
      * Add municipality and other parameters to the URL, so the view can be shared.
      * @param {number|string} zoom Zoom level.
-     * @param {!Object} center Coordinate of center of map.
-     * @return {void}
+     * @param {!object} center Coordinate of center of map.
+     * @returns {void}
      */
     function updateUrlForLocation(zoom, center) {
         /**
          * Remove trailing zeros from a number represented as a string.
-         * @param {string} value
+         * @param {string} value String representation of a number.
          * @returns {string} Value without trailing zeros.
          */
         function removeTrailingZeros(value) {
@@ -1400,9 +1404,9 @@ async function initMap() {
 
     /**
      * Calculate the distance between two points, using the haversine formula.
-     * @param {!Object} from Coordinate 1.
-     * @param {!Object} to Coordinate 2.
-     * @return {number} Distance in meters.
+     * @param {!object} from Coordinate 1.
+     * @param {!object} to Coordinate 2.
+     * @returns {number} Distance in meters.
      */
     function computeDistanceBetween(from, to) {
         // Source: http://www.movable-type.co.uk/scripts/latlong.html
@@ -1420,8 +1424,8 @@ async function initMap() {
 
     /**
      * Not accurate, but try to find the closest municipality center.
-     * @param {!Object} position Coordinate to start.
-     * @return {void}
+     * @param {!object} position Coordinate to start.
+     * @returns {void}
      */
     function activateClosestMunicipality(position) {
         const municipalityNames = Object.keys(appState.municipalities);
@@ -1439,7 +1443,7 @@ async function initMap() {
 
     /**
      * Determine if the municipality is part of the URL.
-     * @return {boolean} Is the municipality part of the URL?
+     * @returns {boolean} Is the municipality part of the URL?
      */
     function isLocationInUrl() {
         if (globalThis.URLSearchParams) {
@@ -1454,7 +1458,7 @@ async function initMap() {
 
     /**
      * Try to find the municipality of the visitor, by using an IP geolocation API. This is a fallback for when the device does not support GPS.
-     * @return {void}
+     * @returns {void}
      */
     function getLocationByIp() {
         const url = "https://basement.nl/proxy-server/location.php";
@@ -1491,12 +1495,12 @@ async function initMap() {
 
     /**
      * Try to find the municipality of the visitor, by using the device position, or IP geolocation API.
-     * @return {void}
+     * @returns {void}
      */
     function getLocationAndLoadData() {
         /**
          * Callback function for when the device's location is found.
-         * @param {!Object} position The position object containing the device's coordinates.
+         * @param {!object} position The position object containing the device's coordinates.
          */
         function deviceLocationFound(position) {
             activateClosestMunicipality({
@@ -1531,13 +1535,13 @@ async function initMap() {
 
     /**
      * Determine the start date. This is used to determine if the history file can be loaded, which improves performance.
-     * @return {void}
+     * @returns {void}
      */
     function determineRequestPeriod() {
         /**
          * Prefix number with zero, if it has one digit.
          * @param {number} n The one or two digit number representing day or month.
-         * @return {string} The formatted number.
+         * @returns {string} The formatted number.
          */
         function addLeadingZero(n) {
             return n > 9 ? String(n) : "0" + n;
@@ -1570,12 +1574,12 @@ async function initMap() {
 
     /**
      * Setup map.
-     * @return {void}
+     * @returns {void}
      */
     function internalInitMap() {
         /**
          * Close the shared info window.
-         * @return {void}
+         * @returns {void}
          */
         function closeInfoWindow() {
             appState.infoWindow.close(); // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.close
@@ -1702,7 +1706,7 @@ async function initMap() {
     /**
      * Scroll map to a certain coordinate (center of municipality). This is done when the municipality is changed.
      * @param {string} municipality Municipality to center.
-     * @return {void}
+     * @returns {void}
      */
     function navigateTo(municipality) {
         const center = appState.municipalities[municipality].center;
@@ -1715,7 +1719,7 @@ async function initMap() {
      * URL: https://zoek.officielebekendmakingen.nl/gmb-2022-425209.html
      * Endpoint: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2022/gmb-2022-425209/1/xml/gmb-2022-425209.xml
      * @param {string} urlDoc URL of publication.
-     * @return {string} API endpoint.
+     * @returns {string} API endpoint.
      */
     function getUrlApi(urlDoc) {
         const licenseId = getLicenseIdFromUrl(urlDoc);
@@ -1742,8 +1746,8 @@ async function initMap() {
 
     /**
      * Parse API response.
-     * @param {!Object} responseJson JSON response.
-     * @return {boolean} True if records are found.
+     * @param {!object} responseJson JSON response.
+     * @returns {boolean} True if records are found.
      */
     function addPublications(responseJson) {
         /**
@@ -1751,15 +1755,15 @@ async function initMap() {
          * and URL as tiebreakers. Operates on the raw response so the cost is
          * bounded by the page size, not the growing publicationsArray. Don't
          * trust the API's claimed sort order.
-         * @param {!Object} a Raw record.
-         * @param {!Object} b Raw record.
-         * @return {number} Comparison result.
+         * @param {!object} a Raw record.
+         * @param {!object} b Raw record.
+         * @returns {number} Comparison result.
          */
         function sortRecords(a, b) {
             /**
              * Extract the modification-date string from a raw SRU record.
-             * @param {!Object} record Raw SRU record.
-             * @return {string} ISO-like timestamp string to compare. Empty string when the field is missing.
+             * @param {!object} record Raw SRU record.
+             * @returns {string} ISO-like timestamp string to compare. Empty string when the field is missing.
              */
             function getRawDate(record) {
                 const meta = record.recordData.gzd.originalData.meta;
@@ -1774,8 +1778,8 @@ async function initMap() {
 
             /**
              * Extract the title from a raw SRU record. Used as a secondary sort key to keep the order stable when two records share the modification date.
-             * @param {!Object} record Raw SRU record.
-             * @return {string} Title, or empty string when missing.
+             * @param {!object} record Raw SRU record.
+             * @returns {string} Title, or empty string when missing.
              */
             function getRawTitle(record) {
                 const meta = record.recordData.gzd.originalData.meta;
@@ -1787,8 +1791,8 @@ async function initMap() {
 
             /**
              * Extract the canonical URL from a raw SRU record. Used as a tertiary sort key.
-             * @param {!Object} record Raw SRU record.
-             * @return {string} Preferred URL, or empty string when missing.
+             * @param {!object} record Raw SRU record.
+             * @returns {string} Preferred URL, or empty string when missing.
              */
             function getRawUrl(record) {
                 const enriched = record.recordData.gzd.enrichedData;
@@ -1808,15 +1812,15 @@ async function initMap() {
 
         /**
          * Convert a single raw SRU record into a publication object and append it to appState.publicationsArray.
-         * @param {!Object} inputRecord Raw SRU record.
-         * @return {void}
+         * @param {!object} inputRecord Raw SRU record.
+         * @returns {void}
          */
         function addPublication(inputRecord) {
             /**
              * Determine the publication type from the record's metadata.
              * Prefers the fine-grained tpmeta.activiteit when present, falls back to the generic owmskern.type, and finally to "onbekend".
-             * @param {!Object} meta originalData.meta object.
-             * @return {string} Type slug (e.g. "bouwen", "kappen").
+             * @param {!object} meta originalData.meta object.
+             * @returns {string} Type slug (e.g. "bouwen", "kappen").
              */
             function getType(meta) {
                 if (meta.hasOwnProperty("tpmeta") && meta.tpmeta.hasOwnProperty("activiteit")) {
@@ -1849,13 +1853,13 @@ async function initMap() {
             /**
              * Determine the publication date from the record's metadata.
              * Rounds to midnight so all publications from a single day share an identical Date value. Falls back to today when the field is missing.
-             * @param {!Object} meta originalData.meta object.
-             * @return {!Date} Midnight-aligned publication date.
+             * @param {!object} meta originalData.meta object.
+             * @returns {!Date} Midnight-aligned publication date.
              */
             function getDate(meta) {
                 /**
                  * Remove the time component from a Date object, setting it to midnight.
-                 * @param {Date} date
+                 * @param {Date} date Date to strip the time component from.
                  * @returns {Date} Date object with time set to midnight.
                  */
                 function removeTimeFromDate(date) {
@@ -1877,9 +1881,9 @@ async function initMap() {
 
             /**
              * Determine the human-readable title. Prefers owmskern.title, falls back to owmsmantel.abstract, and finally to the type slug when neither is a usable string.
-             * @param {!Object} meta originalData.meta object.
+             * @param {!object} meta originalData.meta object.
              * @param {string} type Type slug to use as last-resort fallback.
-             * @return {string} Publication title.
+             * @returns {string} Publication title.
              */
             function getTitle(meta, type) {
                 if (meta.hasOwnProperty("owmskern") && meta.owmskern.hasOwnProperty("title") && typeof meta.owmskern.title === "string") {
@@ -1895,8 +1899,8 @@ async function initMap() {
 
             /**
              * Determine the long-form description. Prefers owmsmantel.abstract, falls back to owmskern.title, and finally to "-" when neither is a usable string.
-             * @param {!Object} meta originalData.meta object.
-             * @return {string} Publication description.
+             * @param {!object} meta originalData.meta object.
+             * @returns {string} Publication description.
              */
             function getDescription(meta) {
                 if (meta.hasOwnProperty("owmsmantel") && meta.owmsmantel.hasOwnProperty("abstract") && typeof meta.owmsmantel.abstract === "string") {
@@ -1914,13 +1918,13 @@ async function initMap() {
              * Parse a gebiedsmarkering (area marker) in any of its historical formats (POINT / LINESTRING / POLYGON / legacy Rijksdriehoek) and append the resulting "lat lng" strings to the provided list.
              * @param {!Array<string>} list Mutable target list receiving "lat lng" coordinate strings.
              * @param {*} gebiedsmarkering Area marker structure from the SRU record; may be a string, object, or array of either.
-             * @return {void}
+             * @returns {void}
              */
             function processCoordinate(list, gebiedsmarkering) {
                 /**
                  * Append a "lat lng" coordinate to the outer list, skipping exact duplicates (common when the same point appears as both the first and last vertex of a closed polygon).
                  * @param {string} coordinate "lat lng" coordinate string.
-                 * @return {void}
+                 * @returns {void}
                  */
                 function addCoordinateToList(coordinate) {
                     // Prevent duplicates:
@@ -1936,7 +1940,7 @@ async function initMap() {
                  * https://thomasv.nl/2019/02/rijksdriehoek-coordinates-to-wgs84/
                  * @param {number} x RD easting in metres.
                  * @param {number} y RD northing in metres.
-                 * @return {!Object} Object with numeric "lat" and "lng".
+                 * @returns {!object} Object with numeric "lat" and "lng".
                  */
                 function convertRijksdriehoekToLatLng(x, y) {
                     // The city "Amersfoort" is used as reference "Rijksdriehoek" coordinate.
@@ -1989,7 +1993,7 @@ async function initMap() {
                 /**
                  * Parse a LINESTRING gebiedsmarkering (or a comma-separated point fallback) and append each vertex to the coordinate list.
                  * @param {string|!Array<string>} locatiegebied LINESTRING WKT or a single "lat,lng" point (legacy).
-                 * @return {void}
+                 * @returns {void}
                  */
                 function processLine(locatiegebied) {
                     if (Array.isArray(locatiegebied)) {
@@ -2018,7 +2022,7 @@ async function initMap() {
                 /**
                  * Parse a POLYGON gebiedsmarkering and append each vertex to the coordinate list.
                  * @param {string|!Array<string>} locatiegebied POLYGON WKT or a legacy point/line encoding.
-                 * @return {void}
+                 * @returns {void}
                  */
                 function processPolygon(locatiegebied) {
                     if (Array.isArray(locatiegebied)) {
@@ -2062,7 +2066,7 @@ async function initMap() {
                 /**
                  * Parse a legacy Rijksdriehoek geometry (POINT or POLYGON in RD coordinates) and append the WGS84-converted vertices to the coordinate list.
                  * @param {string} geometrie WKT in RD coordinates.
-                 * @return {void}
+                 * @returns {void}
                  */
                 function processPointLegacy(geometrie) {
                     // Single-ring: POLYGON ((177456.11 361401.39, 177459.78 361374.02, ..., 177456.11 361401.39))
@@ -2200,7 +2204,7 @@ async function initMap() {
 
     /**
      * Hide the active municipality marker, since this overlaps the licenses.
-     * @return {void}
+     * @returns {void}
      */
     function hideActiveMunicipalityMarker() {
         appState.municipalityMarkers.forEach(function (markerObject) {
@@ -2213,7 +2217,7 @@ async function initMap() {
     /**
      * Show or hide the loading indicator.
      * @param {string} visibility Change visibility. Options: "show", or "hide".
-     * @return {void}
+     * @returns {void}
      */
     function setLoadingIndicatorVisibility(visibility) {
         if (visibility === "show") {
@@ -2229,7 +2233,7 @@ async function initMap() {
      * Show an error banner inside the map container. Unlike globalThis.alert(),
      * this works in iframes, can be styled, and does not block the UI thread.
      * @param {string} message Error message to display.
-     * @return {void}
+     * @returns {void}
      */
     function showError(message) {
         const banner = document.createElement("div");
@@ -2247,7 +2251,7 @@ async function initMap() {
      * Show a brief toast notification at the bottom of the map.
      * Disappears automatically after 3 seconds.
      * @param {string} message Message to display.
-     * @return {void}
+     * @returns {void}
      */
     function showToast(message) {
         const toast = document.createElement("div");
@@ -2268,7 +2272,7 @@ async function initMap() {
      * Download json from the GitHub Live Pages.
      * @param {string} path Path and file name to retrieve.
      * @param {function} callback Function when request is successful.
-     * @return {!Promise<*>} Promise that resolves with the parsed JSON, or
+     * @returns {!Promise<*>} Promise that resolves with the parsed JSON, or
      *     rejects on network error / non-OK response. The optional callback
      *     is still invoked for backward compatibility.
      */
@@ -2303,7 +2307,7 @@ async function initMap() {
      *     publicationsArray with the response. When false, append the
      *     response to the existing view (used to extend the visible range
      *     with an older month without discarding what is already loaded).
-     * @return {void}
+     * @returns {void}
      */
     function loadHistory(period, isNewRequest) {
         const lookupMunicipality =
@@ -2378,16 +2382,15 @@ async function initMap() {
      * Call the API to get live data.
      * @param {string} municipality Municipality to load.
      * @param {number} startRecord Start of batch.
-     * @return {void}
+     * @returns {void}
      */
     function loadDataForMunicipality(municipality, startRecord) {
         /**
          * Process the API response.
-         * @param {Object} responseJson
-         * @returns
+         * @param {object} responseJson Parsed JSON response from the API.
+         * @returns {void}
          */
         function processResponse(responseJson) {
-            let isMoreDataAvailable;
             if (municipality !== appState.activeMunicipality || appState.isHistoryActive) {
                 // We are loading a municipality, but user selected another one.
                 return;
@@ -2406,7 +2409,7 @@ async function initMap() {
             } else {
                 console.log("No new bekendmakingen found in " + municipality);
             }
-            isMoreDataAvailable = responseJson.searchRetrieveResponse.hasOwnProperty("nextRecordPosition");
+            const isMoreDataAvailable = responseJson.searchRetrieveResponse.hasOwnProperty("nextRecordPosition");
             if (isMoreDataAvailable) {
                 // Add next page:
                 console.log("Loading next page..");
@@ -2424,9 +2427,9 @@ async function initMap() {
 
         /**
          * Fetch data and retry when something goes wrong.
-         * @param {string} url
-         * @param {number} retriesLeft
-         * @return {void}
+         * @param {string} url URL to fetch data from.
+         * @param {number} retriesLeft Number of remaining retry attempts.
+         * @returns {void}
          */
         function loadDataWithRetries(url, retriesLeft) {
             if (retriesLeft <= 0) {
@@ -2475,7 +2478,7 @@ async function initMap() {
     /**
      * Clear markers, because of a different period, or municipality. This is done when the municipality is changed.
      * @param {string} municipalityToHide Municipality to show licenses from. Empty string to show all.
-     * @return {void}
+     * @returns {void}
      */
     function clearMarkers(municipalityToHide) {
         // https://developers.google.com/maps/documentation/javascript/markers#remove
@@ -2493,7 +2496,7 @@ async function initMap() {
     /**
      * Populate the map with markers. This is done when the municipality is changed. Or when the time filter is changed. Or when the map is scrolled.
      * @param {boolean} isNavigationNeeded Move to different center. This is done when the municipality is changed.
-     * @return {void}
+     * @returns {void}
      */
     function loadData(isNavigationNeeded) {
         const municipalityComboElm = document.getElementById("idCbxMunicipality");
@@ -2534,7 +2537,7 @@ async function initMap() {
      * Application entry point. Loads the static periods and municipalities
      * configuration files in parallel, then resolves the user's location and
      * kicks off the initial SRU fetch.
-     * @return {void}
+     * @returns {void}
      */
     function init() {
         Promise.all([getData("/periods.json"), getData("/municipalities.json")])
@@ -2554,4 +2557,4 @@ async function initMap() {
     }
 
     init();
-}
+};
