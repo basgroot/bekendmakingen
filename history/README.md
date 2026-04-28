@@ -80,24 +80,105 @@ Gemeenten die na 2017 zijn ontstaan door een herindeling hebben een `origin`-vel
 }
 ```
 
-Gemeenten met een `origin`-vermelding in deze dataset:
+Gemeenten met een `origin`-vermelding in deze dataset.
 
 | Gemeente | Jaar | Voorgaande gemeenten |
 |---|---|---|
+| Midden-Drenthe | 2000 | Beilen, Smilde, Westerbork |
+| Nijkerk | 2000 | Nijkerk, Hoevelaken |
+| Bergen (Noord-Holland) | 2001 | Bergen, Egmond, Schoorl |
+| Dalfsen | 2001 | Dalfsen, Nieuwleusen |
+| De Bilt | 2001 | De Bilt, Maartensdijk |
+| Dinkelland | 2001 | Denekamp, Ootmarsum, Weerselo |
+| Hardenberg | 2001 | Avereest, Gramsbergen, Stad Hardenberg |
+| Hof van Twente | 2001 | Ambt Delden, Diepenheim, Goor, Markelo, Stad Delden |
+| Kampen | 2001 | Kampen, IJsselmuiden |
+| Lingewaard | 2001 | Bemmel, Gendt, Huissen |
+| Olst-Wijhe | 2001 | Olst, Wijhe |
+| Overbetuwe | 2001 | Elst, Gendt, Herveld, Huissen, Valburg |
+| Raalte | 2001 | Raalte, Heino |
+| Sittard-Geleen | 2001 | Born, Geleen, Sittard |
+| Steenwijkerland | 2001 | Blankenham, Blokzijl, Brederwiede, Giethoorn, Kuinre, Oldemarkt, Vollenhove, Wanneperveen |
+| Twenterand | 2001 | Den Ham, Vriezenveen, Wierden |
+| Utrecht | 2001 | Utrecht, Haarzuilens, Vleuten-De Meern |
+| Venlo | 2001 | Venlo, Belfeld, Tegelen |
+| Woerden | 2001 | Woerden, Harmelen |
+| Zwartewaterland | 2001 | Genemuiden, Hasselt, Zwartsluis |
+| Castricum | 2002 | Castricum, Akersloot |
+| Leidschendam-Voorburg | 2002 | Stompwijk, Veur, Voorburg |
+| Neder-Betuwe | 2002 | Dodewaard, Echteld, Kesteren |
+| Pijnacker-Nootdorp | 2002 | Nootdorp, Pijnacker |
+| Wijdemeren | 2002 | 's-Graveland, Loosdrecht, Nederhorst den Berg |
+| Echt-Susteren | 2003 | Echt, Susteren |
+| Hulst | 2003 | Hulst, Hontenisse |
+| Rijssen-Holten | 2003 | Holten, Rijssen |
+| Sluis | 2003 | Aardenburg, Oostburg, Sluis-Aardenburg |
+| Terneuzen | 2003 | Terneuzen, Axel, Sas van Gent, Zaamslag |
+| Zwijndrecht | 2003 | Zwijndrecht, Heerjansdam |
+| Geldrop-Mierlo | 2004 | Geldrop, Mierlo |
+| Midden-Delfland | 2004 | Maasland, Schipluiden |
+| Westland | 2004 | 's-Gravenzande, De Lier, Monster, Naaldwijk, Wateringen |
+| Aalten | 2005 | Aalten, Dinxperlo |
+| Berkelland | 2005 | Borculo, Eibergen, Neede, Ruurlo |
+| Bronckhorst | 2005 | Hengelo (Gld), Hummelo en Keppel, Steenderen, Vorden, Zelhem |
+| Deventer | 2005 | Deventer, Bathmen |
+| Doetinchem | 2005 | Doetinchem, Wehl |
+| Lochem | 2005 | Lochem, Gorssel |
+| Montferland | 2005 | Didam, 's-Heerenberg, Netterden, Zeddam |
+| Oost Gelre | 2005 | Groenlo, Lichtenvoorde |
+| Oude IJsselstreek | 2005 | Gendringen, Terborg, Varsseveld |
+| Zutphen | 2005 | Zutphen, Warnsveld |
+| Drechterland | 2006 | Drechterland, Venhuizen |
+| Katwijk | 2006 | Katwijk, Rijnsburg, Valkenburg |
+| Teylingen | 2006 | Sassenheim, Voorhout, Warmond |
+| Utrechtse Heuvelrug | 2006 | Amerongen, Doorn, Driebergen-Rijsenburg, Leersum, Maarn |
+| Koggenland | 2007 | Avenhorn, Berkhout, Obdam, Oudendijk, Ursem |
+| Lansingerland | 2007 | Bergschenhoek, Berkel en Rodenrijs, Bleiswijk |
+| Leudal | 2007 | Haelen, Heythuysen, Hunsel, Neer, Roggel, Roggel en Neer |
+| Maasgouw | 2007 | Beegden, Heel, Maasbracht, Thorn, Wessem |
+| Nieuwkoop | 2007 | Nieuwkoop, Nieuwveen, Ter Aar |
+| Roerdalen | 2007 | Ambt Montfort, Sint Odiliënberg |
+| Roermond | 2007 | Roermond, Swalmen |
+| Bloemendaal | 2009 | Bloemendaal, Bennebroek |
+| Kaag en Braassem | 2009 | Alkemade, Jacobswoude, Leimuiden, Rijnsaterwoude, Woubrugge |
+| Horst aan de Maas | 2010 | Broekhuizen, Grubbenvorst, Horst, Sevenum, Arcen en Velden, Meerlo-Wanssum |
+| Oldambt | 2010 | Reiderland, Scheemda, Winschoten |
+| Peel en Maas | 2010 | Helden, Kessel, Maasbree, Meijel |
+| Rotterdam | 2010 | Rotterdam, Rozenburg |
+| Venray | 2010 | Venray, Wanssum, Geijsteren, Blitterswijck |
+| Zuidplas | 2010 | Moordrecht, Nieuwerkerk aan den IJssel, Zevenhuizen-Moerkapelle, Moerkapelle, Zevenhuizen |
+| Bodegraven-Reeuwijk | 2011 | Bodegraven, Reeuwijk |
+| De Ronde Venen | 2011 | De Ronde Venen, Abcoude |
+| Eijsden-Margraten | 2011 | Eijsden, Margraten |
+| Medemblik | 2011 | Medemblik, Noorder-Koggenland, Nibbixwoud, Wognum, Andijk, Wervershoof |
+| Oss | 2011 | Oss, Ravenstein, Lith |
+| Stichtse Vecht | 2011 | Breukelen, Loenen, Maarssen |
+| Súdwest-Fryslân | 2018 | Bolsward, Nijefurd, Sneek, Wûnseradiel, Wymbritseradiel, Súdwest-Fryslân, Littenseradiel |
+| Hollands Kroon | 2012 | Anna Paulowna, Niedorp, Wieringen, Wieringermeer |
+| Goeree-Overflakkee | 2013 | Dirksland, Goedereede, Middelharnis, Oostflakkee |
+| Schagen | 2013 | Schagen, Harenkarspel, Zijpe |
+| Alphen aan den Rijn | 2014 | Alphen aan den Rijn, Boskoop, Rijnwoude |
+| De Fryske Marren | 2014 | Boarnsterhim, Gaasterlân-Sleat, Lemsterland, Skasterlân |
+| Heerenveen | 2014 | Heerenveen, Boarnsterhim |
+| Leeuwarden | 2018 | Leeuwarden, Leeuwarderadeel, Boarnsterhim |
+| Alkmaar | 2015 | Alkmaar, Graft-De Rijp, Schermer |
+| Berg en Dal | 2015 | Groesbeek, Millingen aan de Rijn, Ubbergen |
+| Krimpenerwaard | 2015 | Bergambacht, Nederlek, Ouderkerk, Schoonhoven, Vlist |
+| Nissewaard | 2015 | Bernisse, Spijkenisse |
+| Edam-Volendam | 2016 | Edam-Volendam, Zeevang |
+| Gooise Meren | 2016 | Bussum, Muiden, Naarden |
 | Meierijstad | 2017 | Schijndel, Sint-Oedenrode, Veghel |
-| Leeuwarden | 2018 | Leeuwarden, Leeuwarderadeel |
 | Midden-Groningen | 2018 | Hoogezand-Sappemeer, Menterwolde, Slochteren |
-| Súdwest-Fryslân | 2018 | Súdwest-Fryslân, Littenseradiel |
 | Waadhoeke | 2018 | Franekeradeel, het Bildt, Menameradiel |
 | Westerwolde | 2018 | Bellingwedde, Vlagtwedde |
-| Zevenaar | 2018 | Zevenaar, Rijnwaarden |
+| Zevenaar | 2018 | Zevenaar, Angerlo, Rijnwaarden |
 | Altena | 2019 | Aalburg, Werkendam, Woudrichem |
 | Beekdaelen | 2019 | Onderbanken, Nuth, Schinnen |
 | Groningen | 2019 | Groningen, Ten Boer, Haren |
 | Haarlemmermeer | 2019 | Haarlemmermeer, Haarlemmerliede en Spaarnwoude |
 | Het Hogeland | 2019 | Bedum, Eemsmond, De Marne, Winsum |
 | Hoeksche Waard | 2019 | Oud-Beijerland, Korendijk, Strijen, Cromstrijen, Binnenmaas |
-| Molenlanden | 2019 | Molenwaard, Giessenlanden |
+| Molenlanden | 2019 | Giessenlanden, Molenwaard, Graafstroom, Liesveld, Nieuw-Lekkerland |
 | Noardeast-Fryslân | 2019 | Dongeradeel, Ferwerderadiel, Kollumerland en Nieuwkruisland |
 | Noordwijk | 2019 | Noordwijk, Noordwijkerhout |
 | Vijfheerenlanden | 2019 | Leerdam, Vianen, Zederik |
@@ -107,6 +188,6 @@ Gemeenten met een `origin`-vermelding in deze dataset:
 | Amsterdam | 2022 | Amsterdam, Weesp |
 | Dijk en Waard | 2022 | Heerhugowaard, Langedijk |
 | Land van Cuijk | 2022 | Boxmeer, Cuijk, Sint Anthonis, Mill en Sint Hubert, Grave |
-| Maashorst | 2022 | Landerd, Uden |
+| Maashorst | 2022 | Landerd, Uden, Schaijk, Zeeland |
 | Purmerend | 2022 | Purmerend, Beemster |
 | Voorne aan Zee | 2023 | Brielle, Hellevoetsluis, Westvoorne |
