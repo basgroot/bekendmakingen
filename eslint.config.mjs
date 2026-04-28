@@ -43,14 +43,17 @@ export default [
             "no-loss-of-precision": "error",
             "no-self-assign": "error",
             "no-shadow": ["error", { "builtinGlobals": false }],
-            "jsdoc/require-jsdoc": ["warn", {
-                "require": {
-                    "FunctionDeclaration": true,
-                    "ArrowFunctionExpression": false,
-                    "FunctionExpression": false
-                },
-                "checkConstructors": false
-            }],
+            "jsdoc/require-jsdoc": [
+                "warn",
+                {
+                    "require": {
+                        "FunctionDeclaration": true,
+                        "ArrowFunctionExpression": false,
+                        "FunctionExpression": false
+                    },
+                    "checkConstructors": false
+                }
+            ],
             "jsdoc/require-param": "warn",
             "jsdoc/require-param-type": "warn",
             "jsdoc/require-param-description": "warn",

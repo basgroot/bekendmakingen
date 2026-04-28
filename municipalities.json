@@ -15,6 +15,10 @@
         "center": {
             "lat": 51.92675,
             "lng": 6.58121
+        },
+        "origin": {
+            "year": 2005,
+            "municipalities": ["Aalten", "Dinxperlo"]
         }
     },
     "Achtkarspelen": {
@@ -39,6 +43,10 @@
         "center": {
             "lat": 52.63254,
             "lng": 4.74403
+        },
+        "origin": {
+            "year": 2015,
+            "municipalities": ["Alkmaar", "Graft-De Rijp", "Schermer"]
         }
     },
     "Almelo": {
@@ -57,6 +65,10 @@
         "center": {
             "lat": 52.12881,
             "lng": 4.66264
+        },
+        "origin": {
+            "year": 2014,
+            "municipalities": ["Alphen aan den Rijn", "Boskoop", "Rijnwoude"]
         }
     },
     "Alphen-Chaam": {
@@ -164,7 +176,7 @@
         },
         "origin": {
             "year": 2019,
-            "municipalities": ["Onderbanken", "Nuth", "Schinnen"]
+            "municipalities": ["Nuth", "Onderbanken", "Schinnen"]
         }
     },
     "Beesel": {
@@ -177,6 +189,10 @@
         "center": {
             "lat": 51.77758,
             "lng": 5.93281
+        },
+        "origin": {
+            "year": 2015,
+            "municipalities": ["Groesbeek", "Millingen aan de Rijn", "Ubbergen"]
         }
     },
     "Bergeijk": {
@@ -197,6 +213,10 @@
         "center": {
             "lat": 52.66935,
             "lng": 4.70043
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["Bergen", "Egmond", "Schoorl"]
         }
     },
     "Bergen op Zoom": {
@@ -209,6 +229,10 @@
         "center": {
             "lat": 52.11624,
             "lng": 6.52474
+        },
+        "origin": {
+            "year": 2005,
+            "municipalities": ["Borculo", "Eibergen", "Neede", "Ruurlo"]
         }
     },
     "Bernheze": {
@@ -251,12 +275,20 @@
         "center": {
             "lat": 52.40506,
             "lng": 4.61865
+        },
+        "origin": {
+            "year": 2009,
+            "municipalities": ["Bennebroek", "Bloemendaal"]
         }
     },
     "Bodegraven-Reeuwijk": {
         "center": {
             "lat": 52.08488,
             "lng": 4.74713
+        },
+        "origin": {
+            "year": 2011,
+            "municipalities": ["Bodegraven", "Reeuwijk"]
         }
     },
     "Boekel": {
@@ -299,6 +331,10 @@
         "center": {
             "lat": 52.05225,
             "lng": 6.31071
+        },
+        "origin": {
+            "year": 2005,
+            "municipalities": ["Hengelo (Gld)", "Hummelo en Keppel", "Steenderen", "Vorden", "Zelhem"]
         }
     },
     "Brummen": {
@@ -341,6 +377,10 @@
         "center": {
             "lat": 52.54651,
             "lng": 4.66218
+        },
+        "origin": {
+            "year": 2002,
+            "municipalities": ["Akersloot", "Castricum"]
         }
     },
     "Coevorden": {
@@ -365,6 +405,10 @@
         "center": {
             "lat": 52.5048,
             "lng": 6.26134
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["Dalfsen", "Nieuwleusen"]
         }
     },
     "Dantumadiel": {
@@ -377,18 +421,30 @@
         "center": {
             "lat": 52.10925,
             "lng": 5.1808
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["De Bilt", "Maartensdijk"]
         }
     },
     "De Fryske Marren": {
         "center": {
             "lat": 52.96777,
             "lng": 5.79688
+        },
+        "origin": {
+            "year": 2014,
+            "municipalities": ["Boarnsterhim", "Gaasterlân-Sleat", "Lemsterland", "Skasterlân"]
         }
     },
     "De Ronde Venen": {
         "center": {
             "lat": 52.20669,
             "lng": 4.86858
+        },
+        "origin": {
+            "year": 2011,
+            "municipalities": ["Abcoude", "De Ronde Venen"]
         }
     },
     "De Wolden": {
@@ -433,6 +489,10 @@
         "center": {
             "lat": 52.25304,
             "lng": 6.16004
+        },
+        "origin": {
+            "year": 2005,
+            "municipalities": ["Bathmen", "Deventer"]
         }
     },
     "Diemen": {
@@ -455,6 +515,10 @@
         "center": {
             "lat": 52.37587,
             "lng": 7.00467
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["Denekamp", "Ootmarsum", "Weerselo"]
         }
     },
     "Doesburg": {
@@ -467,6 +531,10 @@
         "center": {
             "lat": 51.96557,
             "lng": 6.2886
+        },
+        "origin": {
+            "year": 2005,
+            "municipalities": ["Doetinchem", "Wehl"]
         }
     },
     "Dongen": {
@@ -485,6 +553,10 @@
         "center": {
             "lat": 52.66581,
             "lng": 5.2048
+        },
+        "origin": {
+            "year": 2006,
+            "municipalities": ["Drechterland", "Venhuizen"]
         }
     },
     "Drimmelen": {
@@ -515,12 +587,20 @@
         "center": {
             "lat": 51.10659,
             "lng": 5.86708
+        },
+        "origin": {
+            "year": 2003,
+            "municipalities": ["Echt", "Susteren"]
         }
     },
     "Edam-Volendam": {
         "center": {
             "lat": 52.495,
             "lng": 5.07439
+        },
+        "origin": {
+            "year": 2016,
+            "municipalities": ["Edam-Volendam", "Zeevang"]
         }
     },
     "Ede": {
@@ -555,6 +635,10 @@
         "center": {
             "lat": 50.79555,
             "lng": 5.76446
+        },
+        "origin": {
+            "year": 2011,
+            "municipalities": ["Eijsden", "Margraten"]
         }
     },
     "Eindhoven": {
@@ -615,6 +699,10 @@
         "center": {
             "lat": 51.42242,
             "lng": 5.5618
+        },
+        "origin": {
+            "year": 2004,
+            "municipalities": ["Geldrop", "Mierlo"]
         }
     },
     "Gemert-Bakel": {
@@ -639,6 +727,10 @@
         "center": {
             "lat": 51.75779,
             "lng": 4.16519
+        },
+        "origin": {
+            "year": 2013,
+            "municipalities": ["Dirksland", "Goedereede", "Middelharnis", "Oostflakkee"]
         }
     },
     "Goes": {
@@ -657,6 +749,10 @@
         "center": {
             "lat": 52.29575,
             "lng": 5.16274
+        },
+        "origin": {
+            "year": 2016,
+            "municipalities": ["Bussum", "Muiden", "Naarden"]
         }
     },
     "Gorinchem": {
@@ -678,7 +774,7 @@
         },
         "origin": {
             "year": 2019,
-            "municipalities": ["Groningen", "Ten Boer", "Haren"]
+            "municipalities": ["Groningen", "Haren", "Ten Boer"]
         }
     },
     "Gulpen-Wittem": {
@@ -706,7 +802,7 @@
         },
         "origin": {
             "year": 2019,
-            "municipalities": ["Haarlemmermeer", "Haarlemmerliede en Spaarnwoude"]
+            "municipalities": ["Haarlemmerliede en Spaarnwoude", "Haarlemmermeer"]
         }
     },
     "Halderberge": {
@@ -719,6 +815,10 @@
         "center": {
             "lat": 52.57539,
             "lng": 6.6237
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["Avereest", "Gramsbergen", "Stad Hardenberg"]
         }
     },
     "Harderwijk": {
@@ -767,6 +867,10 @@
         "center": {
             "lat": 52.96072,
             "lng": 5.92582
+        },
+        "origin": {
+            "year": 2014,
+            "municipalities": ["Boarnsterhim", "Heerenveen"]
         }
     },
     "Heerlen": {
@@ -818,7 +922,7 @@
         },
         "origin": {
             "year": 2019,
-            "municipalities": ["Bedum", "Eemsmond", "De Marne", "Winsum"]
+            "municipalities": ["Bedum", "De Marne", "Eemsmond", "Winsum"]
         }
     },
     "Heumen": {
@@ -858,19 +962,27 @@
         },
         "origin": {
             "year": 2019,
-            "municipalities": ["Oud-Beijerland", "Korendijk", "Strijen", "Cromstrijen", "Binnenmaas"]
+            "municipalities": ["Binnenmaas", "Cromstrijen", "Korendijk", "Oud-Beijerland", "Strijen"]
         }
     },
     "Hof van Twente": {
         "center": {
             "lat": 52.23334,
             "lng": 6.58702
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["Ambt Delden", "Diepenheim", "Goor", "Markelo", "Stad Delden"]
         }
     },
     "Hollands Kroon": {
         "center": {
             "lat": 52.81235,
             "lng": 4.99822
+        },
+        "origin": {
+            "year": 2012,
+            "municipalities": ["Anna Paulowna", "Niedorp", "Wieringen", "Wieringermeer"]
         }
     },
     "Hoogeveen": {
@@ -889,6 +1001,10 @@
         "center": {
             "lat": 51.45181,
             "lng": 6.05339
+        },
+        "origin": {
+            "year": 2010,
+            "municipalities": ["Arcen en Velden", "Broekhuizen", "Grubbenvorst", "Horst", "Meerlo-Wanssum", "Sevenum"]
         }
     },
     "Houten": {
@@ -907,6 +1023,10 @@
         "center": {
             "lat": 51.28062,
             "lng": 4.05409
+        },
+        "origin": {
+            "year": 2003,
+            "municipalities": ["Hontenisse", "Hulst"]
         }
     },
     "IJsselstein": {
@@ -919,12 +1039,20 @@
         "center": {
             "lat": 52.2041,
             "lng": 4.63128
+        },
+        "origin": {
+            "year": 2009,
+            "municipalities": ["Alkemade", "Jacobswoude", "Leimuiden", "Rijnsaterwoude", "Woubrugge"]
         }
     },
     "Kampen": {
         "center": {
             "lat": 52.55529,
             "lng": 5.91273
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["IJsselmuiden", "Kampen"]
         }
     },
     "Kapelle": {
@@ -937,6 +1065,10 @@
         "center": {
             "lat": 52.1993,
             "lng": 4.4131
+        },
+        "origin": {
+            "year": 2006,
+            "municipalities": ["Katwijk", "Rijnsburg", "Valkenburg"]
         }
     },
     "Kerkrade": {
@@ -949,6 +1081,10 @@
         "center": {
             "lat": 52.62953,
             "lng": 4.94708
+        },
+        "origin": {
+            "year": 2007,
+            "municipalities": ["Avenhorn", "Berkhout", "Obdam", "Oudendijk", "Ursem"]
         }
     },
     "Krimpen aan den IJssel": {
@@ -961,6 +1097,10 @@
         "center": {
             "lat": 51.97239,
             "lng": 4.77221
+        },
+        "origin": {
+            "year": 2015,
+            "municipalities": ["Bergambacht", "Nederlek", "Ouderkerk", "Schoonhoven", "Vlist"]
         }
     },
     "Laarbeek": {
@@ -976,7 +1116,7 @@
         },
         "origin": {
             "year": 2022,
-            "municipalities": ["Boxmeer", "Cuijk", "Sint Anthonis", "Mill en Sint Hubert", "Grave"]
+            "municipalities": ["Boxmeer", "Cuijk", "Grave", "Mill en Sint Hubert", "Sint Anthonis"]
         }
     },
     "Landgraaf": {
@@ -995,6 +1135,10 @@
         "center": {
             "lat": 51.99565,
             "lng": 4.4874
+        },
+        "origin": {
+            "year": 2007,
+            "municipalities": ["Bergschenhoek", "Berkel en Rodenrijs", "Bleiswijk"]
         }
     },
     "Laren": {
@@ -1010,7 +1154,7 @@
         },
         "origin": {
             "year": 2018,
-            "municipalities": ["Leeuwarden", "Leeuwarderadeel"]
+            "municipalities": ["Boarnsterhim", "Leeuwarden", "Leeuwarderadeel"]
         }
     },
     "Leiden": {
@@ -1029,6 +1173,10 @@
         "center": {
             "lat": 52.08526,
             "lng": 4.37916
+        },
+        "origin": {
+            "year": 2002,
+            "municipalities": ["Stompwijk", "Veur", "Voorburg"]
         }
     },
     "Lelystad": {
@@ -1041,6 +1189,10 @@
         "center": {
             "lat": 51.24989,
             "lng": 5.89448
+        },
+        "origin": {
+            "year": 2007,
+            "municipalities": ["Haelen", "Heythuysen", "Hunsel", "Neer", "Roggel", "Roggel en Neer"]
         }
     },
     "Leusden": {
@@ -1053,6 +1205,10 @@
         "center": {
             "lat": 51.89215,
             "lng": 5.89971
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["Bemmel", "Gendt", "Huissen"]
         }
     },
     "Lisse": {
@@ -1065,6 +1221,10 @@
         "center": {
             "lat": 52.16141,
             "lng": 6.41635
+        },
+        "origin": {
+            "year": 2005,
+            "municipalities": ["Gorssel", "Lochem"]
         }
     },
     "Loon op Zand": {
@@ -1095,6 +1255,10 @@
         "center": {
             "lat": 51.17755,
             "lng": 5.90558
+        },
+        "origin": {
+            "year": 2007,
+            "municipalities": ["Beegden", "Heel", "Maasbracht", "Thorn", "Wessem"]
         }
     },
     "Maashorst": {
@@ -1104,7 +1268,7 @@
         },
         "origin": {
             "year": 2022,
-            "municipalities": ["Landerd", "Uden"]
+            "municipalities": ["Landerd", "Schaijk", "Uden", "Zeeland"]
         }
     },
     "Maassluis": {
@@ -1123,6 +1287,10 @@
         "center": {
             "lat": 52.7669,
             "lng": 5.10409
+        },
+        "origin": {
+            "year": 2011,
+            "municipalities": ["Andijk", "Medemblik", "Nibbixwoud", "Noorder-Koggenland", "Wervershoof", "Wognum"]
         }
     },
     "Meerssen": {
@@ -1157,12 +1325,20 @@
         "center": {
             "lat": 51.97554,
             "lng": 4.31571
+        },
+        "origin": {
+            "year": 2004,
+            "municipalities": ["Maasland", "Schipluiden"]
         }
     },
     "Midden-Drenthe": {
         "center": {
             "lat": 52.85932,
             "lng": 6.51541
+        },
+        "origin": {
+            "year": 2000,
+            "municipalities": ["Beilen", "Smilde", "Westerbork"]
         }
     },
     "Midden-Groningen": {
@@ -1188,13 +1364,17 @@
         },
         "origin": {
             "year": 2019,
-            "municipalities": ["Molenwaard", "Giessenlanden"]
+            "municipalities": ["Giessenlanden", "Graafstroom", "Liesveld", "Molenwaard", "Nieuw-Lekkerland"]
         }
     },
     "Montferland": {
         "center": {
             "lat": 51.93675,
             "lng": 6.12934
+        },
+        "origin": {
+            "year": 2005,
+            "municipalities": ["'s-Heerenberg", "Didam", "Netterden", "Zeddam"]
         }
     },
     "Montfoort": {
@@ -1213,6 +1393,10 @@
         "center": {
             "lat": 51.90954,
             "lng": 5.56933
+        },
+        "origin": {
+            "year": 2002,
+            "municipalities": ["Dodewaard", "Echteld", "Kesteren"]
         }
     },
     "Nederweert": {
@@ -1231,12 +1415,20 @@
         "center": {
             "lat": 52.14965,
             "lng": 4.77998
+        },
+        "origin": {
+            "year": 2007,
+            "municipalities": ["Nieuwkoop", "Nieuwveen", "Ter Aar"]
         }
     },
     "Nijkerk": {
         "center": {
             "lat": 52.22343,
             "lng": 5.48558
+        },
+        "origin": {
+            "year": 2000,
+            "municipalities": ["Hoevelaken", "Nijkerk"]
         }
     },
     "Nijmegen": {
@@ -1249,6 +1441,10 @@
         "center": {
             "lat": 51.84891,
             "lng": 4.33116
+        },
+        "origin": {
+            "year": 2015,
+            "municipalities": ["Bernisse", "Spijkenisse"]
         }
     },
     "Noardeast-Fryslân": {
@@ -1323,6 +1519,10 @@
         "center": {
             "lat": 53.14665,
             "lng": 7.03311
+        },
+        "origin": {
+            "year": 2010,
+            "municipalities": ["Reiderland", "Scheemda", "Winschoten"]
         }
     },
     "Oldebroek": {
@@ -1341,6 +1541,10 @@
         "center": {
             "lat": 52.38445,
             "lng": 6.13576
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["Olst", "Wijhe"]
         }
     },
     "Ommen": {
@@ -1353,6 +1557,10 @@
         "center": {
             "lat": 51.98695,
             "lng": 6.56762
+        },
+        "origin": {
+            "year": 2005,
+            "municipalities": ["Groenlo", "Lichtenvoorde"]
         }
     },
     "Oosterhout": {
@@ -1389,12 +1597,20 @@
         "center": {
             "lat": 51.7681,
             "lng": 5.52309
+        },
+        "origin": {
+            "year": 2011,
+            "municipalities": ["Lith", "Oss", "Ravenstein"]
         }
     },
     "Oude IJsselstreek": {
         "center": {
             "lat": 51.89004,
             "lng": 6.38055
+        },
+        "origin": {
+            "year": 2005,
+            "municipalities": ["Gendringen", "Terborg", "Varsseveld"]
         }
     },
     "Ouder-Amstel": {
@@ -1413,6 +1629,10 @@
         "center": {
             "lat": 51.91872,
             "lng": 5.84363
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["Elst", "Gendt", "Herveld", "Huissen", "Valburg"]
         }
     },
     "Papendrecht": {
@@ -1425,6 +1645,10 @@
         "center": {
             "lat": 51.32867,
             "lng": 5.9777
+        },
+        "origin": {
+            "year": 2010,
+            "municipalities": ["Helden", "Kessel", "Maasbree", "Meijel"]
         }
     },
     "Pekela": {
@@ -1437,6 +1661,10 @@
         "center": {
             "lat": 52.0199,
             "lng": 4.43365
+        },
+        "origin": {
+            "year": 2002,
+            "municipalities": ["Nootdorp", "Pijnacker"]
         }
     },
     "Purmerend": {
@@ -1446,7 +1674,7 @@
         },
         "origin": {
             "year": 2022,
-            "municipalities": ["Purmerend", "Beemster"]
+            "municipalities": ["Beemster", "Purmerend"]
         }
     },
     "Putten": {
@@ -1459,6 +1687,10 @@
         "center": {
             "lat": 52.38574,
             "lng": 6.27515
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["Heino", "Raalte"]
         }
     },
     "Reimerswaal": {
@@ -1507,6 +1739,10 @@
         "center": {
             "lat": 52.28245,
             "lng": 6.4206
+        },
+        "origin": {
+            "year": 2003,
+            "municipalities": ["Holten", "Rijssen"]
         }
     },
     "Rijswijk": {
@@ -1519,12 +1755,20 @@
         "center": {
             "lat": 51.14429,
             "lng": 6.00138
+        },
+        "origin": {
+            "year": 2007,
+            "municipalities": ["Ambt Montfort", "Sint Odiliënberg"]
         }
     },
     "Roermond": {
         "center": {
             "lat": 51.19359,
             "lng": 5.9887
+        },
+        "origin": {
+            "year": 2007,
+            "municipalities": ["Roermond", "Swalmen"]
         }
     },
     "Roosendaal": {
@@ -1537,6 +1781,10 @@
         "center": {
             "lat": 51.9244,
             "lng": 4.47775
+        },
+        "origin": {
+            "year": 2010,
+            "municipalities": ["Rotterdam", "Rozenburg"]
         }
     },
     "Rozendaal": {
@@ -1555,6 +1803,10 @@
         "center": {
             "lat": 52.78669,
             "lng": 4.79647
+        },
+        "origin": {
+            "year": 2013,
+            "municipalities": ["Harenkarspel", "Schagen", "Zijpe"]
         }
     },
     "Scherpenzeel": {
@@ -1597,6 +1849,10 @@
         "center": {
             "lat": 50.99875,
             "lng": 5.86812
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["Born", "Geleen", "Sittard"]
         }
     },
     "Sliedrecht": {
@@ -1609,6 +1865,10 @@
         "center": {
             "lat": 51.32639,
             "lng": 3.48906
+        },
+        "origin": {
+            "year": 2003,
+            "municipalities": ["Aardenburg", "Oostburg", "Sluis-Aardenburg"]
         }
     },
     "Smallingerland": {
@@ -1663,6 +1923,10 @@
         "center": {
             "lat": 52.78768,
             "lng": 6.11505
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["Blankenham", "Blokzijl", "Brederwiede", "Giethoorn", "Kuinre", "Oldemarkt", "Vollenhove", "Wanneperveen"]
         }
     },
     "Stein": {
@@ -1675,6 +1939,10 @@
         "center": {
             "lat": 52.14483,
             "lng": 5.03321
+        },
+        "origin": {
+            "year": 2011,
+            "municipalities": ["Breukelen", "Loenen", "Maarssen"]
         }
     },
     "Súdwest-Fryslân": {
@@ -1684,13 +1952,17 @@
         },
         "origin": {
             "year": 2018,
-            "municipalities": ["Súdwest-Fryslân", "Littenseradiel"]
+            "municipalities": ["Bolsward", "Littenseradiel", "Nijefurd", "Sneek", "Súdwest-Fryslân", "Wymbritseradiel", "Wûnseradiel"]
         }
     },
     "Terneuzen": {
         "center": {
             "lat": 51.33453,
             "lng": 3.82693
+        },
+        "origin": {
+            "year": 2003,
+            "municipalities": ["Axel", "Sas van Gent", "Terneuzen", "Zaamslag"]
         }
     },
     "Terschelling": {
@@ -1709,6 +1981,10 @@
         "center": {
             "lat": 52.22556,
             "lng": 4.52412
+        },
+        "origin": {
+            "year": 2006,
+            "municipalities": ["Sassenheim", "Voorhout", "Warmond"]
         }
     },
     "Tholen": {
@@ -1739,6 +2015,10 @@
         "center": {
             "lat": 52.46132,
             "lng": 6.5732
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["Den Ham", "Vriezenveen", "Wierden"]
         }
     },
     "Tynaarlo": {
@@ -1775,12 +2055,20 @@
         "center": {
             "lat": 52.09079,
             "lng": 5.1214
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["Haarzuilens", "Utrecht", "Vleuten-De Meern"]
         }
     },
     "Utrechtse Heuvelrug": {
         "center": {
             "lat": 52.03321,
             "lng": 5.34505
+        },
+        "origin": {
+            "year": 2006,
+            "municipalities": ["Amerongen", "Doorn", "Driebergen-Rijsenburg", "Leersum", "Maarn"]
         }
     },
     "Vaals": {
@@ -1835,12 +2123,20 @@
         "center": {
             "lat": 51.37031,
             "lng": 6.16897
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["Belfeld", "Tegelen", "Venlo"]
         }
     },
     "Venray": {
         "center": {
             "lat": 51.52703,
             "lng": 5.97538
+        },
+        "origin": {
+            "year": 2010,
+            "municipalities": ["Blitterswijck", "Geijsteren", "Venray", "Wanssum"]
         }
     },
     "Vijfheerenlanden": {
@@ -1912,7 +2208,7 @@
         },
         "origin": {
             "year": 2018,
-            "municipalities": ["Franekeradeel", "het Bildt", "Menameradiel"]
+            "municipalities": ["Franekeradeel", "Menameradiel", "het Bildt"]
         }
     },
     "Waalre": {
@@ -1964,7 +2260,7 @@
         },
         "origin": {
             "year": 2019,
-            "municipalities": ["Geldermalsen", "Neerijnen", "Lingewaal"]
+            "municipalities": ["Geldermalsen", "Lingewaal", "Neerijnen"]
         }
     },
     "West Maas en Waal": {
@@ -2009,6 +2305,10 @@
         "center": {
             "lat": 52.02316,
             "lng": 4.17014
+        },
+        "origin": {
+            "year": 2004,
+            "municipalities": ["'s-Gravenzande", "De Lier", "Monster", "Naaldwijk", "Wateringen"]
         }
     },
     "Weststellingwerf": {
@@ -2033,6 +2333,10 @@
         "center": {
             "lat": 52.24175,
             "lng": 5.1093
+        },
+        "origin": {
+            "year": 2002,
+            "municipalities": ["'s-Graveland", "Loosdrecht", "Nederhorst den Berg"]
         }
     },
     "Wijk bij Duurstede": {
@@ -2057,6 +2361,10 @@
         "center": {
             "lat": 52.08571,
             "lng": 4.88497
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["Harmelen", "Woerden"]
         }
     },
     "Wormerland": {
@@ -2108,7 +2416,7 @@
         },
         "origin": {
             "year": 2018,
-            "municipalities": ["Zevenaar", "Rijnwaarden"]
+            "municipalities": ["Angerlo", "Rijnwaarden", "Zevenaar"]
         }
     },
     "Zoetermeer": {
@@ -2127,6 +2435,10 @@
         "center": {
             "lat": 51.96742,
             "lng": 4.61695
+        },
+        "origin": {
+            "year": 2010,
+            "municipalities": ["Moerkapelle", "Moordrecht", "Nieuwerkerk aan den IJssel", "Zevenhuizen", "Zevenhuizen-Moerkapelle"]
         }
     },
     "Zundert": {
@@ -2139,18 +2451,30 @@
         "center": {
             "lat": 52.13996,
             "lng": 6.19501
+        },
+        "origin": {
+            "year": 2005,
+            "municipalities": ["Warnsveld", "Zutphen"]
         }
     },
     "Zwartewaterland": {
         "center": {
             "lat": 52.62478,
             "lng": 6.04072
+        },
+        "origin": {
+            "year": 2001,
+            "municipalities": ["Genemuiden", "Hasselt", "Zwartsluis"]
         }
     },
     "Zwijndrecht": {
         "center": {
             "lat": 51.81272,
             "lng": 4.63241
+        },
+        "origin": {
+            "year": 2003,
+            "municipalities": ["Heerjansdam", "Zwijndrecht"]
         }
     },
     "Zwolle": {
