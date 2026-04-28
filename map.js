@@ -640,6 +640,19 @@ window.initMap = async function initMap() {
         const combobox = document.createElement("input");
         const datalist = document.createElement("datalist");
         const municipalityNames = Object.keys(appState.municipalities);
+        // Build a reverse lookup: origin municipality name → merged municipality name
+        const originToMunicipality = {};
+        municipalityNames.forEach(function (municipalityName) {
+            const data = appState.municipalities[municipalityName];
+            if (data.origin && Array.isArray(data.origin.municipalities)) {
+                data.origin.municipalities.forEach(function (originName) {
+                    // Only add origins that are not themselves a current municipality
+                    if (appState.municipalities[originName] === undefined) {
+                        originToMunicipality[originName] = municipalityName;
+                    }
+                });
+            }
+        });
         const datalistId = "idDlMunicipality";
         combobox.id = "idCbxMunicipality";
         combobox.title = "Gemeente selecteren";
@@ -655,7 +668,21 @@ window.initMap = async function initMap() {
             option.value = municipalityName;
             datalist.appendChild(option);
         });
+        // Add origin (former) municipality names to the datalist
+        Object.keys(originToMunicipality)
+            .sort()
+            .forEach(function (originName) {
+                const mergedName = originToMunicipality[originName];
+                const option = document.createElement("option");
+                option.value = originName;
+                option.label = originName + " (\u2192 " + mergedName + ")";
+                datalist.appendChild(option);
+            });
         combobox.addEventListener("change", function () {
+            // Resolve origin (former) municipality names to their merged municipality
+            if (originToMunicipality[combobox.value] !== undefined) {
+                combobox.value = originToMunicipality[combobox.value];
+            }
             // Only act on a valid municipality; otherwise revert.
             if (appState.municipalities[combobox.value] === undefined) {
                 combobox.value = appState.activeMunicipality;
@@ -669,7 +696,10 @@ window.initMap = async function initMap() {
             combobox.value = "";
         });
         combobox.addEventListener("blur", function () {
-            if (combobox.value === "" || appState.municipalities[combobox.value] === undefined) {
+            if (
+                combobox.value === "" ||
+                (appState.municipalities[combobox.value] === undefined && originToMunicipality[combobox.value] === undefined)
+            ) {
                 combobox.value = combobox.dataset.previousValue || appState.activeMunicipality;
             }
         });
