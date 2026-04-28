@@ -1,74 +1,74 @@
 {
     "Aa en Hunze": {
         "center": {
-            "lat": 52.93517488,
-            "lng": 6.67283615
+            "lat": 52.93517,
+            "lng": 6.67284
         }
     },
     "Aalsmeer": {
         "center": {
-            "lat": 52.263622347,
-            "lng": 4.75970643
+            "lat": 52.26362,
+            "lng": 4.75971
         }
     },
     "Aalten": {
         "center": {
-            "lat": 51.926752636,
-            "lng": 6.58120956
+            "lat": 51.92675,
+            "lng": 6.58121
         }
     },
     "Achtkarspelen": {
         "center": {
-            "lat": 53.21665192,
-            "lng": 6.14134481
+            "lat": 53.21665,
+            "lng": 6.14134
         }
     },
     "Alblasserdam": {
         "center": {
-            "lat": 51.864005231,
-            "lng": 4.65804994
+            "lat": 51.86401,
+            "lng": 4.65805
         }
     },
     "Albrandswaard": {
         "center": {
-            "lat": 51.85656801,
-            "lng": 4.400273
+            "lat": 51.85657,
+            "lng": 4.40027
         }
     },
     "Alkmaar": {
         "center": {
-            "lat": 52.632537715,
-            "lng": 4.744034446
+            "lat": 52.63254,
+            "lng": 4.74403
         }
     },
     "Almelo": {
         "center": {
-            "lat": 52.35639583,
-            "lng": 6.66364717
+            "lat": 52.3564,
+            "lng": 6.66365
         }
     },
     "Almere": {
         "center": {
-            "lat": 52.37512849,
-            "lng": 5.215380253
+            "lat": 52.37513,
+            "lng": 5.21538
         }
     },
     "Alphen aan den Rijn": {
         "center": {
-            "lat": 52.1288118,
-            "lng": 4.66263953
+            "lat": 52.12881,
+            "lng": 4.66264
         }
     },
     "Alphen-Chaam": {
         "center": {
-            "lat": 51.50391203,
-            "lng": 4.86489698
+            "lat": 51.50391,
+            "lng": 4.8649
         }
     },
     "Altena": {
         "center": {
-            "lat": 51.77181134,
-            "lng": 4.96046594
+            "lat": 51.77181,
+            "lng": 4.96047
         },
         "origin": {
             "year": 2019,
@@ -77,86 +77,90 @@
     },
     "Ameland": {
         "center": {
-            "lat": 53.44646072,
-            "lng": 5.76963493
+            "lat": 53.44646,
+            "lng": 5.76963
         }
     },
     "Amersfoort": {
         "center": {
-            "lat": 52.15636667,
-            "lng": 5.38970399
+            "lat": 52.15637,
+            "lng": 5.3897
         }
     },
     "Amstelveen": {
         "center": {
-            "lat": 52.302914505,
-            "lng": 4.86035105
+            "lat": 52.30291,
+            "lng": 4.86035
         }
     },
     "Amsterdam": {
         "center": {
-            "lat": 52.37316382,
-            "lng": 4.89166806
+            "lat": 52.37316,
+            "lng": 4.89167
+        },
+        "origin": {
+            "year": 2022,
+            "municipalities": ["Amsterdam", "Weesp"]
         }
     },
     "Apeldoorn": {
         "center": {
-            "lat": 52.21260888,
-            "lng": 5.96148455
+            "lat": 52.21261,
+            "lng": 5.96148
         }
     },
     "Arnhem": {
         "center": {
-            "lat": 51.9817103,
-            "lng": 5.90798787
+            "lat": 51.98171,
+            "lng": 5.90799
         }
     },
     "Assen": {
         "center": {
-            "lat": 52.995627196,
-            "lng": 6.56131166
+            "lat": 52.99563,
+            "lng": 6.56131
         }
     },
     "Asten": {
         "center": {
-            "lat": 51.403636309,
-            "lng": 5.74575077
+            "lat": 51.40364,
+            "lng": 5.74575
         }
     },
     "Baarle-Nassau": {
         "center": {
-            "lat": 51.44318741,
-            "lng": 4.9305039
+            "lat": 51.44319,
+            "lng": 4.9305
         }
     },
     "Baarn": {
         "center": {
-            "lat": 52.211281048,
-            "lng": 5.28648938
+            "lat": 52.21128,
+            "lng": 5.28649
         }
     },
     "Barendrecht": {
         "center": {
-            "lat": 51.854827582,
-            "lng": 4.53966494
+            "lat": 51.85483,
+            "lng": 4.53966
         }
     },
     "Barneveld": {
         "center": {
-            "lat": 52.13977529,
-            "lng": 5.5867349
+            "lat": 52.13978,
+            "lng": 5.58673
         }
     },
     "Beek": {
         "center": {
-            "lat": 50.93989592,
-            "lng": 5.79563162
+            "lat": 50.9399,
+            "lng": 5.79563
         }
     },
     "Beekdaelen": {
         "center": {
-            "lat": 50.91941187,
-            "lng": 5.88674438
+            "lat": 50.91941,
+            "lng": 5.88674
         },
         "origin": {
             "year": 2019,
@@ -165,282 +169,282 @@
     },
     "Beesel": {
         "center": {
-            "lat": 51.28380191,
-            "lng": 6.07770383
+            "lat": 51.2838,
+            "lng": 6.0777
         }
     },
     "Berg en Dal": {
         "center": {
-            "lat": 51.77757682,
-            "lng": 5.93281142
+            "lat": 51.77758,
+            "lng": 5.93281
         }
     },
     "Bergeijk": {
         "center": {
-            "lat": 51.32227019,
-            "lng": 5.358136156
+            "lat": 51.32227,
+            "lng": 5.35814
         }
     },
     "Bergen (Limburg)": {
         "lookupName": "Bergen",
         "center": {
-            "lat": 51.60343148,
-            "lng": 6.04958943
+            "lat": 51.60343,
+            "lng": 6.04959
         }
     },
     "Bergen (Noord-Holland)": {
         "lookupName": "Bergen NH",
         "center": {
-            "lat": 52.6693513,
-            "lng": 4.70043109
+            "lat": 52.66935,
+            "lng": 4.70043
         }
     },
     "Bergen op Zoom": {
         "center": {
-            "lat": 51.4945343,
-            "lng": 4.2870889
+            "lat": 51.49453,
+            "lng": 4.28709
         }
     },
     "Berkelland": {
         "center": {
-            "lat": 52.11623523,
-            "lng": 6.52474167
+            "lat": 52.11624,
+            "lng": 6.52474
         }
     },
     "Bernheze": {
         "center": {
-            "lat": 51.67832344,
-            "lng": 5.50810638
+            "lat": 51.67832,
+            "lng": 5.50811
         }
     },
     "Best": {
         "center": {
-            "lat": 51.512130547,
-            "lng": 5.394268866
+            "lat": 51.51213,
+            "lng": 5.39427
         }
     },
     "Beuningen": {
         "center": {
-            "lat": 51.861742621,
-            "lng": 5.76936259
+            "lat": 51.86174,
+            "lng": 5.76936
         }
     },
     "Beverwijk": {
         "center": {
-            "lat": 52.47852156,
-            "lng": 4.65458712
+            "lat": 52.47852,
+            "lng": 4.65459
         }
     },
     "Bladel": {
         "center": {
-            "lat": 51.3664926,
-            "lng": 5.21520474
+            "lat": 51.36649,
+            "lng": 5.2152
         }
     },
     "Blaricum": {
         "center": {
-            "lat": 52.2726592,
-            "lng": 5.24312064
+            "lat": 52.27266,
+            "lng": 5.24312
         }
     },
     "Bloemendaal": {
         "center": {
-            "lat": 52.405058603,
-            "lng": 4.618654776
+            "lat": 52.40506,
+            "lng": 4.61865
         }
     },
     "Bodegraven-Reeuwijk": {
         "center": {
-            "lat": 52.0848836,
-            "lng": 4.74713178
+            "lat": 52.08488,
+            "lng": 4.74713
         }
     },
     "Boekel": {
         "center": {
-            "lat": 51.60289173,
-            "lng": 5.6739877
+            "lat": 51.60289,
+            "lng": 5.67399
         }
     },
     "Borger-Odoorn": {
         "center": {
-            "lat": 52.923996,
-            "lng": 6.79139942
+            "lat": 52.924,
+            "lng": 6.7914
         }
     },
     "Borne": {
         "center": {
-            "lat": 52.300275131,
-            "lng": 6.75713344
+            "lat": 52.30028,
+            "lng": 6.75713
         }
     },
     "Borsele": {
         "center": {
-            "lat": 51.4489473,
-            "lng": 3.81937544
+            "lat": 51.44895,
+            "lng": 3.81938
         }
     },
     "Boxtel": {
         "center": {
-            "lat": 51.58869421,
-            "lng": 5.32627354
+            "lat": 51.58869,
+            "lng": 5.32627
         }
     },
     "Breda": {
         "center": {
-            "lat": 51.595394367,
-            "lng": 4.7796292
+            "lat": 51.59539,
+            "lng": 4.77963
         }
     },
     "Bronckhorst": {
         "center": {
-            "lat": 52.05224731,
-            "lng": 6.31070646
+            "lat": 52.05225,
+            "lng": 6.31071
         }
     },
     "Brummen": {
         "center": {
-            "lat": 52.09319985,
-            "lng": 6.15438454
+            "lat": 52.0932,
+            "lng": 6.15438
         }
     },
     "Brunssum": {
         "center": {
-            "lat": 50.9456386,
-            "lng": 5.97141001
+            "lat": 50.94564,
+            "lng": 5.97141
         }
     },
     "Bunnik": {
         "center": {
-            "lat": 52.06714285,
-            "lng": 5.200112
+            "lat": 52.06714,
+            "lng": 5.20011
         }
     },
     "Bunschoten": {
         "center": {
-            "lat": 52.24380134,
-            "lng": 5.37501109
+            "lat": 52.2438,
+            "lng": 5.37501
         }
     },
     "Buren": {
         "center": {
-            "lat": 51.912415613,
-            "lng": 5.33411789
+            "lat": 51.91242,
+            "lng": 5.33412
         }
     },
     "Capelle aan den IJssel": {
         "center": {
-            "lat": 51.93125354,
-            "lng": 4.5890525
+            "lat": 51.93125,
+            "lng": 4.58905
         }
     },
     "Castricum": {
         "center": {
-            "lat": 52.54650943,
-            "lng": 4.66217873
+            "lat": 52.54651,
+            "lng": 4.66218
         }
     },
     "Coevorden": {
         "center": {
-            "lat": 52.66111429,
-            "lng": 6.74079953
+            "lat": 52.66111,
+            "lng": 6.7408
         }
     },
     "Cranendonck": {
         "center": {
-            "lat": 51.274564849,
-            "lng": 5.5749666
+            "lat": 51.27456,
+            "lng": 5.57497
         }
     },
     "Culemborg": {
         "center": {
-            "lat": 51.958225074,
-            "lng": 5.22483243
+            "lat": 51.95823,
+            "lng": 5.22483
         }
     },
     "Dalfsen": {
         "center": {
-            "lat": 52.504800988,
-            "lng": 6.26133877
+            "lat": 52.5048,
+            "lng": 6.26134
         }
     },
     "Dantumadiel": {
         "center": {
-            "lat": 53.285811274,
-            "lng": 5.99070224
+            "lat": 53.28581,
+            "lng": 5.9907
         }
     },
     "De Bilt": {
         "center": {
-            "lat": 52.10924978,
-            "lng": 5.18079826
+            "lat": 52.10925,
+            "lng": 5.1808
         }
     },
     "De Fryske Marren": {
         "center": {
-            "lat": 52.96777251,
-            "lng": 5.79687896
+            "lat": 52.96777,
+            "lng": 5.79688
         }
     },
     "De Ronde Venen": {
         "center": {
-            "lat": 52.206689073,
-            "lng": 4.8685827
+            "lat": 52.20669,
+            "lng": 4.86858
         }
     },
     "De Wolden": {
         "center": {
-            "lat": 52.6767344,
-            "lng": 6.42172806
+            "lat": 52.67673,
+            "lng": 6.42173
         }
     },
     "Delft": {
         "center": {
-            "lat": 52.01143263,
-            "lng": 4.35834421
+            "lat": 52.01143,
+            "lng": 4.35834
         }
     },
     "Den Bosch": {
         "lookupName": "'s-Hertogenbosch",
         "center": {
-            "lat": 51.69095639,
-            "lng": 5.30417985
+            "lat": 51.69096,
+            "lng": 5.30418
         }
     },
     "Den Haag": {
         "lookupName": "'s-Gravenhage",
         "center": {
-            "lat": 52.08026322,
-            "lng": 4.312297069
+            "lat": 52.08026,
+            "lng": 4.3123
         }
     },
     "Den Helder": {
         "center": {
-            "lat": 52.956547038,
-            "lng": 4.76074517
+            "lat": 52.95655,
+            "lng": 4.76075
         }
     },
     "Deurne": {
         "center": {
-            "lat": 51.46237968,
-            "lng": 5.7948054
+            "lat": 51.46238,
+            "lng": 5.79481
         }
     },
     "Deventer": {
         "center": {
-            "lat": 52.2530399,
-            "lng": 6.160043617
+            "lat": 52.25304,
+            "lng": 6.16004
         }
     },
     "Diemen": {
         "center": {
-            "lat": 52.34099197,
-            "lng": 4.9633172
+            "lat": 52.34099,
+            "lng": 4.96332
         }
     },
     "Dijk en Waard": {
         "center": {
-            "lat": 52.67968577,
-            "lng": 4.8025466
+            "lat": 52.67969,
+            "lng": 4.80255
         },
         "origin": {
             "year": 2022,
@@ -449,92 +453,92 @@
     },
     "Dinkelland": {
         "center": {
-            "lat": 52.375873543,
-            "lng": 7.00466643
+            "lat": 52.37587,
+            "lng": 7.00467
         }
     },
     "Doesburg": {
         "center": {
-            "lat": 52.01464687,
-            "lng": 6.13457682
+            "lat": 52.01465,
+            "lng": 6.13458
         }
     },
     "Doetinchem": {
         "center": {
-            "lat": 51.965574,
-            "lng": 6.28860378
+            "lat": 51.96557,
+            "lng": 6.2886
         }
     },
     "Dongen": {
         "center": {
-            "lat": 51.6261033,
-            "lng": 4.94369636
+            "lat": 51.6261,
+            "lng": 4.9437
         }
     },
     "Dordrecht": {
         "center": {
-            "lat": 51.80269359,
-            "lng": 4.71939585
+            "lat": 51.80269,
+            "lng": 4.7194
         }
     },
     "Drechterland": {
         "center": {
-            "lat": 52.66581122,
-            "lng": 5.20480376
+            "lat": 52.66581,
+            "lng": 5.2048
         }
     },
     "Drimmelen": {
         "center": {
-            "lat": 51.7089126,
-            "lng": 4.81068609
+            "lat": 51.70891,
+            "lng": 4.81069
         }
     },
     "Dronten": {
         "center": {
-            "lat": 52.52486333,
-            "lng": 5.71797383
+            "lat": 52.52486,
+            "lng": 5.71797
         }
     },
     "Druten": {
         "center": {
-            "lat": 51.89078434,
-            "lng": 5.6102196
+            "lat": 51.89078,
+            "lng": 5.61022
         }
     },
     "Duiven": {
         "center": {
-            "lat": 51.95007578,
-            "lng": 6.02362064
+            "lat": 51.95008,
+            "lng": 6.02362
         }
     },
     "Echt-Susteren": {
         "center": {
-            "lat": 51.10658836,
-            "lng": 5.867079802
+            "lat": 51.10659,
+            "lng": 5.86708
         }
     },
     "Edam-Volendam": {
         "center": {
-            "lat": 52.49500121,
-            "lng": 5.07439154
+            "lat": 52.495,
+            "lng": 5.07439
         }
     },
     "Ede": {
         "center": {
-            "lat": 52.043204871,
-            "lng": 5.66808303
+            "lat": 52.0432,
+            "lng": 5.66808
         }
     },
     "Eemnes": {
         "center": {
-            "lat": 52.251431743,
-            "lng": 5.25709498
+            "lat": 52.25143,
+            "lng": 5.25709
         }
     },
     "Eemsdelta": {
         "center": {
-            "lat": 53.334684806,
-            "lng": 6.74613854
+            "lat": 53.33468,
+            "lng": 6.74614
         },
         "origin": {
             "year": 2021,
@@ -543,266 +547,274 @@
     },
     "Eersel": {
         "center": {
-            "lat": 51.3551229,
-            "lng": 5.307052
+            "lat": 51.35512,
+            "lng": 5.30705
         }
     },
     "Eijsden-Margraten": {
         "center": {
-            "lat": 50.79555178,
-            "lng": 5.76445655
+            "lat": 50.79555,
+            "lng": 5.76446
         }
     },
     "Eindhoven": {
         "center": {
-            "lat": 51.43931079,
-            "lng": 5.47844001
+            "lat": 51.43931,
+            "lng": 5.47844
         }
     },
     "Elburg": {
         "center": {
-            "lat": 52.44850767,
-            "lng": 5.83385293
+            "lat": 52.44851,
+            "lng": 5.83385
         }
     },
     "Emmen": {
         "center": {
-            "lat": 52.78283737,
-            "lng": 6.89450277
+            "lat": 52.78284,
+            "lng": 6.8945
         }
     },
     "Enkhuizen": {
         "center": {
-            "lat": 52.70377677,
-            "lng": 5.2929775
+            "lat": 52.70378,
+            "lng": 5.29298
         }
     },
     "Enschede": {
         "center": {
-            "lat": 52.21975818,
-            "lng": 6.8959356
+            "lat": 52.21976,
+            "lng": 6.89594
         }
     },
     "Epe": {
         "center": {
-            "lat": 52.34823153,
-            "lng": 5.9833876
+            "lat": 52.34823,
+            "lng": 5.98339
         }
     },
     "Ermelo": {
         "center": {
-            "lat": 52.29923324,
-            "lng": 5.62138291
+            "lat": 52.29923,
+            "lng": 5.62138
         }
     },
     "Etten-Leur": {
         "center": {
-            "lat": 51.568889456,
-            "lng": 4.64066622
+            "lat": 51.56889,
+            "lng": 4.64067
         }
     },
     "Geertruidenberg": {
         "center": {
-            "lat": 51.70082404,
-            "lng": 4.861246512
+            "lat": 51.70082,
+            "lng": 4.86125
         }
     },
     "Geldrop-Mierlo": {
         "center": {
-            "lat": 51.42241713,
-            "lng": 5.5618016
+            "lat": 51.42242,
+            "lng": 5.5618
         }
     },
     "Gemert-Bakel": {
         "center": {
-            "lat": 51.557207258,
-            "lng": 5.6821687
+            "lat": 51.55721,
+            "lng": 5.68217
         }
     },
     "Gennep": {
         "center": {
-            "lat": 51.69957926,
-            "lng": 5.97100411
+            "lat": 51.69958,
+            "lng": 5.971
         }
     },
     "Gilze en Rijen": {
         "center": {
-            "lat": 51.58835757,
-            "lng": 4.91934535
+            "lat": 51.58836,
+            "lng": 4.91935
         }
     },
     "Goeree-Overflakkee": {
         "center": {
-            "lat": 51.75779416,
-            "lng": 4.16518532
+            "lat": 51.75779,
+            "lng": 4.16519
         }
     },
     "Goes": {
         "center": {
-            "lat": 51.50238711,
-            "lng": 3.8929121
+            "lat": 51.50239,
+            "lng": 3.89291
         }
     },
     "Goirle": {
         "center": {
-            "lat": 51.52013205,
-            "lng": 5.06732074
+            "lat": 51.52013,
+            "lng": 5.06732
         }
     },
     "Gooise Meren": {
         "center": {
-            "lat": 52.295753098,
-            "lng": 5.16274062
+            "lat": 52.29575,
+            "lng": 5.16274
         }
     },
     "Gorinchem": {
         "center": {
-            "lat": 51.83073686,
-            "lng": 4.9744539
+            "lat": 51.83074,
+            "lng": 4.97445
         }
     },
     "Gouda": {
         "center": {
-            "lat": 52.011655057,
-            "lng": 4.71047226
+            "lat": 52.01166,
+            "lng": 4.71047
         }
     },
     "Groningen": {
         "center": {
-            "lat": 53.21731778,
-            "lng": 6.56719583
+            "lat": 53.21732,
+            "lng": 6.5672
+        },
+        "origin": {
+            "year": 2019,
+            "municipalities": ["Groningen", "Ten Boer", "Haren"]
         }
     },
     "Gulpen-Wittem": {
         "center": {
-            "lat": 50.81585626,
-            "lng": 5.893291957
+            "lat": 50.81586,
+            "lng": 5.89329
         }
     },
     "Haaksbergen": {
         "center": {
-            "lat": 52.15596815,
-            "lng": 6.74107857
+            "lat": 52.15597,
+            "lng": 6.74108
         }
     },
     "Haarlem": {
         "center": {
-            "lat": 52.38002361,
-            "lng": 4.63596566
+            "lat": 52.38002,
+            "lng": 4.63597
         }
     },
     "Haarlemmermeer": {
         "center": {
-            "lat": 52.304320376,
-            "lng": 4.69132708
+            "lat": 52.30432,
+            "lng": 4.69133
+        },
+        "origin": {
+            "year": 2019,
+            "municipalities": ["Haarlemmermeer", "Haarlemmerliede en Spaarnwoude"]
         }
     },
     "Halderberge": {
         "center": {
-            "lat": 51.58880868,
-            "lng": 4.52730599
+            "lat": 51.58881,
+            "lng": 4.52731
         }
     },
     "Hardenberg": {
         "center": {
             "lat": 52.57539,
-            "lng": 6.62369501
+            "lng": 6.6237
         }
     },
     "Harderwijk": {
         "center": {
-            "lat": 52.34907753,
-            "lng": 5.61899519
+            "lat": 52.34908,
+            "lng": 5.619
         }
     },
     "Hardinxveld-Giessendam": {
         "center": {
-            "lat": 51.827615331,
-            "lng": 4.83476545
+            "lat": 51.82762,
+            "lng": 4.83477
         }
     },
     "Harlingen": {
         "center": {
-            "lat": 53.174514224,
-            "lng": 5.41972869
+            "lat": 53.17451,
+            "lng": 5.41973
         }
     },
     "Hattem": {
         "center": {
-            "lat": 52.47470799,
-            "lng": 6.06820668
+            "lat": 52.47471,
+            "lng": 6.06821
         }
     },
     "Heemskerk": {
         "center": {
-            "lat": 52.5106031,
-            "lng": 4.67092291
+            "lat": 52.5106,
+            "lng": 4.67092
         }
     },
     "Heemstede": {
         "center": {
-            "lat": 52.34982979,
-            "lng": 4.62124885
+            "lat": 52.34983,
+            "lng": 4.62125
         }
     },
     "Heerde": {
         "center": {
-            "lat": 52.38736686,
-            "lng": 6.04134237
+            "lat": 52.38737,
+            "lng": 6.04134
         }
     },
     "Heerenveen": {
         "center": {
-            "lat": 52.960717366,
-            "lng": 5.92582362
+            "lat": 52.96072,
+            "lng": 5.92582
         }
     },
     "Heerlen": {
         "center": {
-            "lat": 50.888888678,
-            "lng": 5.97893161
+            "lat": 50.88889,
+            "lng": 5.97893
         }
     },
     "Heeze-Leende": {
         "center": {
-            "lat": 51.37981015,
-            "lng": 5.5778712
+            "lat": 51.37981,
+            "lng": 5.57787
         }
     },
     "Heiloo": {
         "center": {
-            "lat": 52.600126781,
-            "lng": 4.7035307
+            "lat": 52.60013,
+            "lng": 4.70353
         }
     },
     "Hellendoorn": {
         "center": {
-            "lat": 52.391326183,
-            "lng": 6.44938932
+            "lat": 52.39133,
+            "lng": 6.44939
         }
     },
     "Helmond": {
         "center": {
-            "lat": 51.48019345,
-            "lng": 5.65657114
+            "lat": 51.48019,
+            "lng": 5.65657
         }
     },
     "Hendrik-Ido-Ambacht": {
         "center": {
-            "lat": 51.842166838,
-            "lng": 4.6334466
+            "lat": 51.84217,
+            "lng": 4.63345
         }
     },
     "Hengelo": {
         "center": {
-            "lat": 52.2671347,
-            "lng": 6.79190047
+            "lat": 52.26713,
+            "lng": 6.7919
         }
     },
     "Het Hogeland": {
         "center": {
-            "lat": 53.33487495,
-            "lng": 6.52760487
+            "lat": 53.33487,
+            "lng": 6.5276
         },
         "origin": {
             "year": 2019,
@@ -811,38 +823,38 @@
     },
     "Heumen": {
         "center": {
-            "lat": 51.76661935,
-            "lng": 5.845033046
+            "lat": 51.76662,
+            "lng": 5.84503
         }
     },
     "Heusden": {
         "center": {
-            "lat": 51.734582,
-            "lng": 5.13737514
+            "lat": 51.73458,
+            "lng": 5.13738
         }
     },
     "Hillegom": {
         "center": {
-            "lat": 52.293143147,
-            "lng": 4.57940651
+            "lat": 52.29314,
+            "lng": 4.57941
         }
     },
     "Hilvarenbeek": {
         "center": {
-            "lat": 51.48423005,
-            "lng": 5.13709806
+            "lat": 51.48423,
+            "lng": 5.1371
         }
     },
     "Hilversum": {
         "center": {
-            "lat": 52.2249705,
-            "lng": 5.17314585
+            "lat": 52.22497,
+            "lng": 5.17315
         }
     },
     "Hoeksche Waard": {
         "center": {
-            "lat": 51.826214,
-            "lng": 4.41189526
+            "lat": 51.82621,
+            "lng": 4.4119
         },
         "origin": {
             "year": 2019,
@@ -851,116 +863,116 @@
     },
     "Hof van Twente": {
         "center": {
-            "lat": 52.23334269,
-            "lng": 6.58702005
+            "lat": 52.23334,
+            "lng": 6.58702
         }
     },
     "Hollands Kroon": {
         "center": {
-            "lat": 52.81234709,
-            "lng": 4.99821656
+            "lat": 52.81235,
+            "lng": 4.99822
         }
     },
     "Hoogeveen": {
         "center": {
-            "lat": 52.725771813,
-            "lng": 6.47889063
+            "lat": 52.72577,
+            "lng": 6.47889
         }
     },
     "Hoorn": {
         "center": {
-            "lat": 52.63934466,
-            "lng": 5.05924635
+            "lat": 52.63934,
+            "lng": 5.05925
         }
     },
     "Horst aan de Maas": {
         "center": {
-            "lat": 51.45180904,
-            "lng": 6.0533924
+            "lat": 51.45181,
+            "lng": 6.05339
         }
     },
     "Houten": {
         "center": {
-            "lat": 52.034662997,
-            "lng": 5.16962688
+            "lat": 52.03466,
+            "lng": 5.16963
         }
     },
     "Huizen": {
         "center": {
-            "lat": 52.297978855,
-            "lng": 5.23549981
+            "lat": 52.29798,
+            "lng": 5.2355
         }
     },
     "Hulst": {
         "center": {
-            "lat": 51.28062433,
-            "lng": 4.054087804
+            "lat": 51.28062,
+            "lng": 4.05409
         }
     },
     "IJsselstein": {
         "center": {
-            "lat": 52.019197068,
-            "lng": 5.043623453
+            "lat": 52.0192,
+            "lng": 5.04362
         }
     },
     "Kaag en Braassem": {
         "center": {
-            "lat": 52.20409968,
-            "lng": 4.6312831
+            "lat": 52.2041,
+            "lng": 4.63128
         }
     },
     "Kampen": {
         "center": {
-            "lat": 52.55529479,
-            "lng": 5.91273429
+            "lat": 52.55529,
+            "lng": 5.91273
         }
     },
     "Kapelle": {
         "center": {
-            "lat": 51.486407586,
-            "lng": 3.95796931
+            "lat": 51.48641,
+            "lng": 3.95797
         }
     },
     "Katwijk": {
         "center": {
-            "lat": 52.19929911,
-            "lng": 4.41309727
+            "lat": 52.1993,
+            "lng": 4.4131
         }
     },
     "Kerkrade": {
         "center": {
-            "lat": 50.866239673,
-            "lng": 6.06400938
+            "lat": 50.86624,
+            "lng": 6.06401
         }
     },
     "Koggenland": {
         "center": {
-            "lat": 52.6295338,
-            "lng": 4.9470804
+            "lat": 52.62953,
+            "lng": 4.94708
         }
     },
     "Krimpen aan den IJssel": {
         "center": {
-            "lat": 51.91469245,
-            "lng": 4.58777768
+            "lat": 51.91469,
+            "lng": 4.58778
         }
     },
     "Krimpenerwaard": {
         "center": {
-            "lat": 51.97239213,
-            "lng": 4.7722134
+            "lat": 51.97239,
+            "lng": 4.77221
         }
     },
     "Laarbeek": {
         "center": {
-            "lat": 51.5293323,
-            "lng": 5.64225305
+            "lat": 51.52933,
+            "lng": 5.64225
         }
     },
     "Land van Cuijk": {
         "center": {
-            "lat": 51.59628376,
-            "lng": 6.01097477
+            "lat": 51.59628,
+            "lng": 6.01097
         },
         "origin": {
             "year": 2022,
@@ -969,122 +981,126 @@
     },
     "Landgraaf": {
         "center": {
-            "lat": 50.90683059,
-            "lng": 6.025718805
+            "lat": 50.90683,
+            "lng": 6.02572
         }
     },
     "Landsmeer": {
         "center": {
-            "lat": 52.43279306,
-            "lng": 4.91455076
+            "lat": 52.43279,
+            "lng": 4.91455
         }
     },
     "Lansingerland": {
         "center": {
-            "lat": 51.995646401,
-            "lng": 4.48739538
+            "lat": 51.99565,
+            "lng": 4.4874
         }
     },
     "Laren": {
         "center": {
-            "lat": 52.256841608,
-            "lng": 5.22407788
+            "lat": 52.25684,
+            "lng": 5.22408
         }
     },
     "Leeuwarden": {
         "center": {
-            "lat": 53.200683646,
-            "lng": 5.79482161
+            "lat": 53.20068,
+            "lng": 5.79482
+        },
+        "origin": {
+            "year": 2018,
+            "municipalities": ["Leeuwarden", "Leeuwarderadeel"]
         }
     },
     "Leiden": {
         "center": {
-            "lat": 52.15897894,
-            "lng": 4.49240437
+            "lat": 52.15898,
+            "lng": 4.4924
         }
     },
     "Leiderdorp": {
         "center": {
-            "lat": 52.16165884,
-            "lng": 4.5316764
+            "lat": 52.16166,
+            "lng": 4.53168
         }
     },
     "Leidschendam-Voorburg": {
         "center": {
-            "lat": 52.08525765,
-            "lng": 4.37916238
+            "lat": 52.08526,
+            "lng": 4.37916
         }
     },
     "Lelystad": {
         "center": {
-            "lat": 52.522711236,
-            "lng": 5.44099084
+            "lat": 52.52271,
+            "lng": 5.44099
         }
     },
     "Leudal": {
         "center": {
-            "lat": 51.24988981,
-            "lng": 5.89448036
+            "lat": 51.24989,
+            "lng": 5.89448
         }
     },
     "Leusden": {
         "center": {
-            "lat": 52.13177576,
-            "lng": 5.42947763
+            "lat": 52.13178,
+            "lng": 5.42948
         }
     },
     "Lingewaard": {
         "center": {
-            "lat": 51.89214923,
-            "lng": 5.89970857
+            "lat": 51.89215,
+            "lng": 5.89971
         }
     },
     "Lisse": {
         "center": {
-            "lat": 52.26332279,
-            "lng": 4.556437472
+            "lat": 52.26332,
+            "lng": 4.55644
         }
     },
     "Lochem": {
         "center": {
-            "lat": 52.1614105,
-            "lng": 6.4163454
+            "lat": 52.16141,
+            "lng": 6.41635
         }
     },
     "Loon op Zand": {
         "center": {
-            "lat": 51.627009533,
-            "lng": 5.07388579
+            "lat": 51.62701,
+            "lng": 5.07389
         }
     },
     "Lopik": {
         "center": {
-            "lat": 51.971548,
-            "lng": 4.950865168
+            "lat": 51.97155,
+            "lng": 4.95087
         }
     },
     "Losser": {
         "center": {
-            "lat": 52.26392044,
-            "lng": 7.0031293
+            "lat": 52.26392,
+            "lng": 7.00313
         }
     },
     "Maasdriel": {
         "center": {
-            "lat": 51.77308147,
-            "lng": 5.339949825
+            "lat": 51.77308,
+            "lng": 5.33995
         }
     },
     "Maasgouw": {
         "center": {
-            "lat": 51.17755065,
-            "lng": 5.90558496
+            "lat": 51.17755,
+            "lng": 5.90558
         }
     },
     "Maashorst": {
         "center": {
-            "lat": 51.659773966,
-            "lng": 5.6178492
+            "lat": 51.65977,
+            "lng": 5.61785
         },
         "origin": {
             "year": 2022,
@@ -1093,62 +1109,66 @@
     },
     "Maassluis": {
         "center": {
-            "lat": 51.9215331,
-            "lng": 4.253426169
+            "lat": 51.92153,
+            "lng": 4.25343
         }
     },
     "Maastricht": {
         "center": {
-            "lat": 50.85186888,
-            "lng": 5.6959214
+            "lat": 50.85187,
+            "lng": 5.69592
         }
     },
     "Medemblik": {
         "center": {
-            "lat": 52.76690458,
-            "lng": 5.10408672
+            "lat": 52.7669,
+            "lng": 5.10409
         }
     },
     "Meerssen": {
         "center": {
-            "lat": 50.883816951,
-            "lng": 5.75416685
+            "lat": 50.88382,
+            "lng": 5.75417
         }
     },
     "Meierijstad": {
         "center": {
-            "lat": 51.61417965,
-            "lng": 5.54576477
+            "lat": 51.61418,
+            "lng": 5.54576
+        },
+        "origin": {
+            "year": 2017,
+            "municipalities": ["Schijndel", "Sint-Oedenrode", "Veghel"]
         }
     },
     "Meppel": {
         "center": {
-            "lat": 52.697895429,
-            "lng": 6.191289
+            "lat": 52.6979,
+            "lng": 6.19129
         }
     },
     "Middelburg": {
         "center": {
-            "lat": 51.49847525,
-            "lng": 3.611607018
+            "lat": 51.49848,
+            "lng": 3.61161
         }
     },
     "Midden-Delfland": {
         "center": {
-            "lat": 51.97553892,
-            "lng": 4.31570509
+            "lat": 51.97554,
+            "lng": 4.31571
         }
     },
     "Midden-Drenthe": {
         "center": {
-            "lat": 52.85931906,
-            "lng": 6.51540863
+            "lat": 52.85932,
+            "lng": 6.51541
         }
     },
     "Midden-Groningen": {
         "center": {
-            "lat": 53.15163665,
-            "lng": 6.75532681
+            "lat": 53.15164,
+            "lng": 6.75533
         },
         "origin": {
             "year": 2018,
@@ -1157,14 +1177,14 @@
     },
     "Moerdijk": {
         "center": {
-            "lat": 51.662723683,
-            "lng": 4.53509926
+            "lat": 51.66272,
+            "lng": 4.5351
         }
     },
     "Molenlanden": {
         "center": {
-            "lat": 51.87029722,
-            "lng": 4.78967797
+            "lat": 51.8703,
+            "lng": 4.78968
         },
         "origin": {
             "year": 2019,
@@ -1173,68 +1193,68 @@
     },
     "Montferland": {
         "center": {
-            "lat": 51.93675008,
-            "lng": 6.12934161
+            "lat": 51.93675,
+            "lng": 6.12934
         }
     },
     "Montfoort": {
         "center": {
-            "lat": 52.045380841,
-            "lng": 4.94776388
+            "lat": 52.04538,
+            "lng": 4.94776
         }
     },
     "Mook en Middelaar": {
         "center": {
-            "lat": 51.75231842,
-            "lng": 5.88366149
+            "lat": 51.75232,
+            "lng": 5.88366
         }
     },
     "Neder-Betuwe": {
         "center": {
-            "lat": 51.90953962,
-            "lng": 5.569328
+            "lat": 51.90954,
+            "lng": 5.56933
         }
     },
     "Nederweert": {
         "center": {
-            "lat": 51.28529394,
-            "lng": 5.7484235
+            "lat": 51.28529,
+            "lng": 5.74842
         }
     },
     "Nieuwegein": {
         "center": {
-            "lat": 52.029420349,
-            "lng": 5.08424332
+            "lat": 52.02942,
+            "lng": 5.08424
         }
     },
     "Nieuwkoop": {
         "center": {
-            "lat": 52.149649024,
-            "lng": 4.77997696
+            "lat": 52.14965,
+            "lng": 4.77998
         }
     },
     "Nijkerk": {
         "center": {
-            "lat": 52.223427994,
+            "lat": 52.22343,
             "lng": 5.48558
         }
     },
     "Nijmegen": {
         "center": {
-            "lat": 51.842118068,
-            "lng": 5.8593695
+            "lat": 51.84212,
+            "lng": 5.85937
         }
     },
     "Nissewaard": {
         "center": {
-            "lat": 51.8489134,
-            "lng": 4.33115521
+            "lat": 51.84891,
+            "lng": 4.33116
         }
     },
     "Noardeast-Fryslân": {
         "center": {
-            "lat": 53.32649414,
-            "lng": 5.99877932
+            "lat": 53.32649,
+            "lng": 5.99878
         },
         "origin": {
             "year": 2019,
@@ -1243,578 +1263,590 @@
     },
     "Noord-Beveland": {
         "center": {
-            "lat": 51.57395731,
-            "lng": 3.703777095
+            "lat": 51.57396,
+            "lng": 3.70378
         }
     },
     "Noordenveld": {
         "center": {
-            "lat": 53.13799618,
-            "lng": 6.43333514
+            "lat": 53.138,
+            "lng": 6.43334
         }
     },
     "Noordoostpolder": {
         "center": {
-            "lat": 52.71095911,
-            "lng": 5.75854234
+            "lat": 52.71096,
+            "lng": 5.75854
         }
     },
     "Noordwijk": {
         "center": {
-            "lat": 52.241101985,
-            "lng": 4.44618181
+            "lat": 52.2411,
+            "lng": 4.44618
+        },
+        "origin": {
+            "year": 2019,
+            "municipalities": ["Noordwijk", "Noordwijkerhout"]
         }
     },
     "Nuenen, Gerwen en Nederwetten": {
         "center": {
-            "lat": 51.47078314,
-            "lng": 5.555014353
+            "lat": 51.47078,
+            "lng": 5.55501
         }
     },
     "Nunspeet": {
         "center": {
-            "lat": 52.375312396,
-            "lng": 5.78244052
+            "lat": 52.37531,
+            "lng": 5.78244
         }
     },
     "Oegstgeest": {
         "center": {
-            "lat": 52.1826105,
-            "lng": 4.4672176
+            "lat": 52.18261,
+            "lng": 4.46722
         }
     },
     "Oirschot": {
         "center": {
-            "lat": 51.50455881,
-            "lng": 5.30753671
+            "lat": 51.50456,
+            "lng": 5.30754
         }
     },
     "Oisterwijk": {
         "center": {
-            "lat": 51.580623436,
-            "lng": 5.19457147
+            "lat": 51.58062,
+            "lng": 5.19457
         }
     },
     "Oldambt": {
         "center": {
-            "lat": 53.146646994,
-            "lng": 7.03311163
+            "lat": 53.14665,
+            "lng": 7.03311
         }
     },
     "Oldebroek": {
         "center": {
-            "lat": 52.44580274,
-            "lng": 5.89928347
+            "lat": 52.4458,
+            "lng": 5.89928
         }
     },
     "Oldenzaal": {
         "center": {
-            "lat": 52.31239576,
-            "lng": 6.92846911
+            "lat": 52.3124,
+            "lng": 6.92847
         }
     },
     "Olst-Wijhe": {
         "center": {
-            "lat": 52.38445112,
-            "lng": 6.13576345
+            "lat": 52.38445,
+            "lng": 6.13576
         }
     },
     "Ommen": {
         "center": {
-            "lat": 52.51852207,
-            "lng": 6.423372694
+            "lat": 52.51852,
+            "lng": 6.42337
         }
     },
     "Oost Gelre": {
         "center": {
-            "lat": 51.986954905,
-            "lng": 6.5676184
+            "lat": 51.98695,
+            "lng": 6.56762
         }
     },
     "Oosterhout": {
         "center": {
-            "lat": 51.64418179,
-            "lng": 4.85731962
+            "lat": 51.64418,
+            "lng": 4.85732
         }
     },
     "Ooststellingwerf": {
         "center": {
-            "lat": 52.99120666,
-            "lng": 6.291792049
+            "lat": 52.99121,
+            "lng": 6.29179
         }
     },
     "Oostzaan": {
         "center": {
-            "lat": 52.44035601,
-            "lng": 4.87545194
+            "lat": 52.44036,
+            "lng": 4.87545
         }
     },
     "Opmeer": {
         "center": {
-            "lat": 52.70543653,
-            "lng": 4.94265979
+            "lat": 52.70544,
+            "lng": 4.94266
         }
     },
     "Opsterland": {
         "center": {
-            "lat": 53.00281802,
-            "lng": 6.06402312
+            "lat": 53.00282,
+            "lng": 6.06402
         }
     },
     "Oss": {
         "center": {
-            "lat": 51.76810079,
-            "lng": 5.523086211
+            "lat": 51.7681,
+            "lng": 5.52309
         }
     },
     "Oude IJsselstreek": {
         "center": {
-            "lat": 51.890042593,
-            "lng": 6.3805536
+            "lat": 51.89004,
+            "lng": 6.38055
         }
     },
     "Ouder-Amstel": {
         "center": {
-            "lat": 52.29516398,
-            "lng": 4.9161233
+            "lat": 52.29516,
+            "lng": 4.91612
         }
     },
     "Oudewater": {
         "center": {
-            "lat": 52.02283988,
-            "lng": 4.870878981
+            "lat": 52.02284,
+            "lng": 4.87088
         }
     },
     "Overbetuwe": {
         "center": {
-            "lat": 51.9187206,
-            "lng": 5.843634528
+            "lat": 51.91872,
+            "lng": 5.84363
         }
     },
     "Papendrecht": {
         "center": {
-            "lat": 51.82586242,
-            "lng": 4.68332941
+            "lat": 51.82586,
+            "lng": 4.68333
         }
     },
     "Peel en Maas": {
         "center": {
-            "lat": 51.328672614,
-            "lng": 5.97770168
+            "lat": 51.32867,
+            "lng": 5.9777
         }
     },
     "Pekela": {
         "center": {
-            "lat": 53.10405157,
-            "lng": 7.00797328
+            "lat": 53.10405,
+            "lng": 7.00797
         }
     },
     "Pijnacker-Nootdorp": {
         "center": {
-            "lat": 52.01989597,
-            "lng": 4.43364693
+            "lat": 52.0199,
+            "lng": 4.43365
         }
     },
     "Purmerend": {
         "center": {
             "lat": 52.51021,
-            "lng": 4.95057323
+            "lng": 4.95057
+        },
+        "origin": {
+            "year": 2022,
+            "municipalities": ["Purmerend", "Beemster"]
         }
     },
     "Putten": {
         "center": {
-            "lat": 52.2609744,
-            "lng": 5.610245202
+            "lat": 52.26097,
+            "lng": 5.61025
         }
     },
     "Raalte": {
         "center": {
-            "lat": 52.38573942,
-            "lng": 6.27514647
+            "lat": 52.38574,
+            "lng": 6.27515
         }
     },
     "Reimerswaal": {
         "center": {
-            "lat": 51.43062015,
-            "lng": 4.11211672
+            "lat": 51.43062,
+            "lng": 4.11212
         }
     },
     "Renkum": {
         "center": {
-            "lat": 51.97272317,
-            "lng": 5.73098669
+            "lat": 51.97272,
+            "lng": 5.73099
         }
     },
     "Renswoude": {
         "center": {
-            "lat": 52.074724485,
-            "lng": 5.53773483
+            "lat": 52.07472,
+            "lng": 5.53773
         }
     },
     "Reusel-De Mierden": {
         "center": {
-            "lat": 51.36247477,
-            "lng": 5.16263408
+            "lat": 51.36247,
+            "lng": 5.16263
         }
     },
     "Rheden": {
         "center": {
-            "lat": 52.010894958,
-            "lng": 6.03064528
+            "lat": 52.01089,
+            "lng": 6.03065
         }
     },
     "Rhenen": {
         "center": {
-            "lat": 51.9573026,
-            "lng": 5.569888
+            "lat": 51.9573,
+            "lng": 5.56989
         }
     },
     "Ridderkerk": {
         "center": {
-            "lat": 51.87065394,
-            "lng": 4.60226568
+            "lat": 51.87065,
+            "lng": 4.60227
         }
     },
     "Rijssen-Holten": {
         "center": {
-            "lat": 52.28244987,
-            "lng": 6.420603205
+            "lat": 52.28245,
+            "lng": 6.4206
         }
     },
     "Rijswijk": {
         "center": {
-            "lat": 52.03990594,
-            "lng": 4.31396342
+            "lat": 52.03991,
+            "lng": 4.31396
         }
     },
     "Roerdalen": {
         "center": {
-            "lat": 51.14429269,
-            "lng": 6.00138105
+            "lat": 51.14429,
+            "lng": 6.00138
         }
     },
     "Roermond": {
         "center": {
-            "lat": 51.19358596,
-            "lng": 5.98869977
+            "lat": 51.19359,
+            "lng": 5.9887
         }
     },
     "Roosendaal": {
         "center": {
-            "lat": 51.53309139,
-            "lng": 4.45624328
+            "lat": 51.53309,
+            "lng": 4.45624
         }
     },
     "Rotterdam": {
         "center": {
-            "lat": 51.924400273,
-            "lng": 4.47775226
+            "lat": 51.9244,
+            "lng": 4.47775
         }
     },
     "Rozendaal": {
         "center": {
-            "lat": 52.0074856,
-            "lng": 5.96343317
+            "lat": 52.00749,
+            "lng": 5.96343
         }
     },
     "Rucphen": {
         "center": {
-            "lat": 51.53285263,
-            "lng": 4.55973054
+            "lat": 51.53285,
+            "lng": 4.55973
         }
     },
     "Schagen": {
         "center": {
-            "lat": 52.7866895,
-            "lng": 4.79647059
+            "lat": 52.78669,
+            "lng": 4.79647
         }
     },
     "Scherpenzeel": {
         "center": {
-            "lat": 52.079608,
-            "lng": 5.48936259
+            "lat": 52.07961,
+            "lng": 5.48936
         }
     },
     "Schiedam": {
         "center": {
-            "lat": 51.918225687,
-            "lng": 4.39682349
+            "lat": 51.91823,
+            "lng": 4.39682
         }
     },
     "Schiermonnikoog": {
         "center": {
-            "lat": 53.4791087,
-            "lng": 6.16044001
+            "lat": 53.47911,
+            "lng": 6.16044
         }
     },
     "Schouwen-Duiveland": {
         "center": {
-            "lat": 51.6505518,
-            "lng": 3.919660296
+            "lat": 51.65055,
+            "lng": 3.91966
         }
     },
     "Simpelveld": {
         "center": {
-            "lat": 50.835261921,
-            "lng": 5.98221486
+            "lat": 50.83526,
+            "lng": 5.98221
         }
     },
     "Sint-Michielsgestel": {
         "center": {
-            "lat": 51.639456784,
-            "lng": 5.35181168
+            "lat": 51.63946,
+            "lng": 5.35181
         }
     },
     "Sittard-Geleen": {
         "center": {
-            "lat": 50.99875131,
-            "lng": 5.86811726
+            "lat": 50.99875,
+            "lng": 5.86812
         }
     },
     "Sliedrecht": {
         "center": {
-            "lat": 51.822132781,
-            "lng": 4.77157469
+            "lat": 51.82213,
+            "lng": 4.77157
         }
     },
     "Sluis": {
         "center": {
-            "lat": 51.326388471,
-            "lng": 3.489058816
+            "lat": 51.32639,
+            "lng": 3.48906
         }
     },
     "Smallingerland": {
         "center": {
-            "lat": 53.106632089,
-            "lng": 6.09631997
+            "lat": 53.10663,
+            "lng": 6.09632
         }
     },
     "Soest": {
         "center": {
-            "lat": 52.16496471,
-            "lng": 5.30621698
+            "lat": 52.16496,
+            "lng": 5.30622
         }
     },
     "Someren": {
         "center": {
-            "lat": 51.38586644,
-            "lng": 5.71281066
+            "lat": 51.38587,
+            "lng": 5.71281
         }
     },
     "Son en Breugel": {
         "center": {
-            "lat": 51.5111893,
-            "lng": 5.4935788
+            "lat": 51.51119,
+            "lng": 5.49358
         }
     },
     "Stadskanaal": {
         "center": {
-            "lat": 52.98730176,
-            "lng": 6.95203048
+            "lat": 52.9873,
+            "lng": 6.95203
         }
     },
     "Staphorst": {
         "center": {
-            "lat": 52.64402391,
-            "lng": 6.210743495
+            "lat": 52.64402,
+            "lng": 6.21074
         }
     },
     "Stede Broec": {
         "center": {
-            "lat": 52.69762305,
-            "lng": 5.235275968
+            "lat": 52.69762,
+            "lng": 5.23528
         }
     },
     "Steenbergen": {
         "center": {
-            "lat": 51.587774424,
-            "lng": 4.32156691
+            "lat": 51.58777,
+            "lng": 4.32157
         }
     },
     "Steenwijkerland": {
         "center": {
-            "lat": 52.78767577,
-            "lng": 6.11504644
+            "lat": 52.78768,
+            "lng": 6.11505
         }
     },
     "Stein": {
         "center": {
-            "lat": 50.96769402,
-            "lng": 5.76481681
+            "lat": 50.96769,
+            "lng": 5.76482
         }
     },
     "Stichtse Vecht": {
         "center": {
-            "lat": 52.144827245,
-            "lng": 5.03321262
+            "lat": 52.14483,
+            "lng": 5.03321
         }
     },
     "Súdwest-Fryslân": {
         "center": {
-            "lat": 53.061736137,
-            "lng": 5.522467207
+            "lat": 53.06174,
+            "lng": 5.52247
+        },
+        "origin": {
+            "year": 2018,
+            "municipalities": ["Súdwest-Fryslân", "Littenseradiel"]
         }
     },
     "Terneuzen": {
         "center": {
-            "lat": 51.334531661,
-            "lng": 3.82693177
+            "lat": 51.33453,
+            "lng": 3.82693
         }
     },
     "Terschelling": {
         "center": {
-            "lat": 53.382965002,
-            "lng": 5.28506682
+            "lat": 53.38297,
+            "lng": 5.28507
         }
     },
     "Texel": {
         "center": {
-            "lat": 53.05430143,
-            "lng": 4.79846293
+            "lat": 53.0543,
+            "lng": 4.79846
         }
     },
     "Teylingen": {
         "center": {
-            "lat": 52.225558704,
-            "lng": 4.524120558
+            "lat": 52.22556,
+            "lng": 4.52412
         }
     },
     "Tholen": {
         "center": {
-            "lat": 51.54921848,
-            "lng": 4.07736022
+            "lat": 51.54922,
+            "lng": 4.07736
         }
     },
     "Tiel": {
         "center": {
-            "lat": 51.88757032,
-            "lng": 5.43079472
+            "lat": 51.88757,
+            "lng": 5.43079
         }
     },
     "Tilburg": {
         "center": {
-            "lat": 51.55850191,
-            "lng": 5.088754398
+            "lat": 51.5585,
+            "lng": 5.08875
         }
     },
     "Tubbergen": {
         "center": {
-            "lat": 52.406045987,
-            "lng": 6.78183059
+            "lat": 52.40605,
+            "lng": 6.78183
         }
     },
     "Twenterand": {
         "center": {
-            "lat": 52.46132355,
-            "lng": 6.57319911
+            "lat": 52.46132,
+            "lng": 6.5732
         }
     },
     "Tynaarlo": {
         "center": {
-            "lat": 53.13733929,
-            "lng": 6.56024329
+            "lat": 53.13734,
+            "lng": 6.56024
         }
     },
     "Tytsjerksteradiel": {
         "center": {
-            "lat": 53.185301,
-            "lng": 5.98885879
+            "lat": 53.1853,
+            "lng": 5.98886
         }
     },
     "Uitgeest": {
         "center": {
-            "lat": 52.528943833,
-            "lng": 4.71507124
+            "lat": 52.52894,
+            "lng": 4.71507
         }
     },
     "Uithoorn": {
         "center": {
-            "lat": 52.2451308,
-            "lng": 4.82647156
+            "lat": 52.24513,
+            "lng": 4.82647
         }
     },
     "Urk": {
         "center": {
-            "lat": 52.662129054,
-            "lng": 5.59350754
+            "lat": 52.66213,
+            "lng": 5.59351
         }
     },
     "Utrecht": {
         "center": {
-            "lat": 52.090794732,
-            "lng": 5.1213952
+            "lat": 52.09079,
+            "lng": 5.1214
         }
     },
     "Utrechtse Heuvelrug": {
         "center": {
-            "lat": 52.03320929,
-            "lng": 5.34505406
+            "lat": 52.03321,
+            "lng": 5.34505
         }
     },
     "Vaals": {
         "center": {
-            "lat": 50.772969997,
-            "lng": 6.013368
+            "lat": 50.77297,
+            "lng": 6.01337
         }
     },
     "Valkenburg aan de Geul": {
         "center": {
-            "lat": 50.86451883,
-            "lng": 5.83240567
+            "lat": 50.86452,
+            "lng": 5.83241
         }
     },
     "Valkenswaard": {
         "center": {
-            "lat": 51.34991843,
-            "lng": 5.46061563
+            "lat": 51.34992,
+            "lng": 5.46062
         }
     },
     "Veendam": {
         "center": {
-            "lat": 53.10434889,
-            "lng": 6.87488301
+            "lat": 53.10435,
+            "lng": 6.87488
         }
     },
     "Veenendaal": {
         "center": {
-            "lat": 52.02889215,
-            "lng": 5.55756408
+            "lat": 52.02889,
+            "lng": 5.55756
         }
     },
     "Veere": {
         "center": {
-            "lat": 51.541958027,
-            "lng": 3.66744304
+            "lat": 51.54196,
+            "lng": 3.66744
         }
     },
     "Veldhoven": {
         "center": {
-            "lat": 51.41997432,
-            "lng": 5.4066527
+            "lat": 51.41997,
+            "lng": 5.40665
         }
     },
     "Velsen": {
         "center": {
-            "lat": 52.46757465,
-            "lng": 4.6075924
+            "lat": 52.46757,
+            "lng": 4.60759
         }
     },
     "Venlo": {
         "center": {
-            "lat": 51.3703096,
-            "lng": 6.16896773
+            "lat": 51.37031,
+            "lng": 6.16897
         }
     },
     "Venray": {
         "center": {
-            "lat": 51.52703108,
-            "lng": 5.97537879
+            "lat": 51.52703,
+            "lng": 5.97538
         }
     },
     "Vijfheerenlanden": {
         "center": {
-            "lat": 51.978791025,
-            "lng": 5.0846601
+            "lat": 51.97879,
+            "lng": 5.08466
         },
         "origin": {
             "year": 2019,
@@ -1823,32 +1855,32 @@
     },
     "Vlaardingen": {
         "center": {
-            "lat": 51.90797083,
-            "lng": 4.34277344
+            "lat": 51.90797,
+            "lng": 4.34277
         }
     },
     "Vlieland": {
         "center": {
-            "lat": 53.295440125,
-            "lng": 5.067185
+            "lat": 53.29544,
+            "lng": 5.06719
         }
     },
     "Vlissingen": {
         "center": {
-            "lat": 51.4415695,
-            "lng": 3.576024703
+            "lat": 51.44157,
+            "lng": 3.57602
         }
     },
     "Voerendaal": {
         "center": {
-            "lat": 50.88202737,
-            "lng": 5.92708097
+            "lat": 50.88203,
+            "lng": 5.92708
         }
     },
     "Voorne aan Zee": {
         "center": {
-            "lat": 51.87402635,
-            "lng": 4.068982702
+            "lat": 51.87403,
+            "lng": 4.06898
         },
         "origin": {
             "year": 2023,
@@ -1857,78 +1889,78 @@
     },
     "Voorschoten": {
         "center": {
-            "lat": 52.12510355,
-            "lng": 4.44688411
+            "lat": 52.1251,
+            "lng": 4.44688
         }
     },
     "Voorst": {
         "center": {
-            "lat": 52.236260232,
-            "lng": 6.105044115
+            "lat": 52.23626,
+            "lng": 6.10504
         }
     },
     "Vught": {
         "center": {
-            "lat": 51.65844402,
-            "lng": 5.29839583
+            "lat": 51.65844,
+            "lng": 5.2984
         }
     },
     "Waadhoeke": {
         "center": {
-            "lat": 53.18590876,
-            "lng": 5.5421589
+            "lat": 53.18591,
+            "lng": 5.54216
         },
         "origin": {
             "year": 2018,
-            "municipalities": ["Franekeradeel", "het Bildt", "Menaldumadeel"]
+            "municipalities": ["Franekeradeel", "het Bildt", "Menameradiel"]
         }
     },
     "Waalre": {
         "center": {
-            "lat": 51.386948507,
-            "lng": 5.44742294
+            "lat": 51.38695,
+            "lng": 5.44742
         }
     },
     "Waalwijk": {
         "center": {
-            "lat": 51.6884403,
-            "lng": 5.06188708
+            "lat": 51.68844,
+            "lng": 5.06189
         }
     },
     "Waddinxveen": {
         "center": {
-            "lat": 52.04501203,
-            "lng": 4.64811686
+            "lat": 52.04501,
+            "lng": 4.64812
         }
     },
     "Wageningen": {
         "center": {
-            "lat": 51.964888861,
-            "lng": 5.66273627
+            "lat": 51.96489,
+            "lng": 5.66274
         }
     },
     "Wassenaar": {
         "center": {
-            "lat": 52.14287083,
-            "lng": 4.40109081
+            "lat": 52.14287,
+            "lng": 4.40109
         }
     },
     "Waterland": {
         "center": {
-            "lat": 52.44773174,
-            "lng": 5.04028336
+            "lat": 52.44773,
+            "lng": 5.04028
         }
     },
     "Weert": {
         "center": {
-            "lat": 51.25342353,
-            "lng": 5.70648149
+            "lat": 51.25342,
+            "lng": 5.70648
         }
     },
     "West Betuwe": {
         "center": {
-            "lat": 51.88792379,
-            "lng": 5.19214884
+            "lat": 51.88792,
+            "lng": 5.19215
         },
         "origin": {
             "year": 2019,
@@ -1937,14 +1969,14 @@
     },
     "West Maas en Waal": {
         "center": {
-            "lat": 51.88213663,
-            "lng": 5.51481347
+            "lat": 51.88214,
+            "lng": 5.51481
         }
     },
     "Westerkwartier": {
         "center": {
-            "lat": 53.213081037,
-            "lng": 6.27360133
+            "lat": 53.21308,
+            "lng": 6.2736
         },
         "origin": {
             "year": 2019,
@@ -1953,20 +1985,20 @@
     },
     "Westerveld": {
         "center": {
-            "lat": 52.8332654,
-            "lng": 6.36742893
+            "lat": 52.83327,
+            "lng": 6.36743
         }
     },
     "Westervoort": {
         "center": {
-            "lat": 51.955630208,
-            "lng": 5.97290196
+            "lat": 51.95563,
+            "lng": 5.9729
         }
     },
     "Westerwolde": {
         "center": {
             "lat": 53.02591,
-            "lng": 7.1057704
+            "lng": 7.10577
         },
         "origin": {
             "year": 2018,
@@ -1975,152 +2007,156 @@
     },
     "Westland": {
         "center": {
-            "lat": 52.02315971,
-            "lng": 4.17013749
+            "lat": 52.02316,
+            "lng": 4.17014
         }
     },
     "Weststellingwerf": {
         "center": {
-            "lat": 52.87712812,
-            "lng": 6.00455096
+            "lat": 52.87713,
+            "lng": 6.00455
         }
     },
     "Wierden": {
         "center": {
-            "lat": 52.359582245,
-            "lng": 6.59237401
+            "lat": 52.35958,
+            "lng": 6.59237
         }
     },
     "Wijchen": {
         "center": {
-            "lat": 51.80722434,
-            "lng": 5.72613161
+            "lat": 51.80722,
+            "lng": 5.72613
         }
     },
     "Wijdemeren": {
         "center": {
-            "lat": 52.241746,
-            "lng": 5.10929747
+            "lat": 52.24175,
+            "lng": 5.1093
         }
     },
     "Wijk bij Duurstede": {
         "center": {
-            "lat": 51.97261239,
-            "lng": 5.345905347
+            "lat": 51.97261,
+            "lng": 5.34591
         }
     },
     "Winterswijk": {
         "center": {
-            "lat": 51.97151894,
-            "lng": 6.72137859
+            "lat": 51.97152,
+            "lng": 6.72138
         }
     },
     "Woensdrecht": {
         "center": {
-            "lat": 51.429672791,
-            "lng": 4.302248
+            "lat": 51.42967,
+            "lng": 4.30225
         }
     },
     "Woerden": {
         "center": {
-            "lat": 52.08570812,
-            "lng": 4.88496639
+            "lat": 52.08571,
+            "lng": 4.88497
         }
     },
     "Wormerland": {
         "center": {
-            "lat": 52.49893009,
-            "lng": 4.81185458
+            "lat": 52.49893,
+            "lng": 4.81185
         }
     },
     "Woudenberg": {
         "center": {
-            "lat": 52.081626117,
-            "lng": 5.4141361
+            "lat": 52.08163,
+            "lng": 5.41414
         }
     },
     "Zaanstad": {
         "center": {
-            "lat": 52.43899412,
-            "lng": 4.82422254
+            "lat": 52.43899,
+            "lng": 4.82422
         }
     },
     "Zaltbommel": {
         "center": {
-            "lat": 51.810305474,
-            "lng": 5.25054876
+            "lat": 51.81031,
+            "lng": 5.25055
         }
     },
     "Zandvoort": {
         "center": {
-            "lat": 52.375814371,
-            "lng": 4.5311883
+            "lat": 52.37581,
+            "lng": 4.53119
         }
     },
     "Zeewolde": {
         "center": {
-            "lat": 52.33039865,
-            "lng": 5.54499665
+            "lat": 52.3304,
+            "lng": 5.545
         }
     },
     "Zeist": {
         "center": {
-            "lat": 52.0846598,
-            "lng": 5.2427043
+            "lat": 52.08466,
+            "lng": 5.2427
         }
     },
     "Zevenaar": {
         "center": {
-            "lat": 51.92825013,
-            "lng": 6.07562526
+            "lat": 51.92825,
+            "lng": 6.07563
+        },
+        "origin": {
+            "year": 2018,
+            "municipalities": ["Zevenaar", "Rijnwaarden"]
         }
     },
     "Zoetermeer": {
         "center": {
-            "lat": 52.06335678,
-            "lng": 4.49033872
+            "lat": 52.06336,
+            "lng": 4.49034
         }
     },
     "Zoeterwoude": {
         "center": {
-            "lat": 52.118031264,
-            "lng": 4.50080409
+            "lat": 52.11803,
+            "lng": 4.5008
         }
     },
     "Zuidplas": {
         "center": {
-            "lat": 51.9674232,
-            "lng": 4.61694979
+            "lat": 51.96742,
+            "lng": 4.61695
         }
     },
     "Zundert": {
         "center": {
-            "lat": 51.46953482,
-            "lng": 4.6583849
+            "lat": 51.46953,
+            "lng": 4.65838
         }
     },
     "Zutphen": {
         "center": {
-            "lat": 52.139957579,
-            "lng": 6.195005874
+            "lat": 52.13996,
+            "lng": 6.19501
         }
     },
     "Zwartewaterland": {
         "center": {
-            "lat": 52.624784728,
-            "lng": 6.04072457
+            "lat": 52.62478,
+            "lng": 6.04072
         }
     },
     "Zwijndrecht": {
         "center": {
-            "lat": 51.8127215,
-            "lng": 4.63241197
+            "lat": 51.81272,
+            "lng": 4.63241
         }
     },
     "Zwolle": {
         "center": {
-            "lat": 52.5115265,
-            "lng": 6.09229013
+            "lat": 52.51153,
+            "lng": 6.09229
         }
     }
 }
