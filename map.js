@@ -53,7 +53,7 @@ window.initMap = async function initMap() {
         "userZoomingTimeout": null
     };
 
-    const cdnHost = "https://cdn.jsdelivr.net/gh/basgroot/bekendmakingen@main";
+    const cdnHost = "https://cdn.jsdelivr.net/gh/basgroot/bekendmakingen@main"; // Request refresh: https://www.jsdelivr.com/tools/purge
 
     /**
      * Find the municipality by name, case insensitive. This must match: ?in=beverwijk
