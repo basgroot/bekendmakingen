@@ -53,7 +53,7 @@ window.initMap = async function initMap() {
         "userZoomingTimeout": null
     };
 
-    const cdnHost = "https://cdn.jsdelivr.net/gh/basgroot/bekendmakingen@main";
+    const cdnHost = "https://cdn.jsdelivr.net/gh/basgroot/bekendmakingen@main"; // Request refresh: https://www.jsdelivr.com/tools/purge
 
     /**
      * Find the municipality by name, case insensitive. This must match: ?in=beverwijk
@@ -752,8 +752,28 @@ window.initMap = async function initMap() {
         const combobox = document.createElement("select");
         combobox.id = "idCbxPeriod";
         combobox.title = "Periode van de bekendmaking selecteren";
+        // Group periods: recent periods first, then historical months grouped by year.
+        let currentOptGroup = null;
+        let currentYear = null;
         appState.periods.forEach(function (period) {
-            combobox.add(createOption(period.key, period.val, period.key === selectedPeriod));
+            if (isHistoricalPeriod(period.key)) {
+                const year = period.key.substring(0, 4);
+                if (year !== currentYear) {
+                    currentOptGroup = document.createElement("optgroup");
+                    currentOptGroup.label = year;
+                    currentYear = year;
+                    combobox.appendChild(currentOptGroup);
+                }
+            } else {
+                // First time we encounter recent periods: create the "Recente publicaties" group.
+                if (currentOptGroup === null || currentYear !== null) {
+                    currentOptGroup = document.createElement("optgroup");
+                    currentOptGroup.label = "Recente publicaties";
+                    currentYear = null;
+                    combobox.appendChild(currentOptGroup);
+                }
+            }
+            currentOptGroup.appendChild(createOption(period.key, period.val, period.key === selectedPeriod));
         });
         combobox.addEventListener("change", updatePeriodFilter);
         combobox.classList.add("controlStyle");
@@ -1121,20 +1141,20 @@ window.initMap = async function initMap() {
     }
 
     /**
+     * Checks if a value represents a historical period. Historical periods are noted like '2023-11'.
+     * @param {string} value The value to check.
+     * @returns {boolean} Returns true if the value represents a historical period, otherwise returns false.
+     */
+    function isHistoricalPeriod(value) {
+        // Values of historical periods are notated like '2023-03'
+        return /^\d{4}-\d{2}$/.test(value);
+    }
+
+    /**
      * Determine what time filter must be used.
      * @returns {!object} Time filter.
      */
     function getPeriodFilter() {
-        /**
-         * Checks if a value represents a historical period. Historical periods are noted like '2023-11'.
-         * @param {string} value The value to check.
-         * @returns {boolean} Returns true if the value represents a historical period, otherwise returns false.
-         */
-        function isHistoricalPeriod(value) {
-            // Values of historical periods are notated like '2023-03'
-            return value.length === 7 && value.substring(4, 5) === "-";
-        }
-
         const periodElm = document.getElementById("idCbxPeriod");
         // Fall back to appState.initialPeriod when the combobox is not yet
         // in the DOM. The period control is added via map.controls.push(),
