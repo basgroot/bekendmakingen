@@ -54,6 +54,7 @@ window.initMap = async function initMap() {
     };
 
     const cdnHost = "https://cdn.jsdelivr.net/gh/basgroot/bekendmakingen@main"; // Request refresh: https://www.jsdelivr.com/tools/purge
+    const MAX_RETRIES = 5;
 
     /**
      * Find the municipality by name, case insensitive. This must match: ?in=beverwijk
@@ -2483,7 +2484,7 @@ window.initMap = async function initMap() {
          */
         function loadDataWithRetries(url, retriesLeft) {
             if (retriesLeft <= 0) {
-                console.error("Giving up loading " + url + " after multiple retries.");
+                console.error("Giving up loading " + url + " after " + MAX_RETRIES + " retries.");
                 showError("Er is een probleem opgetreden bij het laden van de bekendmakingen van " + municipality + ".\nProbeer het later nogmaals.");
                 setLoadingIndicatorVisibility("hide");
                 return;
@@ -2502,12 +2503,16 @@ window.initMap = async function initMap() {
                     } else {
                         console.error(response);
                         // This happens when response is 503 Service Unavailable, for example.
-                        loadDataWithRetries(url, retriesLeft - 1);
+                        var attemptNumber = MAX_RETRIES - retriesLeft + 1;
+                        console.error("Retrying in " + attemptNumber + " second(s)..");
+                        setTimeout(function () { loadDataWithRetries(url, retriesLeft - 1); }, attemptNumber * 1000);
                     }
                 })
                 .catch(function (error) {
                     console.error(error);
-                    loadDataWithRetries(url, retriesLeft - 1);
+                    var attemptNumber = MAX_RETRIES - retriesLeft + 1;
+                    console.error("Retrying in " + attemptNumber + " second(s)..");
+                    setTimeout(function () { loadDataWithRetries(url, retriesLeft - 1); }, attemptNumber * 1000);
                 });
         }
 
@@ -2522,7 +2527,7 @@ window.initMap = async function initMap() {
             "%22%20sortBy%20dt.available%20/sort.descending&maximumRecords=500&startRecord=" +
             startRecord +
             "&httpAccept=application/json";
-        loadDataWithRetries(url, 3);
+        loadDataWithRetries(url, MAX_RETRIES);
     }
 
     /**
