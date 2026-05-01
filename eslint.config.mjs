@@ -69,5 +69,20 @@ export default [
         "languageOptions": {
             "sourceType": "module"
         }
+    },
+    {
+        "files": [".githooks/*.cjs"],
+        "languageOptions": {
+            "sourceType": "commonjs",
+            "globals": {
+                ...globals.node
+            }
+        },
+        "rules": {
+            "no-implicit-globals": "off",
+            "jsdoc/require-jsdoc": "off",
+            "jsdoc/require-param": "off",
+            "jsdoc/require-returns": "off"
+        }
     }
 ];
