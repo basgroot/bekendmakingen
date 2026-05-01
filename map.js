@@ -54,7 +54,7 @@ window.initMap = async function initMap() {
     };
 
     const cdnHost = "https://cdn.jsdelivr.net/gh/basgroot/bekendmakingen@main"; // Request refresh: https://www.jsdelivr.com/tools/purge
-    const MAX_RETRIES = 5; // Max number of retries for fetching publications, to work around temporary network or server issues.
+    const MAX_RETRIES = 7; // Max number of retries for fetching publications, to work around temporary network or server issues.
 
     /**
      * Find the municipality by name, case insensitive. This must match: ?in=beverwijk
@@ -2504,19 +2504,19 @@ window.initMap = async function initMap() {
                         console.error(response);
                         // This happens when response is 503 Service Unavailable, for example.
                         const attemptNumber = MAX_RETRIES - retriesLeft + 1;
-                        console.error("Retrying in " + attemptNumber + " second(s)..");
+                        console.error("Retrying in " + attemptNumber * 5 + " second(s)..");
                         setTimeout(function () {
                             loadDataWithRetries(url, retriesLeft - 1);
-                        }, attemptNumber * 1000);
+                        }, attemptNumber * 5000);
                     }
                 })
                 .catch(function (error) {
                     console.error(error);
                     const attemptNumber = MAX_RETRIES - retriesLeft + 1;
-                    console.error("Retrying in " + attemptNumber + " second(s)..");
+                    console.error("Retrying in " + attemptNumber * 5 + " second(s)..");
                     setTimeout(function () {
                         loadDataWithRetries(url, retriesLeft - 1);
-                    }, attemptNumber * 1000);
+                    }, attemptNumber * 5000);
                 });
         }
 
