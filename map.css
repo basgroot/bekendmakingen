@@ -1,7 +1,7 @@
 #map {
     width: 100%;
-    height: 100%;
-    position: absolute;
+    flex: 1;
+    min-height: 0;
     background-color: #9cc0f9;
 }
 
@@ -10,6 +10,11 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
 }
 
 .info_window_image {
@@ -77,6 +82,17 @@ h2.info_window_heading {
         outline: 3px solid ButtonText;
         box-shadow: none;
     }
+}
+
+#siteInfo {
+    background: #fff;
+    color: #333;
+    font-family: Roboto, Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+    padding: 6px 12px;
+    border-top: 1px solid #ddd;
+    flex-shrink: 0;
 }
 
 #adOverlay {

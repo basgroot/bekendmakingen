@@ -992,6 +992,7 @@ window.initMap = async function initMap() {
         const iconContainer = document.createElement("div");
         const icon = document.createElement("img");
         icon.src = sourceUrl;
+        icon.crossOrigin = "anonymous"; // Fix OpaqueResponseBlocking when using CDN-hosted icons, to allow canvas extraction for color shifting on hover.
         icon.width = width;
         icon.height = height;
         icon.alt = "";
@@ -1442,6 +1443,13 @@ window.initMap = async function initMap() {
             globalThis.history.replaceState(null, "", globalThis.location.pathname + "?" + urlSearchParams.toString());
         }
         document.title = "Bekendmakingen " + appState.activeMunicipality;
+        const siteInfoElm = document.getElementById("siteInfo");
+        if (siteInfoElm) {
+            siteInfoElm.innerHTML =
+                "<strong>Bekendmakingen op kaart</strong> — Bekijk recent verleende vergunningen, aanvragen en andere bekendmakingen op de kaart. De gemeente <strong>" +
+                appState.activeMunicipality +
+                "</strong> wordt nu getoond. Kies een periode voor het archief.";
+        }
         // Update the meta tags for the preview on social media:
         const ogTitle = document.querySelector('meta[property="og:title"]');
         if (ogTitle) {
