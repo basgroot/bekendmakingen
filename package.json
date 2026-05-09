@@ -15,7 +15,7 @@
     "type": "module",
     "scripts": {
         "prepare": "git config core.hooksPath .githooks",
-        "build": "node node_modules/terser/bin/terser map.js -o map.min.js --compress --mangle",
+        "build": "node node_modules/terser/bin/terser map.js -o map.min.js --compress --mangle && node node_modules/clean-css-cli/bin/cleancss map.css -o map.min.css",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "format": "prettier --write .",
@@ -24,6 +24,7 @@
     },
     "devDependencies": {
         "@eslint/js": "^10.0.1",
+        "clean-css-cli": "^5.6.3",
         "eslint": "^10.3.0",
         "eslint-plugin-jsdoc": "^62.9.0",
         "globals": "^17.6.0",

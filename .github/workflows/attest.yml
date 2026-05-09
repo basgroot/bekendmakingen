@@ -29,6 +29,7 @@ jobs:
             map.js \
             map.min.js \
             map.css \
+            map.min.css \
             manifest.json \
             municipalities.json \
             periods.json \

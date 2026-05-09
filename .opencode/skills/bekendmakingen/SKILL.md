@@ -13,7 +13,7 @@ This skill describes the architecture, data sources, and key logic of the `beken
 
 - **Single-page app**: pure HTML + JS (`map.js`) + CSS (`map.css`), no framework.
 - **Runtime dependencies**: Google Maps JavaScript API (loaded at runtime via API key in `index.html`).
-- **Build**: `npm run build` runs prettier → eslint → terser to produce `map.min.js`.
+- **Build**: `npm run build` runs terser → cleancss to produce `map.min.js` and `map.min.css`. Prettier and ESLint run via the pre-commit hook, not the build script.
 - **Hosting**: static files; history data served from CDN.
 
 ---
@@ -298,6 +298,7 @@ History files always store coordinates in WGS84 (`"lat lng"` string format).
 | `map.js`                        | All application logic (~2630 lines)                      |
 | `map.min.js`                    | Minified build output (do not edit)                      |
 | `map.css`                       | Styles                                                   |
+| `map.min.css`                   | Minified build output (do not edit)                      |
 | `index.html`                    | Entry point, Google Maps API key, PWA meta               |
 | `municipalities.json`           | Municipality list with coordinates and merger history    |
 | `periods.json`                  | Time period filter options (rolling + monthly 2014–2026) |

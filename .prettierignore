@@ -3,4 +3,5 @@ history/
 img/
 manual/
 *.min.js
+*.min.css
 closure/
