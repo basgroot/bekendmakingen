@@ -27,6 +27,7 @@ jobs:
           tar -czf bouwmelding-site.tar.gz \
             index.html \
             map.js \
+            map.min.js \
             map.css \
             manifest.json \
             municipalities.json \

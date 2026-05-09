@@ -1,17 +1,20 @@
 {
     "Aa en Hunze": {
+        "url": "https://www.aa-en-hunze.nl",
         "center": {
             "lat": 52.93517,
             "lng": 6.67284
         }
     },
     "Aalsmeer": {
+        "url": "https://www.aalsmeer.nl",
         "center": {
             "lat": 52.26362,
             "lng": 4.75971
         }
     },
     "Aalten": {
+        "url": "https://www.aalten.nl",
         "center": {
             "lat": 51.92675,
             "lng": 6.58121
@@ -22,24 +25,28 @@
         }
     },
     "Achtkarspelen": {
+        "url": "https://www.achtkarspelen.nl",
         "center": {
             "lat": 53.21665,
             "lng": 6.14134
         }
     },
     "Alblasserdam": {
+        "url": "https://www.alblasserdam.nl",
         "center": {
             "lat": 51.86401,
             "lng": 4.65805
         }
     },
     "Albrandswaard": {
+        "url": "https://www.albrandswaard.nl",
         "center": {
             "lat": 51.85657,
             "lng": 4.40027
         }
     },
     "Alkmaar": {
+        "url": "https://www.alkmaar.nl",
         "center": {
             "lat": 52.63254,
             "lng": 4.74403
@@ -50,18 +57,21 @@
         }
     },
     "Almelo": {
+        "url": "https://www.almelo.nl",
         "center": {
             "lat": 52.3564,
             "lng": 6.66365
         }
     },
     "Almere": {
+        "url": "https://www.almere.nl",
         "center": {
             "lat": 52.37513,
             "lng": 5.21538
         }
     },
     "Alphen aan den Rijn": {
+        "url": "https://www.alphen-aan-den-rijn.nl",
         "center": {
             "lat": 52.12881,
             "lng": 4.66264
@@ -72,12 +82,14 @@
         }
     },
     "Alphen-Chaam": {
+        "url": "https://www.alphen-chaam.nl",
         "center": {
             "lat": 51.50391,
             "lng": 4.8649
         }
     },
     "Altena": {
+        "url": "https://www.altena.nl",
         "center": {
             "lat": 51.77181,
             "lng": 4.96047
@@ -88,24 +100,28 @@
         }
     },
     "Ameland": {
+        "url": "https://www.ameland.nl",
         "center": {
             "lat": 53.44646,
             "lng": 5.76963
         }
     },
     "Amersfoort": {
+        "url": "https://www.amersfoort.nl",
         "center": {
             "lat": 52.15637,
             "lng": 5.3897
         }
     },
     "Amstelveen": {
+        "url": "https://www.amstelveen.nl",
         "center": {
             "lat": 52.30291,
             "lng": 4.86035
         }
     },
     "Amsterdam": {
+        "url": "https://www.amsterdam.nl",
         "center": {
             "lat": 52.37316,
             "lng": 4.89167
@@ -116,60 +132,70 @@
         }
     },
     "Apeldoorn": {
+        "url": "https://www.apeldoorn.nl",
         "center": {
             "lat": 52.21261,
             "lng": 5.96148
         }
     },
     "Arnhem": {
+        "url": "https://www.arnhem.nl",
         "center": {
             "lat": 51.98171,
             "lng": 5.90799
         }
     },
     "Assen": {
+        "url": "https://www.assen.nl",
         "center": {
             "lat": 52.99563,
             "lng": 6.56131
         }
     },
     "Asten": {
+        "url": "https://www.asten.nl",
         "center": {
             "lat": 51.40364,
             "lng": 5.74575
         }
     },
     "Baarle-Nassau": {
+        "url": "https://www.baarle-nassau.nl",
         "center": {
             "lat": 51.44319,
             "lng": 4.9305
         }
     },
     "Baarn": {
+        "url": "https://www.baarn.nl",
         "center": {
             "lat": 52.21128,
             "lng": 5.28649
         }
     },
     "Barendrecht": {
+        "url": "https://www.barendrecht.nl",
         "center": {
             "lat": 51.85483,
             "lng": 4.53966
         }
     },
     "Barneveld": {
+        "url": "https://www.barneveld.nl",
         "center": {
             "lat": 52.13978,
             "lng": 5.58673
         }
     },
     "Beek": {
+        "url": "https://www.beek.nl",
         "center": {
             "lat": 50.9399,
             "lng": 5.79563
         }
     },
     "Beekdaelen": {
+        "url": "https://www.beekdaelen.nl",
         "center": {
             "lat": 50.91941,
             "lng": 5.88674
@@ -180,12 +206,14 @@
         }
     },
     "Beesel": {
+        "url": "https://www.beesel.nl",
         "center": {
             "lat": 51.2838,
             "lng": 6.0777
         }
     },
     "Berg en Dal": {
+        "url": "https://www.berg-en-dal.nl",
         "center": {
             "lat": 51.77758,
             "lng": 5.93281
@@ -196,12 +224,14 @@
         }
     },
     "Bergeijk": {
+        "url": "https://www.bergeijk.nl",
         "center": {
             "lat": 51.32227,
             "lng": 5.35814
         }
     },
     "Bergen (Limburg)": {
+        "url": "https://www.bergen.nl",
         "lookupName": "Bergen",
         "center": {
             "lat": 51.60343,
@@ -209,6 +239,7 @@
         }
     },
     "Bergen (Noord-Holland)": {
+        "url": "https://www.bergen-nh.nl",
         "lookupName": "Bergen NH",
         "center": {
             "lat": 52.66935,
@@ -220,12 +251,14 @@
         }
     },
     "Bergen op Zoom": {
+        "url": "https://www.bergen-op-zoom.nl",
         "center": {
             "lat": 51.49453,
             "lng": 4.28709
         }
     },
     "Berkelland": {
+        "url": "https://www.berkelland.nl",
         "center": {
             "lat": 52.11624,
             "lng": 6.52474
@@ -236,42 +269,49 @@
         }
     },
     "Bernheze": {
+        "url": "https://www.bernheze.nl",
         "center": {
             "lat": 51.67832,
             "lng": 5.50811
         }
     },
     "Best": {
+        "url": "https://www.best.nl",
         "center": {
             "lat": 51.51213,
             "lng": 5.39427
         }
     },
     "Beuningen": {
+        "url": "https://www.beuningen.nl",
         "center": {
             "lat": 51.86174,
             "lng": 5.76936
         }
     },
     "Beverwijk": {
+        "url": "https://www.beverwijk.nl",
         "center": {
             "lat": 52.47852,
             "lng": 4.65459
         }
     },
     "Bladel": {
+        "url": "https://www.bladel.nl",
         "center": {
             "lat": 51.36649,
             "lng": 5.2152
         }
     },
     "Blaricum": {
+        "url": "https://www.blaricum.nl",
         "center": {
             "lat": 52.27266,
             "lng": 5.24312
         }
     },
     "Bloemendaal": {
+        "url": "https://www.bloemendaal.nl",
         "center": {
             "lat": 52.40506,
             "lng": 4.61865
@@ -282,6 +322,7 @@
         }
     },
     "Bodegraven-Reeuwijk": {
+        "url": "https://www.bodegraven-reeuwijk.nl",
         "center": {
             "lat": 52.08488,
             "lng": 4.74713
@@ -292,42 +333,49 @@
         }
     },
     "Boekel": {
+        "url": "https://www.boekel.nl",
         "center": {
             "lat": 51.60289,
             "lng": 5.67399
         }
     },
     "Borger-Odoorn": {
+        "url": "https://www.borger-odoorn.nl",
         "center": {
             "lat": 52.924,
             "lng": 6.7914
         }
     },
     "Borne": {
+        "url": "https://www.borne.nl",
         "center": {
             "lat": 52.30028,
             "lng": 6.75713
         }
     },
     "Borsele": {
+        "url": "https://www.borsele.nl",
         "center": {
             "lat": 51.44895,
             "lng": 3.81938
         }
     },
     "Boxtel": {
+        "url": "https://www.boxtel.nl",
         "center": {
             "lat": 51.58869,
             "lng": 5.32627
         }
     },
     "Breda": {
+        "url": "https://www.breda.nl",
         "center": {
             "lat": 51.59539,
             "lng": 4.77963
         }
     },
     "Bronckhorst": {
+        "url": "https://www.bronckhorst.nl",
         "center": {
             "lat": 52.05225,
             "lng": 6.31071
@@ -338,42 +386,49 @@
         }
     },
     "Brummen": {
+        "url": "https://www.brummen.nl",
         "center": {
             "lat": 52.0932,
             "lng": 6.15438
         }
     },
     "Brunssum": {
+        "url": "https://www.brunssum.nl",
         "center": {
             "lat": 50.94564,
             "lng": 5.97141
         }
     },
     "Bunnik": {
+        "url": "https://www.bunnik.nl",
         "center": {
             "lat": 52.06714,
             "lng": 5.20011
         }
     },
     "Bunschoten": {
+        "url": "https://www.bunschoten.nl",
         "center": {
             "lat": 52.2438,
             "lng": 5.37501
         }
     },
     "Buren": {
+        "url": "https://www.buren.nl",
         "center": {
             "lat": 51.91242,
             "lng": 5.33412
         }
     },
     "Capelle aan den IJssel": {
+        "url": "https://www.capelle-aan-den-ijssel.nl",
         "center": {
             "lat": 51.93125,
             "lng": 4.58905
         }
     },
     "Castricum": {
+        "url": "https://www.castricum.nl",
         "center": {
             "lat": 52.54651,
             "lng": 4.66218
@@ -384,24 +439,28 @@
         }
     },
     "Coevorden": {
+        "url": "https://www.coevorden.nl",
         "center": {
             "lat": 52.66111,
             "lng": 6.7408
         }
     },
     "Cranendonck": {
+        "url": "https://www.cranendonck.nl",
         "center": {
             "lat": 51.27456,
             "lng": 5.57497
         }
     },
     "Culemborg": {
+        "url": "https://www.culemborg.nl",
         "center": {
             "lat": 51.95823,
             "lng": 5.22483
         }
     },
     "Dalfsen": {
+        "url": "https://www.dalfsen.nl",
         "center": {
             "lat": 52.5048,
             "lng": 6.26134
@@ -412,12 +471,14 @@
         }
     },
     "Dantumadiel": {
+        "url": "https://www.dantumadiel.nl",
         "center": {
             "lat": 53.28581,
             "lng": 5.9907
         }
     },
     "De Bilt": {
+        "url": "https://www.de-bilt.nl",
         "center": {
             "lat": 52.10925,
             "lng": 5.1808
@@ -428,6 +489,7 @@
         }
     },
     "De Fryske Marren": {
+        "url": "https://www.de-fryske-marren.nl",
         "center": {
             "lat": 52.96777,
             "lng": 5.79688
@@ -438,6 +500,7 @@
         }
     },
     "De Ronde Venen": {
+        "url": "https://www.de-ronde-venen.nl",
         "center": {
             "lat": 52.20669,
             "lng": 4.86858
@@ -448,18 +511,21 @@
         }
     },
     "De Wolden": {
+        "url": "https://www.de-wolden.nl",
         "center": {
             "lat": 52.67673,
             "lng": 6.42173
         }
     },
     "Delft": {
+        "url": "https://www.delft.nl",
         "center": {
             "lat": 52.01143,
             "lng": 4.35834
         }
     },
     "Den Bosch": {
+        "url": "https://www.s-hertogenbosch.nl",
         "lookupName": "'s-Hertogenbosch",
         "center": {
             "lat": 51.69096,
@@ -467,6 +533,7 @@
         }
     },
     "Den Haag": {
+        "url": "https://www.denhaag.nl",
         "lookupName": "'s-Gravenhage",
         "center": {
             "lat": 52.08026,
@@ -474,18 +541,21 @@
         }
     },
     "Den Helder": {
+        "url": "https://www.den-helder.nl",
         "center": {
             "lat": 52.95655,
             "lng": 4.76075
         }
     },
     "Deurne": {
+        "url": "https://www.deurne.nl",
         "center": {
             "lat": 51.46238,
             "lng": 5.79481
         }
     },
     "Deventer": {
+        "url": "https://www.deventer.nl",
         "center": {
             "lat": 52.25304,
             "lng": 6.16004
@@ -496,12 +566,14 @@
         }
     },
     "Diemen": {
+        "url": "https://www.diemen.nl",
         "center": {
             "lat": 52.34099,
             "lng": 4.96332
         }
     },
     "Dijk en Waard": {
+        "url": "https://www.dijk-en-waard.nl",
         "center": {
             "lat": 52.67969,
             "lng": 4.80255
@@ -512,6 +584,7 @@
         }
     },
     "Dinkelland": {
+        "url": "https://www.dinkelland.nl",
         "center": {
             "lat": 52.37587,
             "lng": 7.00467
@@ -522,12 +595,14 @@
         }
     },
     "Doesburg": {
+        "url": "https://www.doesburg.nl",
         "center": {
             "lat": 52.01465,
             "lng": 6.13458
         }
     },
     "Doetinchem": {
+        "url": "https://www.doetinchem.nl",
         "center": {
             "lat": 51.96557,
             "lng": 6.2886
@@ -538,18 +613,21 @@
         }
     },
     "Dongen": {
+        "url": "https://www.dongen.nl",
         "center": {
             "lat": 51.6261,
             "lng": 4.9437
         }
     },
     "Dordrecht": {
+        "url": "https://www.dordrecht.nl",
         "center": {
             "lat": 51.80269,
             "lng": 4.7194
         }
     },
     "Drechterland": {
+        "url": "https://www.drechterland.nl",
         "center": {
             "lat": 52.66581,
             "lng": 5.2048
@@ -560,30 +638,35 @@
         }
     },
     "Drimmelen": {
+        "url": "https://www.drimmelen.nl",
         "center": {
             "lat": 51.70891,
             "lng": 4.81069
         }
     },
     "Dronten": {
+        "url": "https://www.dronten.nl",
         "center": {
             "lat": 52.52486,
             "lng": 5.71797
         }
     },
     "Druten": {
+        "url": "https://www.druten.nl",
         "center": {
             "lat": 51.89078,
             "lng": 5.61022
         }
     },
     "Duiven": {
+        "url": "https://www.duiven.nl",
         "center": {
             "lat": 51.95008,
             "lng": 6.02362
         }
     },
     "Echt-Susteren": {
+        "url": "https://www.echt-susteren.nl",
         "center": {
             "lat": 51.10659,
             "lng": 5.86708
@@ -594,6 +677,7 @@
         }
     },
     "Edam-Volendam": {
+        "url": "https://www.edam-volendam.nl",
         "center": {
             "lat": 52.495,
             "lng": 5.07439
@@ -604,18 +688,21 @@
         }
     },
     "Ede": {
+        "url": "https://www.ede.nl",
         "center": {
             "lat": 52.0432,
             "lng": 5.66808
         }
     },
     "Eemnes": {
+        "url": "https://www.eemnes.nl",
         "center": {
             "lat": 52.25143,
             "lng": 5.25709
         }
     },
     "Eemsdelta": {
+        "url": "https://www.eemsdelta.nl",
         "center": {
             "lat": 53.33468,
             "lng": 6.74614
@@ -626,12 +713,14 @@
         }
     },
     "Eersel": {
+        "url": "https://www.eersel.nl",
         "center": {
             "lat": 51.35512,
             "lng": 5.30705
         }
     },
     "Eijsden-Margraten": {
+        "url": "https://www.eijsden-margraten.nl",
         "center": {
             "lat": 50.79555,
             "lng": 5.76446
@@ -642,60 +731,70 @@
         }
     },
     "Eindhoven": {
+        "url": "https://www.eindhoven.nl",
         "center": {
             "lat": 51.43931,
             "lng": 5.47844
         }
     },
     "Elburg": {
+        "url": "https://www.elburg.nl",
         "center": {
             "lat": 52.44851,
             "lng": 5.83385
         }
     },
     "Emmen": {
+        "url": "https://www.emmen.nl",
         "center": {
             "lat": 52.78284,
             "lng": 6.8945
         }
     },
     "Enkhuizen": {
+        "url": "https://www.enkhuizen.nl",
         "center": {
             "lat": 52.70378,
             "lng": 5.29298
         }
     },
     "Enschede": {
+        "url": "https://www.enschede.nl",
         "center": {
             "lat": 52.21976,
             "lng": 6.89594
         }
     },
     "Epe": {
+        "url": "https://www.epe.nl",
         "center": {
             "lat": 52.34823,
             "lng": 5.98339
         }
     },
     "Ermelo": {
+        "url": "https://www.ermelo.nl",
         "center": {
             "lat": 52.29923,
             "lng": 5.62138
         }
     },
     "Etten-Leur": {
+        "url": "https://www.etten-leur.nl",
         "center": {
             "lat": 51.56889,
             "lng": 4.64067
         }
     },
     "Geertruidenberg": {
+        "url": "https://www.geertruidenberg.nl",
         "center": {
             "lat": 51.70082,
             "lng": 4.86125
         }
     },
     "Geldrop-Mierlo": {
+        "url": "https://www.geldrop-mierlo.nl",
         "center": {
             "lat": 51.42242,
             "lng": 5.5618
@@ -706,24 +805,28 @@
         }
     },
     "Gemert-Bakel": {
+        "url": "https://www.gemert-bakel.nl",
         "center": {
             "lat": 51.55721,
             "lng": 5.68217
         }
     },
     "Gennep": {
+        "url": "https://www.gennep.nl",
         "center": {
             "lat": 51.69958,
             "lng": 5.971
         }
     },
     "Gilze en Rijen": {
+        "url": "https://www.gilze-en-rijen.nl",
         "center": {
             "lat": 51.58836,
             "lng": 4.91935
         }
     },
     "Goeree-Overflakkee": {
+        "url": "https://www.goeree-overflakkee.nl",
         "center": {
             "lat": 51.75779,
             "lng": 4.16519
@@ -734,18 +837,21 @@
         }
     },
     "Goes": {
+        "url": "https://www.goes.nl",
         "center": {
             "lat": 51.50239,
             "lng": 3.89291
         }
     },
     "Goirle": {
+        "url": "https://www.goirle.nl",
         "center": {
             "lat": 51.52013,
             "lng": 5.06732
         }
     },
     "Gooise Meren": {
+        "url": "https://www.gooise-meren.nl",
         "center": {
             "lat": 52.29575,
             "lng": 5.16274
@@ -756,18 +862,21 @@
         }
     },
     "Gorinchem": {
+        "url": "https://www.gorinchem.nl",
         "center": {
             "lat": 51.83074,
             "lng": 4.97445
         }
     },
     "Gouda": {
+        "url": "https://www.gouda.nl",
         "center": {
             "lat": 52.01166,
             "lng": 4.71047
         }
     },
     "Groningen": {
+        "url": "https://gemeente.groningen.nl",
         "center": {
             "lat": 53.21732,
             "lng": 6.5672
@@ -778,24 +887,28 @@
         }
     },
     "Gulpen-Wittem": {
+        "url": "https://www.gulpen-wittem.nl",
         "center": {
             "lat": 50.81586,
             "lng": 5.89329
         }
     },
     "Haaksbergen": {
+        "url": "https://www.haaksbergen.nl",
         "center": {
             "lat": 52.15597,
             "lng": 6.74108
         }
     },
     "Haarlem": {
+        "url": "https://www.haarlem.nl",
         "center": {
             "lat": 52.38002,
             "lng": 4.63597
         }
     },
     "Haarlemmermeer": {
+        "url": "https://www.haarlemmermeer.nl",
         "center": {
             "lat": 52.30432,
             "lng": 4.69133
@@ -806,12 +919,14 @@
         }
     },
     "Halderberge": {
+        "url": "https://www.halderberge.nl",
         "center": {
             "lat": 51.58881,
             "lng": 4.52731
         }
     },
     "Hardenberg": {
+        "url": "https://www.hardenberg.nl",
         "center": {
             "lat": 52.57539,
             "lng": 6.6237
@@ -822,48 +937,56 @@
         }
     },
     "Harderwijk": {
+        "url": "https://www.harderwijk.nl",
         "center": {
             "lat": 52.34908,
             "lng": 5.619
         }
     },
     "Hardinxveld-Giessendam": {
+        "url": "https://www.hardinxveld-giessendam.nl",
         "center": {
             "lat": 51.82762,
             "lng": 4.83477
         }
     },
     "Harlingen": {
+        "url": "https://www.harlingen.nl",
         "center": {
             "lat": 53.17451,
             "lng": 5.41973
         }
     },
     "Hattem": {
+        "url": "https://www.hattem.nl",
         "center": {
             "lat": 52.47471,
             "lng": 6.06821
         }
     },
     "Heemskerk": {
+        "url": "https://www.heemskerk.nl",
         "center": {
             "lat": 52.5106,
             "lng": 4.67092
         }
     },
     "Heemstede": {
+        "url": "https://www.heemstede.nl",
         "center": {
             "lat": 52.34983,
             "lng": 4.62125
         }
     },
     "Heerde": {
+        "url": "https://www.heerde.nl",
         "center": {
             "lat": 52.38737,
             "lng": 6.04134
         }
     },
     "Heerenveen": {
+        "url": "https://www.heerenveen.nl",
         "center": {
             "lat": 52.96072,
             "lng": 5.92582
@@ -874,48 +997,56 @@
         }
     },
     "Heerlen": {
+        "url": "https://www.heerlen.nl",
         "center": {
             "lat": 50.88889,
             "lng": 5.97893
         }
     },
     "Heeze-Leende": {
+        "url": "https://www.heeze-leende.nl",
         "center": {
             "lat": 51.37981,
             "lng": 5.57787
         }
     },
     "Heiloo": {
+        "url": "https://www.heiloo.nl",
         "center": {
             "lat": 52.60013,
             "lng": 4.70353
         }
     },
     "Hellendoorn": {
+        "url": "https://www.hellendoorn.nl",
         "center": {
             "lat": 52.39133,
             "lng": 6.44939
         }
     },
     "Helmond": {
+        "url": "https://www.helmond.nl",
         "center": {
             "lat": 51.48019,
             "lng": 5.65657
         }
     },
     "Hendrik-Ido-Ambacht": {
+        "url": "https://www.hendrik-ido-ambacht.nl",
         "center": {
             "lat": 51.84217,
             "lng": 4.63345
         }
     },
     "Hengelo": {
+        "url": "https://www.hengelo.nl",
         "center": {
             "lat": 52.26713,
             "lng": 6.7919
         }
     },
     "Het Hogeland": {
+        "url": "https://www.het-hogeland.nl",
         "center": {
             "lat": 53.33487,
             "lng": 6.5276
@@ -926,36 +1057,42 @@
         }
     },
     "Heumen": {
+        "url": "https://www.heumen.nl",
         "center": {
             "lat": 51.76662,
             "lng": 5.84503
         }
     },
     "Heusden": {
+        "url": "https://www.heusden.nl",
         "center": {
             "lat": 51.73458,
             "lng": 5.13738
         }
     },
     "Hillegom": {
+        "url": "https://www.hillegom.nl",
         "center": {
             "lat": 52.29314,
             "lng": 4.57941
         }
     },
     "Hilvarenbeek": {
+        "url": "https://www.hilvarenbeek.nl",
         "center": {
             "lat": 51.48423,
             "lng": 5.1371
         }
     },
     "Hilversum": {
+        "url": "https://www.hilversum.nl",
         "center": {
             "lat": 52.22497,
             "lng": 5.17315
         }
     },
     "Hoeksche Waard": {
+        "url": "https://www.hoeksche-waard.nl",
         "center": {
             "lat": 51.82621,
             "lng": 4.4119
@@ -966,6 +1103,7 @@
         }
     },
     "Hof van Twente": {
+        "url": "https://www.hof-van-twente.nl",
         "center": {
             "lat": 52.23334,
             "lng": 6.58702
@@ -976,6 +1114,7 @@
         }
     },
     "Hollands Kroon": {
+        "url": "https://www.hollands-kroon.nl",
         "center": {
             "lat": 52.81235,
             "lng": 4.99822
@@ -986,18 +1125,21 @@
         }
     },
     "Hoogeveen": {
+        "url": "https://www.hoogeveen.nl",
         "center": {
             "lat": 52.72577,
             "lng": 6.47889
         }
     },
     "Hoorn": {
+        "url": "https://www.hoorn.nl",
         "center": {
             "lat": 52.63934,
             "lng": 5.05925
         }
     },
     "Horst aan de Maas": {
+        "url": "https://www.horst-aan-de-maas.nl",
         "center": {
             "lat": 51.45181,
             "lng": 6.05339
@@ -1008,18 +1150,21 @@
         }
     },
     "Houten": {
+        "url": "https://www.houten.nl",
         "center": {
             "lat": 52.03466,
             "lng": 5.16963
         }
     },
     "Huizen": {
+        "url": "https://www.huizen.nl",
         "center": {
             "lat": 52.29798,
             "lng": 5.2355
         }
     },
     "Hulst": {
+        "url": "https://www.hulst.nl",
         "center": {
             "lat": 51.28062,
             "lng": 4.05409
@@ -1030,12 +1175,14 @@
         }
     },
     "IJsselstein": {
+        "url": "https://www.ijsselstein.nl",
         "center": {
             "lat": 52.0192,
             "lng": 5.04362
         }
     },
     "Kaag en Braassem": {
+        "url": "https://www.kaag-en-braassem.nl",
         "center": {
             "lat": 52.2041,
             "lng": 4.63128
@@ -1046,6 +1193,7 @@
         }
     },
     "Kampen": {
+        "url": "https://www.kampen.nl",
         "center": {
             "lat": 52.55529,
             "lng": 5.91273
@@ -1056,12 +1204,14 @@
         }
     },
     "Kapelle": {
+        "url": "https://www.kapelle.nl",
         "center": {
             "lat": 51.48641,
             "lng": 3.95797
         }
     },
     "Katwijk": {
+        "url": "https://www.katwijk.nl",
         "center": {
             "lat": 52.1993,
             "lng": 4.4131
@@ -1072,12 +1222,14 @@
         }
     },
     "Kerkrade": {
+        "url": "https://www.kerkrade.nl",
         "center": {
             "lat": 50.86624,
             "lng": 6.06401
         }
     },
     "Koggenland": {
+        "url": "https://www.koggenland.nl",
         "center": {
             "lat": 52.62953,
             "lng": 4.94708
@@ -1088,12 +1240,14 @@
         }
     },
     "Krimpen aan den IJssel": {
+        "url": "https://www.krimpen-aan-den-ijssel.nl",
         "center": {
             "lat": 51.91469,
             "lng": 4.58778
         }
     },
     "Krimpenerwaard": {
+        "url": "https://www.krimpenerwaard.nl",
         "center": {
             "lat": 51.97239,
             "lng": 4.77221
@@ -1104,12 +1258,14 @@
         }
     },
     "Laarbeek": {
+        "url": "https://www.laarbeek.nl",
         "center": {
             "lat": 51.52933,
             "lng": 5.64225
         }
     },
     "Land van Cuijk": {
+        "url": "https://www.land-van-cuijk.nl",
         "center": {
             "lat": 51.59628,
             "lng": 6.01097
@@ -1120,18 +1276,21 @@
         }
     },
     "Landgraaf": {
+        "url": "https://www.landgraaf.nl",
         "center": {
             "lat": 50.90683,
             "lng": 6.02572
         }
     },
     "Landsmeer": {
+        "url": "https://www.landsmeer.nl",
         "center": {
             "lat": 52.43279,
             "lng": 4.91455
         }
     },
     "Lansingerland": {
+        "url": "https://www.lansingerland.nl",
         "center": {
             "lat": 51.99565,
             "lng": 4.4874
@@ -1142,12 +1301,14 @@
         }
     },
     "Laren": {
+        "url": "https://www.laren.nl",
         "center": {
             "lat": 52.25684,
             "lng": 5.22408
         }
     },
     "Leeuwarden": {
+        "url": "https://www.leeuwarden.nl",
         "center": {
             "lat": 53.20068,
             "lng": 5.79482
@@ -1158,18 +1319,21 @@
         }
     },
     "Leiden": {
+        "url": "https://www.leiden.nl",
         "center": {
             "lat": 52.15898,
             "lng": 4.4924
         }
     },
     "Leiderdorp": {
+        "url": "https://www.leiderdorp.nl",
         "center": {
             "lat": 52.16166,
             "lng": 4.53168
         }
     },
     "Leidschendam-Voorburg": {
+        "url": "https://www.leidschendam-voorburg.nl",
         "center": {
             "lat": 52.08526,
             "lng": 4.37916
@@ -1180,12 +1344,14 @@
         }
     },
     "Lelystad": {
+        "url": "https://www.lelystad.nl",
         "center": {
             "lat": 52.52271,
             "lng": 5.44099
         }
     },
     "Leudal": {
+        "url": "https://www.leudal.nl",
         "center": {
             "lat": 51.24989,
             "lng": 5.89448
@@ -1196,12 +1362,14 @@
         }
     },
     "Leusden": {
+        "url": "https://www.leusden.nl",
         "center": {
             "lat": 52.13178,
             "lng": 5.42948
         }
     },
     "Lingewaard": {
+        "url": "https://www.lingewaard.nl",
         "center": {
             "lat": 51.89215,
             "lng": 5.89971
@@ -1212,12 +1380,14 @@
         }
     },
     "Lisse": {
+        "url": "https://www.lisse.nl",
         "center": {
             "lat": 52.26332,
             "lng": 4.55644
         }
     },
     "Lochem": {
+        "url": "https://www.lochem.nl",
         "center": {
             "lat": 52.16141,
             "lng": 6.41635
@@ -1228,30 +1398,35 @@
         }
     },
     "Loon op Zand": {
+        "url": "https://www.loon-op-zand.nl",
         "center": {
             "lat": 51.62701,
             "lng": 5.07389
         }
     },
     "Lopik": {
+        "url": "https://www.lopik.nl",
         "center": {
             "lat": 51.97155,
             "lng": 4.95087
         }
     },
     "Losser": {
+        "url": "https://www.losser.nl",
         "center": {
             "lat": 52.26392,
             "lng": 7.00313
         }
     },
     "Maasdriel": {
+        "url": "https://www.maasdriel.nl",
         "center": {
             "lat": 51.77308,
             "lng": 5.33995
         }
     },
     "Maasgouw": {
+        "url": "https://www.maasgouw.nl",
         "center": {
             "lat": 51.17755,
             "lng": 5.90558
@@ -1262,6 +1437,7 @@
         }
     },
     "Maashorst": {
+        "url": "https://www.maashorst.nl",
         "center": {
             "lat": 51.65977,
             "lng": 5.61785
@@ -1272,18 +1448,21 @@
         }
     },
     "Maassluis": {
+        "url": "https://www.maassluis.nl",
         "center": {
             "lat": 51.92153,
             "lng": 4.25343
         }
     },
     "Maastricht": {
+        "url": "https://www.maastricht.nl",
         "center": {
             "lat": 50.85187,
             "lng": 5.69592
         }
     },
     "Medemblik": {
+        "url": "https://www.medemblik.nl",
         "center": {
             "lat": 52.7669,
             "lng": 5.10409
@@ -1294,12 +1473,14 @@
         }
     },
     "Meerssen": {
+        "url": "https://www.meerssen.nl",
         "center": {
             "lat": 50.88382,
             "lng": 5.75417
         }
     },
     "Meierijstad": {
+        "url": "https://www.meierijstad.nl",
         "center": {
             "lat": 51.61418,
             "lng": 5.54576
@@ -1310,18 +1491,21 @@
         }
     },
     "Meppel": {
+        "url": "https://www.meppel.nl",
         "center": {
             "lat": 52.6979,
             "lng": 6.19129
         }
     },
     "Middelburg": {
+        "url": "https://www.middelburg.nl",
         "center": {
             "lat": 51.49848,
             "lng": 3.61161
         }
     },
     "Midden-Delfland": {
+        "url": "https://www.midden-delfland.nl",
         "center": {
             "lat": 51.97554,
             "lng": 4.31571
@@ -1332,6 +1516,7 @@
         }
     },
     "Midden-Drenthe": {
+        "url": "https://www.midden-drenthe.nl",
         "center": {
             "lat": 52.85932,
             "lng": 6.51541
@@ -1342,6 +1527,7 @@
         }
     },
     "Midden-Groningen": {
+        "url": "https://www.midden-groningen.nl",
         "center": {
             "lat": 53.15164,
             "lng": 6.75533
@@ -1352,12 +1538,14 @@
         }
     },
     "Moerdijk": {
+        "url": "https://www.moerdijk.nl",
         "center": {
             "lat": 51.66272,
             "lng": 4.5351
         }
     },
     "Molenlanden": {
+        "url": "https://www.molenlanden.nl",
         "center": {
             "lat": 51.8703,
             "lng": 4.78968
@@ -1368,6 +1556,7 @@
         }
     },
     "Montferland": {
+        "url": "https://www.montferland.nl",
         "center": {
             "lat": 51.93675,
             "lng": 6.12934
@@ -1378,18 +1567,21 @@
         }
     },
     "Montfoort": {
+        "url": "https://www.montfoort.nl",
         "center": {
             "lat": 52.04538,
             "lng": 4.94776
         }
     },
     "Mook en Middelaar": {
+        "url": "https://www.mook-en-middelaar.nl",
         "center": {
             "lat": 51.75232,
             "lng": 5.88366
         }
     },
     "Neder-Betuwe": {
+        "url": "https://www.neder-betuwe.nl",
         "center": {
             "lat": 51.90954,
             "lng": 5.56933
@@ -1400,18 +1592,21 @@
         }
     },
     "Nederweert": {
+        "url": "https://www.nederweert.nl",
         "center": {
             "lat": 51.28529,
             "lng": 5.74842
         }
     },
     "Nieuwegein": {
+        "url": "https://www.nieuwegein.nl",
         "center": {
             "lat": 52.02942,
             "lng": 5.08424
         }
     },
     "Nieuwkoop": {
+        "url": "https://www.nieuwkoop.nl",
         "center": {
             "lat": 52.14965,
             "lng": 4.77998
@@ -1422,6 +1617,7 @@
         }
     },
     "Nijkerk": {
+        "url": "https://www.nijkerk.nl",
         "center": {
             "lat": 52.22343,
             "lng": 5.48558
@@ -1432,12 +1628,14 @@
         }
     },
     "Nijmegen": {
+        "url": "https://www.nijmegen.nl",
         "center": {
             "lat": 51.84212,
             "lng": 5.85937
         }
     },
     "Nissewaard": {
+        "url": "https://www.nissewaard.nl",
         "center": {
             "lat": 51.84891,
             "lng": 4.33116
@@ -1448,6 +1646,7 @@
         }
     },
     "Noardeast-Fryslân": {
+        "url": "https://www.noardeast-fryslan.nl",
         "center": {
             "lat": 53.32649,
             "lng": 5.99878
@@ -1458,24 +1657,28 @@
         }
     },
     "Noord-Beveland": {
+        "url": "https://www.noord-beveland.nl",
         "center": {
             "lat": 51.57396,
             "lng": 3.70378
         }
     },
     "Noordenveld": {
+        "url": "https://www.noordenveld.nl",
         "center": {
             "lat": 53.138,
             "lng": 6.43334
         }
     },
     "Noordoostpolder": {
+        "url": "https://www.noordoostpolder.nl",
         "center": {
             "lat": 52.71096,
             "lng": 5.75854
         }
     },
     "Noordwijk": {
+        "url": "https://www.noordwijk.nl",
         "center": {
             "lat": 52.2411,
             "lng": 4.44618
@@ -1486,36 +1689,42 @@
         }
     },
     "Nuenen, Gerwen en Nederwetten": {
+        "url": "https://www.nuenen.nl",
         "center": {
             "lat": 51.47078,
             "lng": 5.55501
         }
     },
     "Nunspeet": {
+        "url": "https://www.nunspeet.nl",
         "center": {
             "lat": 52.37531,
             "lng": 5.78244
         }
     },
     "Oegstgeest": {
+        "url": "https://www.oegstgeest.nl",
         "center": {
             "lat": 52.18261,
             "lng": 4.46722
         }
     },
     "Oirschot": {
+        "url": "https://www.oirschot.nl",
         "center": {
             "lat": 51.50456,
             "lng": 5.30754
         }
     },
     "Oisterwijk": {
+        "url": "https://www.oisterwijk.nl",
         "center": {
             "lat": 51.58062,
             "lng": 5.19457
         }
     },
     "Oldambt": {
+        "url": "https://www.oldambt.nl",
         "center": {
             "lat": 53.14665,
             "lng": 7.03311
@@ -1526,18 +1735,21 @@
         }
     },
     "Oldebroek": {
+        "url": "https://www.oldebroek.nl",
         "center": {
             "lat": 52.4458,
             "lng": 5.89928
         }
     },
     "Oldenzaal": {
+        "url": "https://www.oldenzaal.nl",
         "center": {
             "lat": 52.3124,
             "lng": 6.92847
         }
     },
     "Olst-Wijhe": {
+        "url": "https://www.olst-wijhe.nl",
         "center": {
             "lat": 52.38445,
             "lng": 6.13576
@@ -1548,12 +1760,14 @@
         }
     },
     "Ommen": {
+        "url": "https://www.ommen.nl",
         "center": {
             "lat": 52.51852,
             "lng": 6.42337
         }
     },
     "Oost Gelre": {
+        "url": "https://www.oost-gelre.nl",
         "center": {
             "lat": 51.98695,
             "lng": 6.56762
@@ -1564,36 +1778,42 @@
         }
     },
     "Oosterhout": {
+        "url": "https://www.oosterhout.nl",
         "center": {
             "lat": 51.64418,
             "lng": 4.85732
         }
     },
     "Ooststellingwerf": {
+        "url": "https://www.ooststellingwerf.nl",
         "center": {
             "lat": 52.99121,
             "lng": 6.29179
         }
     },
     "Oostzaan": {
+        "url": "https://www.oostzaan.nl",
         "center": {
             "lat": 52.44036,
             "lng": 4.87545
         }
     },
     "Opmeer": {
+        "url": "https://www.opmeer.nl",
         "center": {
             "lat": 52.70544,
             "lng": 4.94266
         }
     },
     "Opsterland": {
+        "url": "https://www.opsterland.nl",
         "center": {
             "lat": 53.00282,
             "lng": 6.06402
         }
     },
     "Oss": {
+        "url": "https://www.oss.nl",
         "center": {
             "lat": 51.7681,
             "lng": 5.52309
@@ -1604,6 +1824,7 @@
         }
     },
     "Oude IJsselstreek": {
+        "url": "https://www.oude-ijsselstreek.nl",
         "center": {
             "lat": 51.89004,
             "lng": 6.38055
@@ -1614,18 +1835,21 @@
         }
     },
     "Ouder-Amstel": {
+        "url": "https://www.ouder-amstel.nl",
         "center": {
             "lat": 52.29516,
             "lng": 4.91612
         }
     },
     "Oudewater": {
+        "url": "https://www.oudewater.nl",
         "center": {
             "lat": 52.02284,
             "lng": 4.87088
         }
     },
     "Overbetuwe": {
+        "url": "https://www.overbetuwe.nl",
         "center": {
             "lat": 51.91872,
             "lng": 5.84363
@@ -1636,12 +1860,14 @@
         }
     },
     "Papendrecht": {
+        "url": "https://www.papendrecht.nl",
         "center": {
             "lat": 51.82586,
             "lng": 4.68333
         }
     },
     "Peel en Maas": {
+        "url": "https://www.peel-en-maas.nl",
         "center": {
             "lat": 51.32867,
             "lng": 5.9777
@@ -1652,12 +1878,14 @@
         }
     },
     "Pekela": {
+        "url": "https://www.pekela.nl",
         "center": {
             "lat": 53.10405,
             "lng": 7.00797
         }
     },
     "Pijnacker-Nootdorp": {
+        "url": "https://www.pijnacker-nootdorp.nl",
         "center": {
             "lat": 52.0199,
             "lng": 4.43365
@@ -1668,6 +1896,7 @@
         }
     },
     "Purmerend": {
+        "url": "https://www.purmerend.nl",
         "center": {
             "lat": 52.51021,
             "lng": 4.95057
@@ -1678,12 +1907,14 @@
         }
     },
     "Putten": {
+        "url": "https://www.putten.nl",
         "center": {
             "lat": 52.26097,
             "lng": 5.61025
         }
     },
     "Raalte": {
+        "url": "https://www.raalte.nl",
         "center": {
             "lat": 52.38574,
             "lng": 6.27515
@@ -1694,48 +1925,56 @@
         }
     },
     "Reimerswaal": {
+        "url": "https://www.reimerswaal.nl",
         "center": {
             "lat": 51.43062,
             "lng": 4.11212
         }
     },
     "Renkum": {
+        "url": "https://www.renkum.nl",
         "center": {
             "lat": 51.97272,
             "lng": 5.73099
         }
     },
     "Renswoude": {
+        "url": "https://www.renswoude.nl",
         "center": {
             "lat": 52.07472,
             "lng": 5.53773
         }
     },
     "Reusel-De Mierden": {
+        "url": "https://www.reusel-de-mierden.nl",
         "center": {
             "lat": 51.36247,
             "lng": 5.16263
         }
     },
     "Rheden": {
+        "url": "https://www.rheden.nl",
         "center": {
             "lat": 52.01089,
             "lng": 6.03065
         }
     },
     "Rhenen": {
+        "url": "https://www.rhenen.nl",
         "center": {
             "lat": 51.9573,
             "lng": 5.56989
         }
     },
     "Ridderkerk": {
+        "url": "https://www.ridderkerk.nl",
         "center": {
             "lat": 51.87065,
             "lng": 4.60227
         }
     },
     "Rijssen-Holten": {
+        "url": "https://www.rijssen-holten.nl",
         "center": {
             "lat": 52.28245,
             "lng": 6.4206
@@ -1746,12 +1985,14 @@
         }
     },
     "Rijswijk": {
+        "url": "https://www.rijswijk.nl",
         "center": {
             "lat": 52.03991,
             "lng": 4.31396
         }
     },
     "Roerdalen": {
+        "url": "https://www.roerdalen.nl",
         "center": {
             "lat": 51.14429,
             "lng": 6.00138
@@ -1762,6 +2003,7 @@
         }
     },
     "Roermond": {
+        "url": "https://www.roermond.nl",
         "center": {
             "lat": 51.19359,
             "lng": 5.9887
@@ -1772,12 +2014,14 @@
         }
     },
     "Roosendaal": {
+        "url": "https://www.roosendaal.nl",
         "center": {
             "lat": 51.53309,
             "lng": 4.45624
         }
     },
     "Rotterdam": {
+        "url": "https://www.rotterdam.nl",
         "center": {
             "lat": 51.9244,
             "lng": 4.47775
@@ -1788,18 +2032,21 @@
         }
     },
     "Rozendaal": {
+        "url": "https://www.rozendaal.nl",
         "center": {
             "lat": 52.00749,
             "lng": 5.96343
         }
     },
     "Rucphen": {
+        "url": "https://www.rucphen.nl",
         "center": {
             "lat": 51.53285,
             "lng": 4.55973
         }
     },
     "Schagen": {
+        "url": "https://www.schagen.nl",
         "center": {
             "lat": 52.78669,
             "lng": 4.79647
@@ -1810,42 +2057,49 @@
         }
     },
     "Scherpenzeel": {
+        "url": "https://www.scherpenzeel.nl",
         "center": {
             "lat": 52.07961,
             "lng": 5.48936
         }
     },
     "Schiedam": {
+        "url": "https://www.schiedam.nl",
         "center": {
             "lat": 51.91823,
             "lng": 4.39682
         }
     },
     "Schiermonnikoog": {
+        "url": "https://www.schiermonnikoog.nl",
         "center": {
             "lat": 53.47911,
             "lng": 6.16044
         }
     },
     "Schouwen-Duiveland": {
+        "url": "https://www.schouwen-duiveland.nl",
         "center": {
             "lat": 51.65055,
             "lng": 3.91966
         }
     },
     "Simpelveld": {
+        "url": "https://www.simpelveld.nl",
         "center": {
             "lat": 50.83526,
             "lng": 5.98221
         }
     },
     "Sint-Michielsgestel": {
+        "url": "https://www.sint-michielsgestel.nl",
         "center": {
             "lat": 51.63946,
             "lng": 5.35181
         }
     },
     "Sittard-Geleen": {
+        "url": "https://www.sittard-geleen.nl",
         "center": {
             "lat": 50.99875,
             "lng": 5.86812
@@ -1856,12 +2110,14 @@
         }
     },
     "Sliedrecht": {
+        "url": "https://www.sliedrecht.nl",
         "center": {
             "lat": 51.82213,
             "lng": 4.77157
         }
     },
     "Sluis": {
+        "url": "https://www.sluis.nl",
         "center": {
             "lat": 51.32639,
             "lng": 3.48906
@@ -1872,54 +2128,63 @@
         }
     },
     "Smallingerland": {
+        "url": "https://www.smallingerland.nl",
         "center": {
             "lat": 53.10663,
             "lng": 6.09632
         }
     },
     "Soest": {
+        "url": "https://www.soest.nl",
         "center": {
             "lat": 52.16496,
             "lng": 5.30622
         }
     },
     "Someren": {
+        "url": "https://www.someren.nl",
         "center": {
             "lat": 51.38587,
             "lng": 5.71281
         }
     },
     "Son en Breugel": {
+        "url": "https://www.son-en-breugel.nl",
         "center": {
             "lat": 51.51119,
             "lng": 5.49358
         }
     },
     "Stadskanaal": {
+        "url": "https://www.stadskanaal.nl",
         "center": {
             "lat": 52.9873,
             "lng": 6.95203
         }
     },
     "Staphorst": {
+        "url": "https://www.staphorst.nl",
         "center": {
             "lat": 52.64402,
             "lng": 6.21074
         }
     },
     "Stede Broec": {
+        "url": "https://www.stede-broec.nl",
         "center": {
             "lat": 52.69762,
             "lng": 5.23528
         }
     },
     "Steenbergen": {
+        "url": "https://www.steenbergen.nl",
         "center": {
             "lat": 51.58777,
             "lng": 4.32157
         }
     },
     "Steenwijkerland": {
+        "url": "https://www.steenwijkerland.nl",
         "center": {
             "lat": 52.78768,
             "lng": 6.11505
@@ -1930,12 +2195,14 @@
         }
     },
     "Stein": {
+        "url": "https://www.stein.nl",
         "center": {
             "lat": 50.96769,
             "lng": 5.76482
         }
     },
     "Stichtse Vecht": {
+        "url": "https://www.stichtse-vecht.nl",
         "center": {
             "lat": 52.14483,
             "lng": 5.03321
@@ -1946,6 +2213,7 @@
         }
     },
     "Súdwest-Fryslân": {
+        "url": "https://www.sudwestfryslan.nl",
         "center": {
             "lat": 53.06174,
             "lng": 5.52247
@@ -1956,6 +2224,7 @@
         }
     },
     "Terneuzen": {
+        "url": "https://www.terneuzen.nl",
         "center": {
             "lat": 51.33453,
             "lng": 3.82693
@@ -1966,18 +2235,21 @@
         }
     },
     "Terschelling": {
+        "url": "https://www.terschelling.nl",
         "center": {
             "lat": 53.38297,
             "lng": 5.28507
         }
     },
     "Texel": {
+        "url": "https://www.texel.nl",
         "center": {
             "lat": 53.0543,
             "lng": 4.79846
         }
     },
     "Teylingen": {
+        "url": "https://www.teylingen.nl",
         "center": {
             "lat": 52.22556,
             "lng": 4.52412
@@ -1988,30 +2260,35 @@
         }
     },
     "Tholen": {
+        "url": "https://www.tholen.nl",
         "center": {
             "lat": 51.54922,
             "lng": 4.07736
         }
     },
     "Tiel": {
+        "url": "https://www.tiel.nl",
         "center": {
             "lat": 51.88757,
             "lng": 5.43079
         }
     },
     "Tilburg": {
+        "url": "https://www.tilburg.nl",
         "center": {
             "lat": 51.5585,
             "lng": 5.08875
         }
     },
     "Tubbergen": {
+        "url": "https://www.tubbergen.nl",
         "center": {
             "lat": 52.40605,
             "lng": 6.78183
         }
     },
     "Twenterand": {
+        "url": "https://www.twenterand.nl",
         "center": {
             "lat": 52.46132,
             "lng": 6.5732
@@ -2022,36 +2299,42 @@
         }
     },
     "Tynaarlo": {
+        "url": "https://www.tynaarlo.nl",
         "center": {
             "lat": 53.13734,
             "lng": 6.56024
         }
     },
     "Tytsjerksteradiel": {
+        "url": "https://www.t-diel.nl",
         "center": {
             "lat": 53.1853,
             "lng": 5.98886
         }
     },
     "Uitgeest": {
+        "url": "https://www.uitgeest.nl",
         "center": {
             "lat": 52.52894,
             "lng": 4.71507
         }
     },
     "Uithoorn": {
+        "url": "https://www.uithoorn.nl",
         "center": {
             "lat": 52.24513,
             "lng": 4.82647
         }
     },
     "Urk": {
+        "url": "https://www.urk.nl",
         "center": {
             "lat": 52.66213,
             "lng": 5.59351
         }
     },
     "Utrecht": {
+        "url": "https://www.utrecht.nl",
         "center": {
             "lat": 52.09079,
             "lng": 5.1214
@@ -2062,6 +2345,7 @@
         }
     },
     "Utrechtse Heuvelrug": {
+        "url": "https://www.utrechtse-heuvelrug.nl",
         "center": {
             "lat": 52.03321,
             "lng": 5.34505
@@ -2072,54 +2356,63 @@
         }
     },
     "Vaals": {
+        "url": "https://www.vaals.nl",
         "center": {
             "lat": 50.77297,
             "lng": 6.01337
         }
     },
     "Valkenburg aan de Geul": {
+        "url": "https://www.valkenburg-aan-de-geul.nl",
         "center": {
             "lat": 50.86452,
             "lng": 5.83241
         }
     },
     "Valkenswaard": {
+        "url": "https://www.valkenswaard.nl",
         "center": {
             "lat": 51.34992,
             "lng": 5.46062
         }
     },
     "Veendam": {
+        "url": "https://www.veendam.nl",
         "center": {
             "lat": 53.10435,
             "lng": 6.87488
         }
     },
     "Veenendaal": {
+        "url": "https://www.veenendaal.nl",
         "center": {
             "lat": 52.02889,
             "lng": 5.55756
         }
     },
     "Veere": {
+        "url": "https://www.veere.nl",
         "center": {
             "lat": 51.54196,
             "lng": 3.66744
         }
     },
     "Veldhoven": {
+        "url": "https://www.veldhoven.nl",
         "center": {
             "lat": 51.41997,
             "lng": 5.40665
         }
     },
     "Velsen": {
+        "url": "https://www.velsen.nl",
         "center": {
             "lat": 52.46757,
             "lng": 4.60759
         }
     },
     "Venlo": {
+        "url": "https://www.venlo.nl",
         "center": {
             "lat": 51.37031,
             "lng": 6.16897
@@ -2130,6 +2423,7 @@
         }
     },
     "Venray": {
+        "url": "https://www.venray.nl",
         "center": {
             "lat": 51.52703,
             "lng": 5.97538
@@ -2140,6 +2434,7 @@
         }
     },
     "Vijfheerenlanden": {
+        "url": "https://www.vijfheerenlanden.nl",
         "center": {
             "lat": 51.97879,
             "lng": 5.08466
@@ -2150,30 +2445,35 @@
         }
     },
     "Vlaardingen": {
+        "url": "https://www.vlaardingen.nl",
         "center": {
             "lat": 51.90797,
             "lng": 4.34277
         }
     },
     "Vlieland": {
+        "url": "https://www.vlieland.nl",
         "center": {
             "lat": 53.29544,
             "lng": 5.06719
         }
     },
     "Vlissingen": {
+        "url": "https://www.vlissingen.nl",
         "center": {
             "lat": 51.44157,
             "lng": 3.57602
         }
     },
     "Voerendaal": {
+        "url": "https://www.voerendaal.nl",
         "center": {
             "lat": 50.88203,
             "lng": 5.92708
         }
     },
     "Voorne aan Zee": {
+        "url": "https://www.voorne-aan-zee.nl",
         "center": {
             "lat": 51.87403,
             "lng": 4.06898
@@ -2184,24 +2484,28 @@
         }
     },
     "Voorschoten": {
+        "url": "https://www.voorschoten.nl",
         "center": {
             "lat": 52.1251,
             "lng": 4.44688
         }
     },
     "Voorst": {
+        "url": "https://www.voorst.nl",
         "center": {
             "lat": 52.23626,
             "lng": 6.10504
         }
     },
     "Vught": {
+        "url": "https://www.vught.nl",
         "center": {
             "lat": 51.65844,
             "lng": 5.2984
         }
     },
     "Waadhoeke": {
+        "url": "https://www.waadhoeke.nl",
         "center": {
             "lat": 53.18591,
             "lng": 5.54216
@@ -2212,48 +2516,56 @@
         }
     },
     "Waalre": {
+        "url": "https://www.waalre.nl",
         "center": {
             "lat": 51.38695,
             "lng": 5.44742
         }
     },
     "Waalwijk": {
+        "url": "https://www.waalwijk.nl",
         "center": {
             "lat": 51.68844,
             "lng": 5.06189
         }
     },
     "Waddinxveen": {
+        "url": "https://www.waddinxveen.nl",
         "center": {
             "lat": 52.04501,
             "lng": 4.64812
         }
     },
     "Wageningen": {
+        "url": "https://www.wageningen.nl",
         "center": {
             "lat": 51.96489,
             "lng": 5.66274
         }
     },
     "Wassenaar": {
+        "url": "https://www.wassenaar.nl",
         "center": {
             "lat": 52.14287,
             "lng": 4.40109
         }
     },
     "Waterland": {
+        "url": "https://www.waterland.nl",
         "center": {
             "lat": 52.44773,
             "lng": 5.04028
         }
     },
     "Weert": {
+        "url": "https://www.weert.nl",
         "center": {
             "lat": 51.25342,
             "lng": 5.70648
         }
     },
     "West Betuwe": {
+        "url": "https://www.west-betuwe.nl",
         "center": {
             "lat": 51.88792,
             "lng": 5.19215
@@ -2264,12 +2576,14 @@
         }
     },
     "West Maas en Waal": {
+        "url": "https://www.west-maas-en-waal.nl",
         "center": {
             "lat": 51.88214,
             "lng": 5.51481
         }
     },
     "Westerkwartier": {
+        "url": "https://www.westerkwartier.nl",
         "center": {
             "lat": 53.21308,
             "lng": 6.2736
@@ -2280,18 +2594,21 @@
         }
     },
     "Westerveld": {
+        "url": "https://www.westerveld.nl",
         "center": {
             "lat": 52.83327,
             "lng": 6.36743
         }
     },
     "Westervoort": {
+        "url": "https://www.westervoort.nl",
         "center": {
             "lat": 51.95563,
             "lng": 5.9729
         }
     },
     "Westerwolde": {
+        "url": "https://www.westerwolde.nl",
         "center": {
             "lat": 53.02591,
             "lng": 7.10577
@@ -2302,6 +2619,7 @@
         }
     },
     "Westland": {
+        "url": "https://www.gemeentewestland.nl",
         "center": {
             "lat": 52.02316,
             "lng": 4.17014
@@ -2312,24 +2630,28 @@
         }
     },
     "Weststellingwerf": {
+        "url": "https://www.weststellingwerf.nl",
         "center": {
             "lat": 52.87713,
             "lng": 6.00455
         }
     },
     "Wierden": {
+        "url": "https://www.wierden.nl",
         "center": {
             "lat": 52.35958,
             "lng": 6.59237
         }
     },
     "Wijchen": {
+        "url": "https://www.wijchen.nl",
         "center": {
             "lat": 51.80722,
             "lng": 5.72613
         }
     },
     "Wijdemeren": {
+        "url": "https://www.wijdemeren.nl",
         "center": {
             "lat": 52.24175,
             "lng": 5.1093
@@ -2340,24 +2662,28 @@
         }
     },
     "Wijk bij Duurstede": {
+        "url": "https://www.wijk-bij-duurstede.nl",
         "center": {
             "lat": 51.97261,
             "lng": 5.34591
         }
     },
     "Winterswijk": {
+        "url": "https://www.winterswijk.nl",
         "center": {
             "lat": 51.97152,
             "lng": 6.72138
         }
     },
     "Woensdrecht": {
+        "url": "https://www.woensdrecht.nl",
         "center": {
             "lat": 51.42967,
             "lng": 4.30225
         }
     },
     "Woerden": {
+        "url": "https://www.woerden.nl",
         "center": {
             "lat": 52.08571,
             "lng": 4.88497
@@ -2368,48 +2694,56 @@
         }
     },
     "Wormerland": {
+        "url": "https://www.wormerland.nl",
         "center": {
             "lat": 52.49893,
             "lng": 4.81185
         }
     },
     "Woudenberg": {
+        "url": "https://www.woudenberg.nl",
         "center": {
             "lat": 52.08163,
             "lng": 5.41414
         }
     },
     "Zaanstad": {
+        "url": "https://www.zaanstad.nl",
         "center": {
             "lat": 52.43899,
             "lng": 4.82422
         }
     },
     "Zaltbommel": {
+        "url": "https://www.zaltbommel.nl",
         "center": {
             "lat": 51.81031,
             "lng": 5.25055
         }
     },
     "Zandvoort": {
+        "url": "https://www.zandvoort.nl",
         "center": {
             "lat": 52.37581,
             "lng": 4.53119
         }
     },
     "Zeewolde": {
+        "url": "https://www.zeewolde.nl",
         "center": {
             "lat": 52.3304,
             "lng": 5.545
         }
     },
     "Zeist": {
+        "url": "https://www.zeist.nl",
         "center": {
             "lat": 52.08466,
             "lng": 5.2427
         }
     },
     "Zevenaar": {
+        "url": "https://www.zevenaar.nl",
         "center": {
             "lat": 51.92825,
             "lng": 6.07563
@@ -2420,18 +2754,21 @@
         }
     },
     "Zoetermeer": {
+        "url": "https://www.zoetermeer.nl",
         "center": {
             "lat": 52.06336,
             "lng": 4.49034
         }
     },
     "Zoeterwoude": {
+        "url": "https://www.zoeterwoude.nl",
         "center": {
             "lat": 52.11803,
             "lng": 4.5008
         }
     },
     "Zuidplas": {
+        "url": "https://www.zuidplas.nl",
         "center": {
             "lat": 51.96742,
             "lng": 4.61695
@@ -2442,12 +2779,14 @@
         }
     },
     "Zundert": {
+        "url": "https://www.zundert.nl",
         "center": {
             "lat": 51.46953,
             "lng": 4.65838
         }
     },
     "Zutphen": {
+        "url": "https://www.zutphen.nl",
         "center": {
             "lat": 52.13996,
             "lng": 6.19501
@@ -2458,6 +2797,7 @@
         }
     },
     "Zwartewaterland": {
+        "url": "https://www.zwartewaterland.nl",
         "center": {
             "lat": 52.62478,
             "lng": 6.04072
@@ -2468,6 +2808,7 @@
         }
     },
     "Zwijndrecht": {
+        "url": "https://www.zwijndrecht.nl",
         "center": {
             "lat": 51.81272,
             "lng": 4.63241
@@ -2478,6 +2819,7 @@
         }
     },
     "Zwolle": {
+        "url": "https://www.zwolle.nl",
         "center": {
             "lat": 52.51153,
             "lng": 6.09229

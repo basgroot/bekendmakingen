@@ -179,17 +179,16 @@ window.initMap = async function initMap() {
             }
             if (parsedUrl !== null && (parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:")) {
                 const linkPara = document.createElement("p");
-                linkPara.appendChild(document.createTextNode("Meer info: "));
                 const link = document.createElement("a");
                 link.href = parsedUrl.href;
+                link.title = parsedUrl.href;
                 // Original code had target="blank" (a named window called "blank")
                 // instead of "_blank" (new tab). Use the correct value plus rel
                 // attributes that prevent the opened page from accessing this one.
                 link.target = "_blank";
                 link.rel = "noopener noreferrer";
-                link.textContent = parsedUrl.href;
+                link.textContent = "Officiële bekendmaking";
                 linkPara.appendChild(link);
-                linkPara.appendChild(document.createTextNode("."));
                 body.appendChild(linkPara);
             }
         }
@@ -1003,7 +1002,7 @@ window.initMap = async function initMap() {
         iconContainer.classList.add("municipalityContainer");
         const labelContainer = document.createElement("div");
         labelContainer.classList.add("municipalityLabel");
-        labelContainer.innerText = label;
+        labelContainer.textContent = label;
         iconContainer.appendChild(labelContainer);
         return iconContainer;
     }
@@ -1150,6 +1149,61 @@ window.initMap = async function initMap() {
     function isHistoricalPeriod(value) {
         // Values of historical periods are notated like '2023-03'
         return /^\d{4}-\d{2}$/.test(value);
+    }
+
+    /**
+     * Update the site info bar with the active municipality and period description.
+     * @returns {void}
+     */
+    function updateSiteInfo() {
+        const siteInfoElm = document.getElementById("siteInfo");
+        if (!siteInfoElm) {
+            return;
+        }
+        const boldTitle = document.createElement("strong");
+        boldTitle.textContent = "Bekendmakingen op kaart";
+        const municipalityLink = document.createElement("a");
+        const municipalityUrl = appState.municipalities[appState.activeMunicipality]?.url;
+        if (municipalityUrl) {
+            municipalityLink.href = municipalityUrl;
+            municipalityLink.target = "_blank";
+            municipalityLink.rel = "noopener noreferrer";
+        }
+        const boldMunicipality = document.createElement("strong");
+        boldMunicipality.textContent = appState.activeMunicipality;
+        municipalityLink.appendChild(boldMunicipality);
+        const periodFilter = getPeriodFilter();
+        let periodText;
+        if (isHistoricalPeriod(periodFilter.period)) {
+            const periodEntry = appState.periods.find(function (p) {
+                return p.key === periodFilter.period;
+            });
+            const periodLabel = periodEntry ? periodEntry.val : periodFilter.period;
+            periodText = "Bekendmakingen uit " + periodLabel.toLowerCase() + " worden getoond.";
+        } else {
+            switch (periodFilter.period) {
+                case "3d":
+                    periodText = "Bekendmakingen van de laatste 3 dagen worden getoond.";
+                    break;
+                case "7d":
+                    periodText = "Bekendmakingen van de laatste week worden getoond.";
+                    break;
+                case "14d":
+                    periodText = "Bekendmakingen van de laatste twee weken worden getoond.";
+                    break;
+                case "all":
+                    periodText = "Alle recente bekendmakingen worden getoond.";
+                    break;
+                default:
+                    periodText = "Kies een periode voor het archief.";
+            }
+        }
+        siteInfoElm.replaceChildren(
+            boldTitle,
+            " — Bekijk recent verleende vergunningen, aanvragen en andere bekendmakingen op de kaart. De gemeente ",
+            municipalityLink,
+            " wordt nu getoond. " + periodText
+        );
     }
 
     /**
@@ -1362,6 +1416,7 @@ window.initMap = async function initMap() {
             });
         }
         updateUrlForPeriod(periodFilter.period);
+        updateSiteInfo();
     }
 
     /**
@@ -1443,13 +1498,7 @@ window.initMap = async function initMap() {
             globalThis.history.replaceState(null, "", globalThis.location.pathname + "?" + urlSearchParams.toString());
         }
         document.title = "Bekendmakingen " + appState.activeMunicipality;
-        const siteInfoElm = document.getElementById("siteInfo");
-        if (siteInfoElm) {
-            siteInfoElm.innerHTML =
-                "<strong>Bekendmakingen op kaart</strong> — Bekijk recent verleende vergunningen, aanvragen en andere bekendmakingen op de kaart. De gemeente <strong>" +
-                appState.activeMunicipality +
-                "</strong> wordt nu getoond. Kies een periode voor het archief.";
-        }
+        updateSiteInfo();
         // Update the meta tags for the preview on social media:
         const ogTitle = document.querySelector('meta[property="og:title"]');
         if (ogTitle) {
@@ -1648,10 +1697,8 @@ window.initMap = async function initMap() {
 
         const containerElm = document.getElementById("map");
         const mapSettings = getInitialMapSettings();
-        const screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
         appState.loadingIndicator.id = "idLoadingIndicator";
         appState.loadingIndicator.alt = "";
-        appState.loadingIndicator.style.width = Math.max((screenWidth / 100) * 12, 70) + "px";
         appState.loadingIndicator.src = cdnHost + "/img/ajax-loader.gif"; // ConnectedWizard, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons
         // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindowOptions
         appState.infoWindow = new google.maps.InfoWindow();

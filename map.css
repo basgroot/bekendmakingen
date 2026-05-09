@@ -5,6 +5,10 @@
     background-color: #9cc0f9;
 }
 
+#idLoadingIndicator {
+    width: clamp(50px, 8vw, 90px);
+}
+
 html,
 body {
     height: 100%;
@@ -26,7 +30,7 @@ body {
 }
 
 h2.info_window_heading {
-    color: #9bc8d4;
+    color: #2a7a8a;
 }
 
 .info_window_body {
@@ -103,6 +107,17 @@ h2.info_window_heading {
     width: 160px;
     z-index: 1000;
     pointer-events: auto;
+}
+
+@media (max-width: 480px) {
+    #adOverlay {
+        top: auto;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
+        transform: none;
+    }
 }
 
 .srOnly {
