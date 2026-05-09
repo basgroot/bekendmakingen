@@ -28,7 +28,8 @@ const staged = git("diff --cached --name-only --diff-filter=ACMR -z")
 const jsFiles = staged.filter((f) => f.endsWith(".js"));
 const htmlFiles = staged.filter((f) => f.endsWith(".html"));
 const jsonFiles = staged.filter((f) => f.endsWith(".json"));
-const prettierFiles = [...jsFiles, ...htmlFiles, ...jsonFiles];
+const mdFiles = staged.filter((f) => f.endsWith(".md"));
+const prettierFiles = [...jsFiles, ...htmlFiles, ...jsonFiles, ...mdFiles];
 
 if (prettierFiles.length === 0) process.exit(0);
 
