@@ -99,6 +99,26 @@ h2.info_window_heading {
     flex-shrink: 0;
 }
 
+#siteInfo details {
+    margin-top: 4px;
+}
+
+#siteInfo summary {
+    cursor: pointer;
+    color: #1a73e8;
+    font-size: 12px;
+}
+
+#siteInfo details p {
+    margin: 6px 0;
+    font-size: 12px;
+    color: #555;
+}
+
+#siteInfo details a {
+    color: #1a73e8;
+}
+
 #adOverlay {
     position: fixed;
     top: 50%;

@@ -305,4 +305,4 @@ History files always store coordinates in WGS84 (`"lat lng"` string format).
 | `history/<year>/*.json`         | Cached monthly publication data per municipality         |
 | `manual/*.pdf`                  | SRU 2.0 API documentation (v1.2, v1.3, v1.4)             |
 | `manual/example-amsterdam.json` | Sample raw SRU API JSON response                         |
-| `.githooks/pre-commit.cjs`      | Pre-commit: prettier → eslint → rebuild                  |
+| `.githooks/pre-commit.cjs`      | Pre-commit: prettier → eslint → rebuild min.js/min.css   |

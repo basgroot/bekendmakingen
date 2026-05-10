@@ -1179,31 +1179,35 @@ window.initMap = async function initMap() {
                 return p.key === periodFilter.period;
             });
             const periodLabel = periodEntry ? periodEntry.val : periodFilter.period;
-            periodText = "Bekendmakingen uit " + periodLabel.toLowerCase() + " worden getoond.";
+            periodText = "Met bekendmakingen uit " + periodLabel.toLowerCase() + ".";
         } else {
             switch (periodFilter.period) {
                 case "3d":
-                    periodText = "Bekendmakingen van de laatste 3 dagen worden getoond.";
+                    periodText = "Dit zijn de bekendmakingen van de laatste 3 dagen.";
                     break;
                 case "7d":
-                    periodText = "Bekendmakingen van de laatste week worden getoond.";
+                    periodText = "Met de publicaties van van de laatste week.";
                     break;
                 case "14d":
-                    periodText = "Bekendmakingen van de laatste twee weken worden getoond.";
+                    periodText = "Met de bekendmakingen van de laatste twee weken.";
                     break;
                 case "all":
-                    periodText = "Alle recente bekendmakingen worden getoond.";
+                    periodText = "Met alle recente bekendmakingen (zo'n 6 weken).";
                     break;
                 default:
-                    periodText = "Kies een periode voor het archief.";
+                    console.error("Unknowm period");
             }
         }
+        const detailsElm = siteInfoElm.querySelector("details");
         siteInfoElm.replaceChildren(
             boldTitle,
             " — Bekijk recent verleende vergunningen, aanvragen en andere bekendmakingen op de kaart. De gemeente ",
             municipalityLink,
             " wordt nu getoond. " + periodText
         );
+        if (detailsElm) {
+            siteInfoElm.appendChild(detailsElm);
+        }
     }
 
     /**
