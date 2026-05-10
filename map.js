@@ -783,26 +783,6 @@ window.initMap = async function initMap() {
     }
 
     /**
-     * Create the button linking to this source code. This is shown in the bottom left.
-     * @returns {void}
-     */
-    function createMapsControlSource() {
-        const controlDiv = document.createElement("div"); // Create a DIV to attach the control UI to the Map.
-        const button = document.createElement("button");
-        button.id = "idBtnSource";
-        button.textContent = "Broncode";
-        button.title = "Source op GitHub bekijken";
-        button.type = "button";
-        button.addEventListener("click", function () {
-            const url = "https://github.com/basgroot/bekendmakingen";
-            globalThis.open(url, "_blank", "noopener,noreferrer");
-        });
-        button.classList.add("controlStyle");
-        controlDiv.appendChild(button);
-        appState.map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(controlDiv);
-    }
-
-    /**
      * Create the elements on the map. This includes the loading indicator, the municipality drop down and the period drop down.
      * https://developers.google.com/maps/documentation/javascript/examples/control-custom
      * @returns {void}
@@ -811,7 +791,6 @@ window.initMap = async function initMap() {
         createMapsControlLoadingIndicator();
         createMapsControlMunicipalities();
         createMapsControlPeriods();
-        createMapsControlSource();
     }
 
     /**
