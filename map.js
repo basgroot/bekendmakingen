@@ -842,14 +842,14 @@ window.initMap = async function initMap() {
         if (type === "kappen" || title.includes("houtopstand") || title.includes("(kap)")) {
             return "boomkap";
         }
-        if (title.includes("oplaadplaats") || title.includes("opladen") || title.includes("laadpaal")) {
+        if (type === "laadpaal" || title.includes("oplaadplaats") || title.includes("opladen") || title.includes("laadpaal")) {
             return "laadpaal";
         }
-        if (title.includes("apv vergunning") || title.includes("parkeervakken") || title.includes("tvm")) {
+        if (type === "tvm" || title.includes("apv vergunning") || title.includes("parkeervakken") || title.includes("tvm")) {
             // Verify this after 'laadpaal':
             return "tvm";
         }
-        if (verkeersvergunningen.includes(type)) {
+        if (type === "verkeersbesluit" || verkeersvergunningen.includes(type)) {
             // Verify this after 'parkeervakken/tvm':
             return "verkeer";
         }
@@ -1912,6 +1912,29 @@ window.initMap = async function initMap() {
              * @returns {string} Type slug (e.g. "bouwen", "kappen").
              */
             function getType(meta) {
+                // Use typeVerkeersbesluit for more specific verkeersbesluit classification:
+                if (meta.hasOwnProperty("tpmeta") && meta.tpmeta.hasOwnProperty("typeVerkeersbesluit")) {
+                    let tvb = meta.tpmeta.typeVerkeersbesluit;
+                    if (Array.isArray(tvb)) {
+                        tvb = tvb[0];
+                    }
+                    const tvbValue = typeof tvb === "object" && tvb.hasOwnProperty("$") ? tvb.$ : tvb;
+                    switch (tvbValue) {
+                        case "aanwijzen parkeerplaats voor het opladen van elektrische voertuigen":
+                            return "laadpaal";
+                        case "tijdelijke verkeersmaatregel van kortere duur dan 4 maanden":
+                        case "tijdelijke verkeersmaatregel van langere duur dan 4 maanden":
+                        case "regelmatig terugkerende tijdelijke verkeersmaatregel":
+                            return "tvm";
+                        case "plaatsing of verwijdering van verkeerstekens":
+                        case "aanbrengen van voorzieningen ter regeling van het verkeer (fysieke maatregel)":
+                        case "maatregel(en) tot wijziging van de inrichting van de weg":
+                            return "verkeersbesluit";
+                        default:
+                            console.error("Unexpected typeVerkeersbesluit: '" + tvbValue + "' " + JSON.stringify(meta, null, 4));
+                    }
+                }
+
                 if (meta.hasOwnProperty("tpmeta") && meta.tpmeta.hasOwnProperty("activiteit")) {
                     if (Array.isArray(meta.tpmeta.activiteit)) {
                         // Select the first one..
@@ -1932,6 +1955,7 @@ window.initMap = async function initMap() {
                             console.error("Unexpected activiteit: '" + meta.tpmeta.activiteit.$ + "' " + JSON.stringify(meta, null, 4));
                     }
                 }
+
                 if (meta.hasOwnProperty("owmskern") && meta.owmskern.hasOwnProperty("type")) {
                     return Array.isArray(meta.owmskern.type) ? meta.owmskern.type[0].$.trim() : meta.owmskern.type.$.trim();
                 }
