@@ -247,7 +247,7 @@
         },
         "origin": {
             "year": 2001,
-            "municipalities": ["Bergen", "Egmond", "Schoorl"]
+            "municipalities": ["Bergen NH", "Egmond", "Schoorl"]
         }
     },
     "Bergen op Zoom": {
@@ -495,8 +495,8 @@
             "lng": 5.79688
         },
         "origin": {
-            "year": 2014,
-            "municipalities": ["Boarnsterhim", "Gaasterlân-Sleat", "Lemsterland", "Skasterlân"]
+            "year": 2016,
+            "municipalities": ["Boarnsterhim", "De Friese Meren", "Gaasterlân-Sleat", "Lemsterland", "Skasterlân"]
         }
     },
     "De Ronde Venen": {
@@ -2295,7 +2295,7 @@
         },
         "origin": {
             "year": 2001,
-            "municipalities": ["Den Ham", "Vriezenveen", "Wierden"]
+            "municipalities": ["Den Ham", "Vriezenveen"]
         }
     },
     "Tynaarlo": {
