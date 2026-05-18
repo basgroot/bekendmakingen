@@ -1788,6 +1788,7 @@ window.initMap = async function initMap() {
             tryOpenPublicationFromUrl();
         });
         loadData(true);
+        loadAdSense();
         console.log("Using Maps version " + google.maps.version); // https://developers.google.com/maps/documentation/javascript/releases
         console.log("Map renderingType " + appState.map.renderingType);
     }
@@ -1957,7 +1958,8 @@ window.initMap = async function initMap() {
                 }
 
                 if (meta.hasOwnProperty("owmskern") && meta.owmskern.hasOwnProperty("type")) {
-                    return Array.isArray(meta.owmskern.type) ? meta.owmskern.type[0].$.trim() : meta.owmskern.type.$.trim();
+                    const t = Array.isArray(meta.owmskern.type) ? meta.owmskern.type[0].$.trim() : meta.owmskern.type.$.trim();
+                    return t.toLowerCase();
                 }
                 console.warn("Type fallback to 'onbekend' because no better available: " + JSON.stringify(meta, null, 4));
                 return "onbekend";
@@ -2652,6 +2654,42 @@ window.initMap = async function initMap() {
         }
         appState.isFullyLoaded = false;
         loadDataForMunicipality(appState.activeMunicipality, 1);
+    }
+
+    /**
+     * Dynamically load the AdSense library and inject the ad unit into the
+     * #adOverlay container. This is called after the map and its controls
+     * are fully rendered, so AdSense never sees a page without publisher
+     * content (which would violate the "ads on screens without publisher
+     * content" policy).
+     * @returns {void}
+     */
+    function loadAdSense() {
+        const adClient = "ca-pub-4225848132552453";
+        const adSlot = "6172638630";
+        const container = document.getElementById("adOverlay");
+        if (!container) {
+            return;
+        }
+        // 1. Inject the AdSense library script.
+        const script = document.createElement("script");
+        script.async = true;
+        script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=" + adClient;
+        script.crossOrigin = "anonymous";
+        document.head.appendChild(script);
+        // 2. Create the ad unit inside the existing container.
+        const ins = document.createElement("ins");
+        ins.className = "adsbygoogle";
+        ins.style.display = "block";
+        ins.dataset.adClient = adClient;
+        ins.dataset.adSlot = adSlot;
+        ins.dataset.adFormat = "auto";
+        ins.dataset.fullWidthResponsive = "true";
+        container.appendChild(ins);
+        // 3. Request the ad once the library is ready.
+        script.addEventListener("load", function () {
+            (globalThis.adsbygoogle = globalThis.adsbygoogle || []).push({});
+        });
     }
 
     /**
