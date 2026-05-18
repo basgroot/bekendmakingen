@@ -1,4 +1,4 @@
 {"publications":[
-{"date":"2014-04-18T00:00:00.000Z","urlDoc":"https://zoek.officielebekendmakingen.nl/stcrt-2014-11294.html","urlApi":"https://repository.overheid.nl/frbr/officielepublicaties/stcrt/2014/stcrt-2014-11294/1/xml/stcrt-2014-11294.xml","type":"Verkeersbesluiten","title":"No.: 13.64840/IIIow/1","description":"No.: 13.64840/IIIow/1","location":[]},
-{"date":"2014-04-22T00:00:00.000Z","urlDoc":"https://zoek.officielebekendmakingen.nl/stcrt-2014-11608.html","urlApi":"https://repository.overheid.nl/frbr/officielepublicaties/stcrt/2014/stcrt-2014-11608/1/xml/stcrt-2014-11608.xml","type":"Verkeersbesluiten","title":"ONTWERP BESLUIT","description":"ONTWERP BESLUIT","location":[]}
+{"date":"2014-04-18T00:00:00.000Z","urlDoc":"https://zoek.officielebekendmakingen.nl/stcrt-2014-11294.html","urlApi":"https://repository.overheid.nl/frbr/officielepublicaties/stcrt/2014/stcrt-2014-11294/1/xml/stcrt-2014-11294.xml","type":"verkeersbesluit","title":"No.: 13.64840/IIIow/1","description":"No.: 13.64840/IIIow/1","location":[]},
+{"date":"2014-04-22T00:00:00.000Z","urlDoc":"https://zoek.officielebekendmakingen.nl/stcrt-2014-11608.html","urlApi":"https://repository.overheid.nl/frbr/officielepublicaties/stcrt/2014/stcrt-2014-11608/1/xml/stcrt-2014-11608.xml","type":"verkeersbesluit","title":"ONTWERP BESLUIT","description":"ONTWERP BESLUIT","location":[]}
 ]}
