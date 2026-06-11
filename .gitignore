@@ -1,4 +1,4 @@
-﻿/.vs
+﻿/.htaccess
+/.vs
 /img/*.pdn
 /node_modules
-/.htaccess

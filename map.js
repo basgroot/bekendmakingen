@@ -1165,7 +1165,7 @@ window.initMap = async function initMap() {
                     periodText = "Dit zijn de bekendmakingen van de laatste 3 dagen.";
                     break;
                 case "7d":
-                    periodText = "Met de publicaties van van de laatste week.";
+                    periodText = "Met de bekendmakingen van de laatste week.";
                     break;
                 case "14d":
                     periodText = "Met de bekendmakingen van de laatste twee weken.";
@@ -1174,7 +1174,7 @@ window.initMap = async function initMap() {
                     periodText = "Met alle recente bekendmakingen (zo'n 6 weken).";
                     break;
                 default:
-                    console.error("Unknowm period");
+                    console.error("Unknown period");
             }
         }
         const detailsElm = siteInfoElm.querySelector("details");

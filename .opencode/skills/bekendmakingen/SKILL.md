@@ -35,13 +35,12 @@ The `manual/` directory contains the official API documentation:
 https://repository.overheid.nl/sru
 ```
 
-### Live query construction (`map.js` ~line 2537)
+### Live query construction (`loadDataForMunicipality` in `map.js`)
 
 ```
 https://repository.overheid.nl/sru
   ?query=c.product-area==officielepublicaties
          AND dt.available>={startDate}
-         AND dt.available<={endDate}          (omitted for open-ended)
          AND dt.creator="{gemeentenaam}"
          sortBy dt.available /sort.descending
   &maximumRecords=500
@@ -50,29 +49,32 @@ https://repository.overheid.nl/sru
 ```
 
 - `dt.creator` is the municipality name as used by the API (see `lookupName` in `municipalities.json`).
-- Pagination: `startRecord` increments by 500; all pages are fetched and merged.
-- Retries: up to `MAX_RETRIES` attempts with exponential back-off (5 s × attempt number).
+- The live query has no end-date clause — it always requests everything from `{startDate}` onward (`startDate` is ~6 weeks back, or the 1st of the current month when last month's history file exists). A `dt.available<=` clause only appears in a commented example URL, not in the constructed query.
+- Pagination: each page returns `nextRecordPosition`; the code follows it (`maximumRecords=500`, so effectively +500 per page) until the field is absent, fetching and merging all pages.
+- Retries: up to `MAX_RETRIES` (= 7) attempts with **linear** back-off — `attemptNumber * 5` seconds (5 s, 10 s, 15 s, …), in `loadDataWithRetries`.
 
 ### XML detail endpoint (for bezwaartermijn)
 
-Each publication has a `urlApi` field pointing to the full XML record:
+Each publication has a `urlApi` field pointing to the full XML record. `getUrlApi` builds it from the licence ID; the first segment is the blad type (`gmb`, `prb`, `wsb`, `stcrt`):
 
 ```
-https://repository.overheid.nl/frbr/officielepublicaties/gmb/{year}/{licenseId}/1/xml/{licenseId}.xml
+https://repository.overheid.nl/frbr/officielepublicaties/{type}/{year}/{licenseId}/1/xml/{licenseId}.xml
+e.g. https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-56454/1/xml/gmb-2023-56454.xml
 ```
 
-This XML is fetched on demand when a user clicks a marker, to extract the bezwaartermijn.
+This XML is fetched on demand when a user clicks a marker, to extract the bezwaartermijn. When the URL is not a recognised `zoek.officielebekendmakingen.nl` link, `urlApi` is `"UNAVAILABLE"` and no detail is fetched.
 
 ### Key SRU response fields (JSON)
 
 The raw JSON record is nested under `recordData.gzd.originalData`:
 
-- `meta.owmskern.type` — publication type string (or array; first element is used)
-- `meta.tpmeta.activiteit.$` — specific activity type (`bouwen`, `slopen`, `kappen`, `milieu`, etc.)
-- `meta.owmskern.identifier` — canonical licence ID (e.g. `gmb-2023-56454`)
-- `meta.owmskern.modified` — ISO date string (modification date)
-- `meta.owmskern.available` — ISO date string (availability / publication date)
-- Geographic data: RD (Rijksdriehoek) coordinates converted to WGS84 lat/lng in `map.js`
+- `meta.owmskern.type` — generic publication type string (or array; first element is used). Fallback type source.
+- `meta.tpmeta.activiteit.$` — specific activity type (`bouwen`, `slopen`, `kappen`, `milieu`, etc.).
+- `meta.tpmeta.typeVerkeersbesluit` — when present, classified first (→ `laadpaal` / `tvm` / `verkeersbesluit`).
+- `meta.owmsmantel.available` — ISO date string; the primary **publication date** used by `getDate` and for sorting. Falls back to `meta.tpmeta.datumTijdstipWijzigingWork`, then today.
+- `meta.owmskern.title` — title (falls back to `meta.owmsmantel.abstract`); `abstract` is the description (falls back to title).
+- `recordData.gzd.enrichedData.preferredUrl` — the publication's `urlDoc`; the licence ID (e.g. `gmb-2023-56454`) is derived from it via `getLicenseIdFromUrl`, not from `owmskern.identifier`.
+- Geographic data: `meta.tpmeta.gebiedsmarkering` (Punt/Adres/Vlak/Perceel/Weg/Lijn/…); RD (Rijksdriehoek) coordinates are converted to WGS84 lat/lng in `map.js`.
 
 ---
 
@@ -190,16 +192,20 @@ If a `lookupName` is present in `municipalities.json`, the slug is derived from 
 
 ## Icon / type classification (`map.js`)
 
-### Step 1 — `getType()` (~line 1887)
+### Step 1 — `getType()`
 
-Extracts a canonical type string from the raw SRU record:
+Extracts a canonical type string from the raw SRU record, in this order:
 
-1. Checks `meta.tpmeta.activiteit.$` for a specific activity:
+1. If `meta.tpmeta.typeVerkeersbesluit` is present, map it to:
+   - `laadpaal` — "aanwijzen parkeerplaats voor het opladen van elektrische voertuigen"
+   - `tvm` — the three "tijdelijke verkeersmaatregel" / "regelmatig terugkerende" variants
+   - `verkeersbesluit` — plaatsing/verwijdering verkeerstekens, fysieke maatregelen, wijziging inrichting weg
+2. Else checks `meta.tpmeta.activiteit.$` for a specific activity:
    - `bouwen`, `slopen`, `uitweg en inrit`, `kappen`, `milieu`, `natuur`, `reclame`, `brandveilig gebruik`, `ruimtelijke ordening`
-2. Falls back to `meta.owmskern.type` (free-text string from the API).
-3. Falls back to `"onbekend"`.
+3. Falls back to `meta.owmskern.type` (free-text string from the API, lower-cased).
+4. Falls back to `"onbekend"`.
 
-### Step 2 — `getIconName(title, type)` (~line 845)
+### Step 2 — `getIconName(title, type)`
 
 Maps type + title keywords to an icon name:
 
@@ -210,9 +216,9 @@ Maps type + title keywords to an icon name:
 | `evenement`    | Title contains `evenement` or `loterij`                                                        |
 | `hotel`        | Title contains `bed & breakfast` or `vakantieverhuur`                                          |
 | `boomkap`      | Type `kappen`, or title contains `houtopstand` / `(kap)`                                       |
-| `laadpaal`     | Title contains `oplaadplaats` / `opladen` / `laadpaal`                                         |
-| `tvm`          | Title contains `apv vergunning` / `parkeervakken` / `tvm`                                      |
-| `verkeer`      | Type `uitweg en inrit`                                                                         |
+| `laadpaal`     | Type `laadpaal`, or title contains `oplaadplaats` / `opladen` / `laadpaal`                     |
+| `tvm`          | Type `tvm`, or title contains `apv vergunning` / `parkeervakken` / `tvm`                       |
+| `verkeer`      | Type `verkeersbesluit` or `uitweg en inrit`                                                    |
 | `kamerverhuur` | Title contains `onttrekkingsvergunning` / `omzettingsvergunning`                               |
 | `boot`         | Title contains `water`                                                                         |
 | `reclame`      | Type `reclame`                                                                                 |
@@ -226,13 +232,13 @@ Icons are SVG files in `img/`.
 
 ## Bezwaartermijn (objection period)
 
-When a user clicks a marker, `collectBezwaartermijn()` (~line 578) fetches the full XML of the publication and passes it to `parseBekendmaking()` (~line 513) to determine whether and how long a formal objection (_bezwaar_) is still possible.
+When a user clicks a marker, `collectBezwaartermijn()` fetches the full XML of the publication and passes it to `parseBekendmaking()` to determine whether and how long a formal objection (_bezwaar_) is still possible.
 
 ### Legal basis
 
-Dutch law grants **6 weeks** from the date the decision was sent (_verzenddatum_ / _bekendgemaakt aan belanghebbende_) to file an objection. `maxLooptijd = 6 * 7 + 1` days (~line 514).
+Dutch law grants **6 weeks** from the date the decision was sent (_verzenddatum_ / _bekendgemaakt aan belanghebbende_) to file an objection. `maxLooptijd = 6 * 7 + 1` days.
 
-### Date extraction from XML (`getDateFromText()`, ~line 388)
+### Date extraction from XML (`getDateFromText()`)
 
 The free-text body of the XML publication is parsed with string matching to find the relevant date. Three patterns are recognised:
 
@@ -244,12 +250,13 @@ The extracted date is used directly; days elapsed since that date are subtracted
 
 #### 2. Objection start date (`identifiersStartWithObjectionStart`)
 
-Some municipalities (e.g. Gouda, Aalsmeer) state the date the objection period _starts_ rather than the dispatch date:
+Gouda states the date the objection period _starts_ rather than the dispatch date:
 
 - `"de termijn voor het indienen van een bezwaar start op "`
-- `"de termijn voor het indienen van een bezwaarschrift start op "`
 
 The extracted date is the start of the objection period; one day is subtracted to derive the dispatch date (`result.date.setDate(...- 1)`).
+
+> Note: the similar Aalsmeer phrasing `"de termijn voor het indienen van een bezwaarschrift start op "` is instead matched as a mid-text marker in `identifiersMiddle`, and its date is used directly **without** the −1 day adjustment.
 
 #### 3. Deadline date (`identifiersWithDeadline`)
 
@@ -295,7 +302,7 @@ History files always store coordinates in WGS84 (`"lat lng"` string format).
 
 | File                            | Purpose                                                  |
 | ------------------------------- | -------------------------------------------------------- |
-| `map.js`                        | All application logic (~2630 lines)                      |
+| `map.js`                        | All application logic (single large monolithic file)     |
 | `map.min.js`                    | Minified build output (do not edit)                      |
 | `map.css`                       | Styles                                                   |
 | `map.min.css`                   | Minified build output (do not edit)                      |

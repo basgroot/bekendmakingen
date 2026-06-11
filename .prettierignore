@@ -1,7 +1,9 @@
-node_modules/
+.opencode/
+closure/
 history/
 img/
 manual/
-*.min.js
+node_modules/
+
 *.min.css
-closure/
+*.min.js
