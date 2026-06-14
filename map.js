@@ -287,9 +287,32 @@ window.initMap = async function initMap() {
             console.error(e);
             return [];
         }
+        // Two document XML schemas exist (see docs/STOP-schema-parsing.md in the
+        // bekendmakingen-downloader repo). Note: the XML was lowercased above, so
+        // the STOP elements <Al>/<Kop> are matched here as "al"/"kop".
+        //
+        // Old schema (officiele-publicatie, op-xsd-2012-3): the body text lives in
+        // <tekst> blocks, inside zakelijke-mededeling-tekst (besluiten/vergunningen)
+        // or regeling-tekst (verkeersbesluiten/regelingen).
         // gemeenteblad / zakelijke-mededeling / zakelijke-mededeling-tekst / tekst / <al>Verzonden naar aanvrager op: 20-09-2022</al>
-        const zakelijkeMededeling = xmlDoc.getElementsByTagName("zakelijke-mededeling-tekst");
-        return zakelijkeMededeling.length === 0 ? [] : zakelijkeMededeling[0].querySelectorAll("al,tussenkop"); // Tussenkop is required for Den Haag https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-78971/1/xml/gmb-2023-78971.xml
+        const teksten = xmlDoc.getElementsByTagName("tekst");
+        if (teksten.length > 0) {
+            const alineas = [];
+            Array.from(teksten).forEach(function (tekst) {
+                // Tussenkop is required for Den Haag https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-78971/1/xml/gmb-2023-78971.xml
+                Array.from(tekst.querySelectorAll("al,tussenkop")).forEach(function (node) {
+                    alineas.push(node);
+                });
+            });
+            return alineas;
+        }
+        // New schema (STOP/IMOP, OfficielePublicatie): the body text lives in <Al>
+        // paragraphs and <Kop> headings (lowercased to "al"/"kop" above). STOP
+        // documents contain no <tekst> element, so this branch only runs for them.
+        if (xmlDoc.getElementsByTagName("al").length > 0) {
+            return xmlDoc.querySelectorAll("al,kop");
+        }
+        return [];
     }
 
     /**
@@ -360,10 +383,14 @@ window.initMap = async function initMap() {
          * @param {boolean} isNextValueBekendmakingsDate Whether the previous
          *     text node was the "datum bekendmaking besluit:" marker, meaning
          *     the current value should be interpreted as that date (Den Haag).
+         * @param {boolean} isStop Whether the document uses the STOP/IMOP schema
+         *     (OfficielePublicatie). STOP documents use different wording, so a
+         *     dedicated terinzage rule is applied and the permit identifiers are
+         *     skipped to avoid false positives on the regulatory body text.
          * @returns {!object} Object with parsed date (when isValid is true) and
          *     the updated isNextValueBekendmakingsDate flag for the next call.
          */
-        function getDateFromText(value, isNextValueBekendmakingsDate) {
+        function getDateFromText(value, isNextValueBekendmakingsDate, isStop) {
             const identifier = "@@@";
             const identifiersStart = [
                 "verzonden naar aanvrager op: ",
@@ -426,8 +453,31 @@ window.initMap = async function initMap() {
                 value = identifier + value;
             }
             isNextValueBekendmakingsDate = false;
+            // STOP/IMOP documents (omgevingsplan-wijzigingen, kennisgevingen) do
+            // not use the permit "verzonden" wording, and their long regulatory
+            // texts contain many unrelated dates. Only trust the terinzage /
+            // bekendmaking sentence, e.g. "... ligt met ingang van <datum> ... ter
+            // inzage". See docs/STOP-schema-parsing.md in the
+            // bekendmakingen-downloader repo.
+            if (isStop && value.indexOf("ter inzage") !== -1) {
+                const terinzageCues = [
+                    "ligt met ingang van ",
+                    "ligt vanaf ",
+                    "ter inzage met ingang van ",
+                    "ter inzage vanaf ",
+                    "ter inzage gelegd met ingang van ",
+                    "ter inzage gelegd vanaf "
+                ];
+                for (i = 0; i < terinzageCues.length; i += 1) {
+                    pos = value.indexOf(terinzageCues[i]);
+                    if (pos !== -1) {
+                        value = identifier + value.substring(pos + terinzageCues[i].length);
+                        break;
+                    }
+                }
+            }
             // If not found, try the regular way of publishing:
-            if (!value.startsWith(identifier)) {
+            if (!isStop && !value.startsWith(identifier)) {
                 for (i = 0; i < identifiersStart.length; i += 1) {
                     if (value.startsWith(identifiersStart[i])) {
                         value = value.replace(identifiersStart[i], identifier);
@@ -436,7 +486,7 @@ window.initMap = async function initMap() {
                 }
             }
             // If not found, try the regular way of publishing objection start date:
-            if (!value.startsWith(identifier)) {
+            if (!isStop && !value.startsWith(identifier)) {
                 for (i = 0; i < identifiersStartWithObjectionStart.length; i += 1) {
                     pos = value.indexOf(identifiersStartWithObjectionStart[i]);
                     if (pos !== -1) {
@@ -447,7 +497,7 @@ window.initMap = async function initMap() {
                 }
             }
             // If not found, try the Noordoostpolder way of publishing:
-            if (!value.startsWith(identifier)) {
+            if (!isStop && !value.startsWith(identifier)) {
                 for (i = 0; i < identifiersAfter.length; i += 1) {
                     // Noordoostpolder has this in the title: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-93843/1/xml/gmb-2023-93843.xml
                     pos = value.indexOf(identifiersAfter[i]);
@@ -458,7 +508,7 @@ window.initMap = async function initMap() {
                 }
             }
             // If not found, try the Alkmaar way of publishing:
-            if (!value.startsWith(identifier)) {
+            if (!isStop && !value.startsWith(identifier)) {
                 for (i = 0; i < identifiersWithDeadline.length; i += 1) {
                     if (value.startsWith(identifiersWithDeadline[i])) {
                         value = value.replace(identifiersWithDeadline[i], identifier);
@@ -468,7 +518,7 @@ window.initMap = async function initMap() {
                 }
             }
             // If not found, try the Texel way of publishing:
-            if (!value.startsWith(identifier)) {
+            if (!isStop && !value.startsWith(identifier)) {
                 // Velsen repeats part of title (Zeeweg 343, interne constructiewijziging (07/02/2022) 143528-2022):
                 identifiersMiddle.push(publication.title.substring(publication.title.length - 4).toLowerCase() + " ("); // Velsen https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-69953/1/xml/gmb-2023-69953.xml
                 for (i = 0; i < identifiersMiddle.length; i += 1) {
@@ -511,6 +561,8 @@ window.initMap = async function initMap() {
         }
 
         const alineas = getAlineas(responseXml);
+        // STOP/IMOP documents use the <OfficielePublicatie> root element.
+        const isStop = responseXml.indexOf("<OfficielePublicatie") !== -1;
         const maxLooptijd = 6 * 7 + 1; // 6 weken de tijd om bezwaar te maken
         const dateFormatOptions = { "weekday": "long", "year": "numeric", "month": "long", "day": "numeric" };
         let datumBekendgemaakt; // Datum verzonden aan belanghebbende(n)
@@ -528,7 +580,7 @@ window.initMap = async function initMap() {
             if (alinea.childNodes.length > 0) {
                 for (j = 0; j < alinea.childNodes.length; j += 1) {
                     if (alinea.childNodes[j].nodeName === "#text") {
-                        datumBekendgemaakt = getDateFromText(alinea.childNodes[j].nodeValue.trim(), isNextValueBekendmakingsDate);
+                        datumBekendgemaakt = getDateFromText(alinea.childNodes[j].nodeValue.trim(), isNextValueBekendmakingsDate, isStop);
                         isNextValueBekendmakingsDate = datumBekendgemaakt.isNextValueBekendmakingsDate;
                         if (datumBekendgemaakt.isValid) {
                             isBezwaartermijnFound = true;
