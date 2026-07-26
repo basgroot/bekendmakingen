@@ -74,13 +74,13 @@ if (jsFiles.includes("map.js")) {
 
 // Rebuild map.min.css when map.css is staged
 if (cssFiles.includes("map.css")) {
-    const cleancssBin = "node_modules/clean-css-cli/bin/cleancss";
-    if (!existsSync(cleancssBin)) {
-        console.error("pre-commit: clean-css-cli not found, run npm install");
+    const cleanCssPackage = "node_modules/clean-css/package.json";
+    if (!existsSync(cleanCssPackage)) {
+        console.error("pre-commit: clean-css not found, run npm install");
         process.exit(1);
     }
     console.log("pre-commit: rebuilding map.min.css..");
-    run("cleancss", [cleancssBin, "map.css", "-o", "map.min.css"]);
+    run("minify-css", ["scripts/minify-css.mjs"]);
     execSync("git add map.min.css");
     console.log("pre-commit: map.min.css staged.");
 }

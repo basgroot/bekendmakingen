@@ -13,7 +13,7 @@ Thank you for your interest in contributing! This project displays Dutch governm
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (LTS version recommended) -- only needed for linting/formatting
+- [Node.js](https://nodejs.org/) (LTS version recommended) -- needed for linting, formatting, and rebuilding minified assets
 - A modern web browser
 - A Google Maps API key (domain-restricted) if you want to run the app locally with the map
 
@@ -64,6 +64,16 @@ To auto-fix lint issues:
 npm run lint:fix
 ```
 
+### Build Artifacts
+
+The deployed JavaScript and CSS are committed as `map.min.js` and `map.min.css`. If you change `map.js` or `map.css`, rebuild them before committing:
+
+```bash
+npm run build
+```
+
+The pre-commit hook installed by `npm install` also rebuilds the matching minified file when `map.js` or `map.css` is staged.
+
 ### Making Changes
 
 1. Create a new branch from `main`:
@@ -74,10 +84,11 @@ npm run lint:fix
 
 2. Make your changes in the relevant files (`map.js`, `index.html`, `map.css`, JSON data files, etc.).
 
-3. Run the quality checks:
+3. Run the quality checks and rebuild generated assets if needed:
 
    ```bash
    npm run check
+   npm run build
    ```
 
 4. Commit your changes with a clear, descriptive message:
