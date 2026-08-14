@@ -32,6 +32,10 @@ window.initMap = async function initMap() {
         // Index of the urlDoc values in publicationsArray, to skip duplicates
         // when the live request overlaps the history files:
         "loadedUrlDocs": new Set(),
+        // Index of the coordinates already taken by a marker, either placed or
+        // queued in delayedMarkersArray. Mirrors those two arrays exactly, so
+        // findUniquePosition does not have to scan them:
+        "occupiedPositions": new Set(),
         // Backup of the recent publications, because loading them again is slow:
         "publicationsArrayBackup": [],
         // Indicates the status of the time filter:
@@ -934,36 +938,12 @@ window.initMap = async function initMap() {
      */
     function findUniquePosition(proposedCoordinate) {
         /**
-         * Checks if a coordinate is available.
-         * @param {!object} coordinate The coordinate to check.
-         * @returns {boolean} True if the coordinate is available, false otherwise.
+         * Key identifying one coordinate in appState.occupiedPositions.
+         * @param {!object} coordinate The coordinate to describe.
+         * @returns {string} The key.
          */
-        function isCoordinateAvailable(coordinate) {
-            let isAvailable = true; // Be positive
-            let i;
-            let marker;
-            for (i = 0; i < appState.markersArray.length; i += 1) {
-                // Don't use forEach, to gain some performance.
-                marker = appState.markersArray[i];
-                if (marker.position.lat === coordinate.lat && marker.position.lng === coordinate.lng) {
-                    isAvailable = false;
-                    break;
-                }
-            }
-            if (isAvailable) {
-                // Off-screen markers are queued in delayedMarkersArray with
-                // their already-resolved positions; they must also count as
-                // occupied so that further publications at the same base
-                // coordinate get fanned out instead of stacking on top.
-                for (i = 0; i < appState.delayedMarkersArray.length; i += 1) {
-                    marker = appState.delayedMarkersArray[i];
-                    if (marker.position.lat === coordinate.lat && marker.position.lng === coordinate.lng) {
-                        isAvailable = false;
-                        break;
-                    }
-                }
-            }
-            return isAvailable;
+        function positionKey(coordinate) {
+            return coordinate.lat + "|" + coordinate.lng;
         }
 
         const destinationCoordinate = {
@@ -974,12 +954,11 @@ window.initMap = async function initMap() {
         const latShift = 0.000017;
         const lngShift = 0.000016;
         // Pigeonhole bound: along a strictly monotonic shift sequence, an
-        // unoccupied coordinate must be reached within
-        // markersArray.length + delayedMarkersArray.length + 1 iterations.
-        // The +1 covers the initial check at the proposed point.
-        const maxIterations = appState.markersArray.length + appState.delayedMarkersArray.length + 1;
+        // unoccupied coordinate must be reached within one more step than there
+        // are occupied ones.
+        const maxIterations = appState.occupiedPositions.size + 1;
         let iterations = 0;
-        while (!isCoordinateAvailable(destinationCoordinate)) {
+        while (appState.occupiedPositions.has(positionKey(destinationCoordinate))) {
             destinationCoordinate.lat = destinationCoordinate.lat + latShift;
             destinationCoordinate.lng = destinationCoordinate.lng + lngShift;
             iterations += 1;
@@ -991,6 +970,9 @@ window.initMap = async function initMap() {
                 break;
             }
         }
+        // Reserve it right away: the caller either places a marker here or
+        // queues it in delayedMarkersArray, and both count as occupied.
+        appState.occupiedPositions.add(positionKey(destinationCoordinate));
         return destinationCoordinate;
     }
 
@@ -2754,6 +2736,7 @@ window.initMap = async function initMap() {
         });
         appState.markersArray = [];
         appState.delayedMarkersArray = [];
+        appState.occupiedPositions = new Set();
     }
 
     /**
