@@ -29,6 +29,9 @@ window.initMap = async function initMap() {
         "delayedMarkersArray": [],
         // The publications to display:
         "publicationsArray": [],
+        // Index of the urlDoc values in publicationsArray, to skip duplicates
+        // when the live request overlaps the history files:
+        "loadedUrlDocs": new Set(),
         // Backup of the recent publications, because loading them again is slow:
         "publicationsArrayBackup": [],
         // Indicates the status of the time filter:
@@ -1431,7 +1434,7 @@ window.initMap = async function initMap() {
         const periodFilter = getPeriodFilter();
         if (periodFilter.isHistory) {
             console.log("Loading historical data of period " + periodFilter.periodToShow);
-            loadHistory(periodFilter.period, true);
+            loadHistory(periodFilter.period);
         } else {
             console.log("Filtering period to " + periodFilter.periodToShow);
             if (appState.isHistoryActive) {
@@ -1439,7 +1442,7 @@ window.initMap = async function initMap() {
                 if (appState.isFullyLoaded) {
                     clearMarkers(appState.activeMunicipality);
                     // Restore the backup
-                    appState.publicationsArray = [].concat(appState.publicationsArrayBackup);
+                    setPublications([].concat(appState.publicationsArrayBackup));
                     console.log("Backup restored");
                     addMarkers(1, false);
                 } else {
@@ -1677,42 +1680,90 @@ window.initMap = async function initMap() {
     }
 
     /**
-     * Determine the start date. This is used to determine if the history file can be loaded, which improves performance.
+     * Prefix a number with a zero when it has one digit.
+     * @param {number} n The one or two digit number representing day or month.
+     * @returns {string} The formatted number.
+     */
+    function addLeadingZero(n) {
+        return n > 9 ? String(n) : "0" + n;
+    }
+
+    /**
+     * Format a date as "YYYY-MM-DD", in local time.
+     * @param {!Date} date Date to format.
+     * @returns {string} The formatted date.
+     */
+    function formatDate(date) {
+        return date.getFullYear() + "-" + addLeadingZero(date.getMonth() + 1) + "-" + addLeadingZero(date.getDate());
+    }
+
+    /**
+     * Format a date as "YYYY-MM", in local time.
+     * @param {!Date} date Date to format.
+     * @returns {string} The formatted month.
+     */
+    function formatMonth(date) {
+        return date.getFullYear() + "-" + addLeadingZero(date.getMonth() + 1);
+    }
+
+    /**
+     * Replace the loaded publications and rebuild the index used to skip duplicates.
+     * @param {!Array<!object>} publications Publications to show.
+     * @returns {void}
+     */
+    function setPublications(publications) {
+        appState.publicationsArray = publications;
+        appState.loadedUrlDocs = new Set();
+        publications.forEach(function (publication) {
+            appState.loadedUrlDocs.add(publication.urlDoc);
+        });
+    }
+
+    /**
+     * Append a publication, unless it is already loaded. The live request
+     * deliberately overlaps the last day covered by the history files, so
+     * duplicates are expected rather than exceptional.
+     * @param {!object} publication Publication to append.
+     * @returns {boolean} True when the publication was added.
+     */
+    function appendPublication(publication) {
+        if (appState.loadedUrlDocs.has(publication.urlDoc)) {
+            return false;
+        }
+        appState.loadedUrlDocs.add(publication.urlDoc);
+        appState.publicationsArray.push(publication);
+        return true;
+    }
+
+    /**
+     * Determine the period to show, and which history files cover it.
+     *
+     * The history files are static JSON and load far faster than the SRU API,
+     * so they are fetched first. The live request afterwards only has to cover
+     * the days that are not in those files yet, which is usually a handful.
      * @returns {void}
      */
     function determineRequestPeriod() {
-        /**
-         * Prefix number with zero, if it has one digit.
-         * @param {number} n The one or two digit number representing day or month.
-         * @returns {string} The formatted number.
-         */
-        function addLeadingZero(n) {
-            return n > 9 ? String(n) : "0" + n;
-        }
-
-        const currentDate = new Date();
-        const previousMonth = new Date();
-        previousMonth.setDate(0); // Set to last day of previous month
-        const previousMonthString = previousMonth.getFullYear() + "-" + addLeadingZero(previousMonth.getMonth() + 1);
-        const periodId = appState.periods.findIndex(function (period) {
-            return period.key === previousMonthString;
-        });
         const WEEKS_BACK = 6;
-        appState.requestPeriod.startDate = new Date();
-        appState.requestPeriod.startDate.setDate(appState.requestPeriod.startDate.getDate() - WEEKS_BACK * 7);
-        if (periodId >= 0) {
-            appState.requestPeriod.historyFile = previousMonthString;
-            appState.requestPeriod.startDateString = currentDate.getFullYear() + "-" + addLeadingZero(currentDate.getMonth() + 1) + "-" + "01"; // Start of current month, because history is already available in a faster to retrieve format
-            console.log("Historical file to add to view: " + appState.requestPeriod.historyFile);
-        } else {
-            appState.requestPeriod.startDateString =
-                appState.requestPeriod.startDate.getFullYear() +
-                "-" +
-                addLeadingZero(appState.requestPeriod.startDate.getMonth() + 1) +
-                "-" +
-                addLeadingZero(appState.requestPeriod.startDate.getDate());
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - WEEKS_BACK * 7);
+        startDate.setHours(0, 0, 0, 0);
+        appState.requestPeriod.startDate = startDate;
+        appState.requestPeriod.startDateString = formatDate(startDate);
+        // Every month the period touches, oldest first. Early in a month the
+        // window of six weeks reaches back into the month before the previous
+        // one, so this can be three files.
+        appState.requestPeriod.historyFiles = [];
+        const firstOfCurrentMonth = new Date();
+        firstOfCurrentMonth.setDate(1);
+        firstOfCurrentMonth.setHours(0, 0, 0, 0);
+        const cursor = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+        while (cursor <= firstOfCurrentMonth) {
+            appState.requestPeriod.historyFiles.push(formatMonth(cursor));
+            cursor.setMonth(cursor.getMonth() + 1);
         }
-        console.log("StartDate: " + appState.requestPeriod.startDateString);
+        console.log("Period starts at " + appState.requestPeriod.startDateString);
+        console.log("History files covering that period: " + appState.requestPeriod.historyFiles.join(", "));
     }
 
     /**
@@ -2344,7 +2395,7 @@ window.initMap = async function initMap() {
                         processCoordinate(publication.location, inputRecord.recordData.gzd.originalData.meta.tpmeta.gebiedsmarkering);
                     }
                 }
-                appState.publicationsArray.push(publication);
+                appendPublication(publication);
             } catch (error) {
                 console.error("Error processing publication: " + JSON.stringify(inputRecord, null, 4) + " Error: " + error);
             }
@@ -2467,16 +2518,11 @@ window.initMap = async function initMap() {
     }
 
     /**
-     * Open an historical file, where data is stored per month.
-     * @param {string} period Month to display, formatted as "YYYY-MM".
-     * @param {boolean} isNewRequest When true, replace the current view:
-     *     clear existing markers, show the loading indicator and overwrite
-     *     publicationsArray with the response. When false, append the
-     *     response to the existing view (used to extend the visible range
-     *     with an older month without discarding what is already loaded).
-     * @returns {void}
+     * Path of the history file of the active municipality for one month.
+     * @param {string} period Month, formatted as "YYYY-MM".
+     * @returns {string} Path below the CDN host.
      */
-    function loadHistory(period, isNewRequest) {
+    function getHistoryPath(period) {
         const lookupMunicipality =
             appState.municipalities[appState.activeMunicipality].hasOwnProperty("lookupName") ?
                 appState.municipalities[appState.activeMunicipality].lookupName
@@ -2485,67 +2531,96 @@ window.initMap = async function initMap() {
         if (periodArray.length !== 2) {
             throw new Error("Invalid period: " + period);
         }
-        const path =
-            "/history/" + periodArray[0] + "/" + encodeURIComponent(lookupMunicipality.toLowerCase().replace(/\s/g, "-")) + "-" + period + ".json";
-        if (isNewRequest) {
-            setLoadingIndicatorVisibility("show");
-            clearMarkers(appState.activeMunicipality);
-        }
+        return "/history/" + periodArray[0] + "/" + encodeURIComponent(lookupMunicipality.toLowerCase().replace(/\s/g, "-")) + "-" + period + ".json";
+    }
+
+    /**
+     * Open an historical file, where data is stored per month. This replaces the
+     * current view, because the user selected one specific month in the period
+     * filter. The recent view is built by loadRecentPublications instead.
+     * @param {string} period Month to display, formatted as "YYYY-MM".
+     * @returns {void}
+     */
+    function loadHistory(period) {
+        const path = getHistoryPath(period);
+        setLoadingIndicatorVisibility("show");
+        clearMarkers(appState.activeMunicipality);
         console.log("Loading historical data of municipality " + appState.activeMunicipality);
         getData(path, function (responseJson) {
-            let startRecord = 1;
-            // Preprocess data:
             responseJson.publications.forEach(function (publication) {
                 publication.date = new Date(publication.date);
             });
-            if (isNewRequest) {
-                // This is a request for an historic month:
-                if (!appState.isHistoryActive) {
-                    if (appState.isFullyLoaded) {
-                        // Make a backup, for when the time filter is reset
-                        appState.publicationsArrayBackup = [].concat(appState.publicationsArray);
-                        console.log("Backup created");
-                    }
-                    appState.isHistoryActive = true;
+            if (!appState.isHistoryActive) {
+                if (appState.isFullyLoaded) {
+                    // Make a backup, for when the time filter is reset
+                    appState.publicationsArrayBackup = [].concat(appState.publicationsArray);
+                    console.log("Backup created");
                 }
-                appState.publicationsArray = responseJson.publications;
-            } else {
-                // This is a request to add some history to the current view:
-                startRecord = appState.publicationsArray.length + 1;
-                // Delete the publications older than 6 weeks. Filtering instead of
-                // slicing at the first match, because the two sources differ in sort
-                // order: the live API returns newest first (see sortRecords), while the
-                // history files are sorted oldest first. Slicing assumed the former and
-                // discarded the entire file for the latter.
-                const publicationCount = responseJson.publications.length;
-                responseJson.publications = responseJson.publications.filter(function (publication) {
-                    return publication.date >= appState.requestPeriod.startDate;
-                });
-                if (responseJson.publications.length < publicationCount) {
-                    console.log(
-                        "Deleting " +
-                            (publicationCount - responseJson.publications.length) +
-                            " historical items from before " +
-                            appState.requestPeriod.startDate.toDateString()
-                    );
-                }
-                appState.publicationsArray = appState.publicationsArray.concat(responseJson.publications);
-                appState.isFullyLoaded = true;
+                appState.isHistoryActive = true;
             }
-            if (responseJson.publications.length > 0 || isNewRequest) {
-                addMarkers(startRecord, false);
-            } else {
-                // Nothing to add (e.g. all historical items were older than
-                // the cutoff date), but loading is complete.
-                setLoadingIndicatorVisibility("hide");
-                tryOpenPublicationFromUrl();
-            }
+            setPublications(responseJson.publications);
+            addMarkers(1, false);
         }).catch(function (error) {
             console.error("Failed to load history " + path, error);
             setLoadingIndicatorVisibility("hide");
-            if (isNewRequest) {
-                showError("Er is een probleem opgetreden bij het laden van de historische bekendmakingen.\nProbeer het later nogmaals.");
+            showError("Er is een probleem opgetreden bij het laden van de historische bekendmakingen.\nProbeer het later nogmaals.");
+        });
+    }
+
+    /**
+     * Load the recent view, history first.
+     *
+     * The static history files are fetched in parallel and cover everything up
+     * to the last run of the update workflow, so the map fills up almost
+     * immediately. Only the remaining days are then requested from the much
+     * slower SRU API, starting at the beginning of the day of the most recent
+     * publication found, so publications added to that day afterwards are not
+     * missed. Duplicates from that overlap are skipped by appendPublication.
+     * @param {string} municipality Municipality to load.
+     * @returns {void}
+     */
+    function loadRecentPublications(municipality) {
+        setLoadingIndicatorVisibility("show");
+        setPublications([]);
+        hideActiveMunicipalityMarker();
+        // Reset the live start date: it is narrowed down per municipality below,
+        // so without this a municipality without history would inherit the date
+        // of the one that was shown before it.
+        appState.requestPeriod.startDateString = formatDate(appState.requestPeriod.startDate);
+        const requests = appState.requestPeriod.historyFiles.map(function (period) {
+            return getData(getHistoryPath(period)).catch(function () {
+                // Not an error: the file of the running month only exists once
+                // the update workflow has run for the first time that month.
+                console.log("No history file for " + period + " (yet)");
+                return { "publications": [] };
+            });
+        });
+        Promise.all(requests).then(function (responses) {
+            if (municipality !== appState.activeMunicipality || appState.isHistoryActive) {
+                // The user selected something else while we were loading.
+                return;
             }
+            let latestDate = null;
+            responses.forEach(function (responseJson) {
+                responseJson.publications.forEach(function (publication) {
+                    publication.date = new Date(publication.date);
+                    if (latestDate === null || publication.date > latestDate) {
+                        latestDate = publication.date;
+                    }
+                    if (publication.date >= appState.requestPeriod.startDate) {
+                        appendPublication(publication);
+                    }
+                });
+            });
+            console.log("Loaded " + appState.publicationsArray.length + " publications from history");
+            if (appState.publicationsArray.length > 0) {
+                addMarkers(1, true);
+            }
+            if (latestDate !== null && latestDate > appState.requestPeriod.startDate) {
+                appState.requestPeriod.startDateString = formatDate(latestDate);
+            }
+            console.log("Requesting live data from " + appState.requestPeriod.startDateString);
+            loadDataForMunicipality(municipality, 1);
         });
     }
 
@@ -2566,16 +2641,25 @@ window.initMap = async function initMap() {
                 // We are loading a municipality, but user selected another one.
                 return;
             }
-            if (startRecord === 1) {
-                appState.publicationsArray = [];
-                // Hide active municipality:
-                hideActiveMunicipalityMarker();
-            }
+            // Publications already loaded from history stay in place, so the
+            // marker offset is derived from the array instead of from the
+            // startRecord of the API, which no longer matches after the
+            // duplicates of the overlapping day have been skipped.
+            const firstNewMarker = appState.publicationsArray.length + 1;
             if (addPublications(responseJson)) {
                 const recordCount =
                     responseJson.searchRetrieveResponse.numberOfRecords === 1 ? 1 : responseJson.searchRetrieveResponse.records.record.length;
+                const addedCount = appState.publicationsArray.length - firstNewMarker + 1;
                 console.log(
-                    "Found " + recordCount + " bekendmakingen of " + responseJson.searchRetrieveResponse.numberOfRecords + " in " + municipality
+                    "Found " +
+                        recordCount +
+                        " bekendmakingen of " +
+                        responseJson.searchRetrieveResponse.numberOfRecords +
+                        " in " +
+                        municipality +
+                        ", " +
+                        addedCount +
+                        " of them new"
                 );
             } else {
                 console.log("No new bekendmakingen found in " + municipality);
@@ -2585,15 +2669,11 @@ window.initMap = async function initMap() {
                 // Add next page:
                 console.log("Loading next page..");
                 loadDataForMunicipality(municipality, responseJson.searchRetrieveResponse.nextRecordPosition);
-            } else if (appState.requestPeriod.hasOwnProperty("historyFile")) {
-                // Load historical data and append that:
-                console.log("Adding historical file " + appState.requestPeriod.historyFile + " to complete the overview");
-                loadHistory(appState.requestPeriod.historyFile, false);
             } else {
                 console.log("Data retrieval complete");
                 appState.isFullyLoaded = true;
             }
-            addMarkers(startRecord, isMoreDataAvailable);
+            addMarkers(firstNewMarker, isMoreDataAvailable);
         }
 
         /**
@@ -2697,19 +2777,18 @@ window.initMap = async function initMap() {
             }
         }
         // If the active period is a historical month (e.g. because the
-        // page was loaded with ?period=2022-10), bypass the live SRU fetch
-        // and load that month's static history file directly. Without this,
-        // the initial load would fetch live data for the past 6 weeks and
-        // append "previous month" history, completely ignoring the
+        // page was loaded with ?period=2022-10), show that month's static
+        // history file on its own. Without this, the initial load would build
+        // the recent view of the past 6 weeks and completely ignore the
         // requested historical period until the user re-selected it.
         const periodFilter = getPeriodFilter();
         if (periodFilter.isHistory) {
             appState.isFullyLoaded = false;
-            loadHistory(periodFilter.period, true);
+            loadHistory(periodFilter.period);
             return;
         }
         appState.isFullyLoaded = false;
-        loadDataForMunicipality(appState.activeMunicipality, 1);
+        loadRecentPublications(appState.activeMunicipality);
     }
 
     /**
