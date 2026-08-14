@@ -1,0 +1,164 @@
+# Keeps the history files up to date.
+# Runs every three days. scripts/fetch_history.py resumes per municipality from
+# the most recent publication in its most recent history file, in whichever
+# month that is, and requests everything from that date up to and including the
+# target month in a single query. When that period crosses a month boundary the
+# result is split and every affected month is written, so the month that just
+# ended is completed automatically and a run that has been missing for weeks
+# repairs itself. No calendar rule is involved.
+# The authoritative file for a completed month is still exported from the
+# archive database in the bekendmakingen-downloader project; that export
+# overwrites whatever this workflow produced.
+# Docs: https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+name: "Update history"
+
+# Months of history checked out and searched for a resume point. Must cover the
+# longest outage that should still repair itself; the script is told the same
+# number so the two cannot drift apart.
+env:
+  LOOKBACK_MONTHS: 2
+
+on:
+  schedule:
+    # 04:17 UTC on the 1st, 4th, 7th, ... 31st of the month. The step restarts
+    # every month, so the gap after the 31st is one day instead of three.
+    - cron: "17 4 */3 * *"
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "Target year (default: current)"
+        required: false
+        type: string
+      month:
+        description: "Target month (default: current)"
+        required: false
+        type: string
+      full:
+        description: "Request the whole target month instead of only what is missing"
+        required: false
+        default: false
+        type: boolean
+      dry_run:
+        description: "Report what would change, commit nothing"
+        required: false
+        default: false
+        type: boolean
+
+# Never let two runs write to the same files at the same time.
+concurrency:
+  group: "update-history"
+  cancel-in-progress: false
+
+jobs:
+  update:
+    name: Fetch and commit
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    if: github.repository == 'basgroot/bekendmakingen'
+    permissions:
+      contents: write # required to commit the updated history files
+
+    steps:
+      - name: Determine period
+        id: period
+        env:
+          # Passed through the environment instead of interpolated into the
+          # script, so free-text inputs cannot inject shell commands.
+          INPUT_YEAR: ${{ inputs.year }}
+          INPUT_MONTH: ${{ inputs.month }}
+          INPUT_FULL: ${{ inputs.full }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          YEAR="$INPUT_YEAR"
+          MONTH="$INPUT_MONTH"
+          [ -n "$YEAR" ] || YEAR=$(date -u +%Y)
+          [ -n "$MONTH" ] || MONTH=$(date -u +%m)
+          case "$YEAR$MONTH" in
+            *[!0-9]*) echo "ERROR: year and month must be numeric, got '$YEAR-$MONTH'"; exit 1 ;;
+          esac
+          # 10# forces base 10, because 08 and 09 are invalid octal.
+          MONTH=$(printf "%02d" "$((10#$MONTH))")
+
+          # The full working tree is ~2.6 GB, so only check out what is needed:
+          # the script, the municipality list and the months the script may read
+          # or write. Collect the years as well, for staging the result.
+          SPARSE="/scripts/
+          /municipalities.json"
+          YEARS=""
+          for OFFSET in $(seq 0 "$LOOKBACK_MONTHS"); do
+            PERIOD=$(date -u -d "$YEAR-$MONTH-01 -$OFFSET month" +%Y-%m)
+            SPARSE="$SPARSE
+          /history/${PERIOD%-*}/*-$PERIOD.json"
+            case " $YEARS " in *" ${PERIOD%-*} "*) ;; *) YEARS="$YEARS ${PERIOD%-*}" ;; esac
+          done
+
+          ARGS=""
+          if [ "$INPUT_FULL" = "true" ]; then ARGS="$ARGS --full"; fi
+          if [ "$INPUT_DRY_RUN" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+
+          {
+            echo "year=$YEAR"
+            echo "month=$MONTH"
+            echo "years=${YEARS# }"
+            echo "args=$ARGS"
+            echo "sparse<<SPARSE_EOF"
+            echo "$SPARSE"
+            echo "SPARSE_EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "Target: $YEAR-$MONTH, years touched:${YEARS}"
+          echo "Sparse checkout:"
+          echo "$SPARSE"
+
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          sparse-checkout-cone-mode: false
+          sparse-checkout: ${{ steps.period.outputs.sparse }}
+
+      # The script sorts with Dutch collation, matching export_history.py. Ubuntu
+      # runners only ship C and en_US; without nl_NL every file would be rewritten
+      # in a different order.
+      - name: Enable Dutch locale
+        run: |
+          sudo locale-gen nl_NL.UTF-8
+          locale -a | grep -i "^nl_NL"
+
+      - name: Fetch publications
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          python3 --version
+          python3 scripts/fetch_history.py \
+            --year "${{ steps.period.outputs.year }}" \
+            --month "${{ steps.period.outputs.month }}" \
+            --lookback-months "$LOOKBACK_MONTHS" \
+            --require-locale \
+            --max-failures 3 \
+            ${{ steps.period.outputs.args }}
+
+      - name: Commit and push
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for YEAR in ${{ steps.period.outputs.years }}; do
+            git add "history/$YEAR"
+          done
+          # A sparse checkout must never stage a deletion: everything outside the
+          # sparse set is marked skip-worktree and has to stay untouched.
+          DELETED=$(git diff --cached --name-only --diff-filter=D)
+          if [ -n "$DELETED" ]; then
+            echo "ERROR: $(echo "$DELETED" | wc -l) deletions staged, aborting:"
+            echo "$DELETED" | head -20
+            exit 1
+          fi
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          MONTHS=$(git diff --cached --name-only | sed -n 's/.*-\([0-9]\{4\}-[0-9]\{2\}\)\.json$/\1/p' | sort -u | tr '\n' ' ')
+          [ -n "$MONTHS" ] || MONTHS="${{ steps.period.outputs.year }}-${{ steps.period.outputs.month }}"
+          echo "Changed files: $(git diff --cached --name-only | wc -l)"
+          git commit -m "History ${MONTHS% }"
+          git push

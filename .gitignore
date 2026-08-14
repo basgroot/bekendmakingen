@@ -2,3 +2,4 @@
 /.vs
 /img/*.pdn
 /node_modules
+__pycache__/
