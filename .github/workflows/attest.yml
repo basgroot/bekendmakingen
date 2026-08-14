@@ -21,6 +21,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          # Only the files that go into the archive below are needed. Cone mode
+          # always adds the files in the repository root, so img/ is the only
+          # directory to ask for; history/ is not part of the attested artifact.
+          filter: blob:none
+          sparse-checkout: |
+            img
 
       - name: Archive site files
         run: |

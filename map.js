@@ -29,9 +29,13 @@ window.initMap = async function initMap() {
         "delayedMarkersArray": [],
         // The publications to display:
         "publicationsArray": [],
-        // Index of the urlDoc values in publicationsArray, to skip duplicates
-        // when the live request overlaps the history files:
+        // Index of the keys of publicationsArray (see getPublicationKey), to
+        // skip duplicates when the live request overlaps the history files:
         "loadedUrlDocs": new Set(),
+        // Index of the coordinates already taken by a marker, either placed or
+        // queued in delayedMarkersArray. Mirrors those two arrays exactly, so
+        // findUniquePosition does not have to scan them:
+        "occupiedPositions": new Set(),
         // Backup of the recent publications, because loading them again is slow:
         "publicationsArrayBackup": [],
         // Indicates the status of the time filter:
@@ -631,7 +635,13 @@ window.initMap = async function initMap() {
      * @returns {void}
      */
     function collectBezwaartermijn(licenseId, publication) {
-        if (publication.urlApi === "UNAVAILABLE") {
+        // getUrlApi() stores "UNAVAILABLE" when the publication URL is not a
+        // recognised zoek.officielebekendmakingen.nl link. The history files are
+        // written by a different tool (scripts/fetch_history.py), which stores
+        // an empty string in that situation, so both have to be rejected here.
+        // Passing "" to fetch() would request the current page and then try to
+        // parse the HTML of this app as a publication.
+        if (!publication.urlApi || publication.urlApi === "UNAVAILABLE") {
             console.error("Unable to get data for license " + publication.urlDoc);
             return;
         }
@@ -934,36 +944,12 @@ window.initMap = async function initMap() {
      */
     function findUniquePosition(proposedCoordinate) {
         /**
-         * Checks if a coordinate is available.
-         * @param {!object} coordinate The coordinate to check.
-         * @returns {boolean} True if the coordinate is available, false otherwise.
+         * Key identifying one coordinate in appState.occupiedPositions.
+         * @param {!object} coordinate The coordinate to describe.
+         * @returns {string} The key.
          */
-        function isCoordinateAvailable(coordinate) {
-            let isAvailable = true; // Be positive
-            let i;
-            let marker;
-            for (i = 0; i < appState.markersArray.length; i += 1) {
-                // Don't use forEach, to gain some performance.
-                marker = appState.markersArray[i];
-                if (marker.position.lat === coordinate.lat && marker.position.lng === coordinate.lng) {
-                    isAvailable = false;
-                    break;
-                }
-            }
-            if (isAvailable) {
-                // Off-screen markers are queued in delayedMarkersArray with
-                // their already-resolved positions; they must also count as
-                // occupied so that further publications at the same base
-                // coordinate get fanned out instead of stacking on top.
-                for (i = 0; i < appState.delayedMarkersArray.length; i += 1) {
-                    marker = appState.delayedMarkersArray[i];
-                    if (marker.position.lat === coordinate.lat && marker.position.lng === coordinate.lng) {
-                        isAvailable = false;
-                        break;
-                    }
-                }
-            }
-            return isAvailable;
+        function positionKey(coordinate) {
+            return coordinate.lat + "|" + coordinate.lng;
         }
 
         const destinationCoordinate = {
@@ -974,12 +960,11 @@ window.initMap = async function initMap() {
         const latShift = 0.000017;
         const lngShift = 0.000016;
         // Pigeonhole bound: along a strictly monotonic shift sequence, an
-        // unoccupied coordinate must be reached within
-        // markersArray.length + delayedMarkersArray.length + 1 iterations.
-        // The +1 covers the initial check at the proposed point.
-        const maxIterations = appState.markersArray.length + appState.delayedMarkersArray.length + 1;
+        // unoccupied coordinate must be reached within one more step than there
+        // are occupied ones.
+        const maxIterations = appState.occupiedPositions.size + 1;
         let iterations = 0;
-        while (!isCoordinateAvailable(destinationCoordinate)) {
+        while (appState.occupiedPositions.has(positionKey(destinationCoordinate))) {
             destinationCoordinate.lat = destinationCoordinate.lat + latShift;
             destinationCoordinate.lng = destinationCoordinate.lng + lngShift;
             iterations += 1;
@@ -991,6 +976,9 @@ window.initMap = async function initMap() {
                 break;
             }
         }
+        // Reserve it right away: the caller either places a marker here or
+        // queues it in delayedMarkersArray, and both count as occupied.
+        appState.occupiedPositions.add(positionKey(destinationCoordinate));
         return destinationCoordinate;
     }
 
@@ -1707,6 +1695,31 @@ window.initMap = async function initMap() {
     }
 
     /**
+     * Key identifying one publication in the duplicate index.
+     *
+     * The URL is the natural key, but not every publication has one: the SRU
+     * record may lack a preferredUrl and the history files store "" in that
+     * case. Keying those on "" would make them all look like the same
+     * publication, so only the first one would ever be shown. They fall back to
+     * a composite key instead.
+     *
+     * The date is compared as a local calendar date, not as a timestamp,
+     * because the two sources produce a different time for the same day: the
+     * history files hold UTC midnight while getDate() rounds down to local
+     * midnight. Both refer to the same instant before rounding, so the local
+     * calendar date matches in every time zone.
+     * @param {!object} publication Publication to describe.
+     * @returns {string} Key for appState.loadedUrlDocs.
+     */
+    function getPublicationKey(publication) {
+        if (publication.urlDoc) {
+            return publication.urlDoc;
+        }
+        // No URL can start with "!", so a composite key cannot collide with one.
+        return "!" + formatDate(publication.date) + "|" + publication.title + "|" + publication.description;
+    }
+
+    /**
      * Replace the loaded publications and rebuild the index used to skip duplicates.
      * @param {!Array<!object>} publications Publications to show.
      * @returns {void}
@@ -1715,7 +1728,7 @@ window.initMap = async function initMap() {
         appState.publicationsArray = publications;
         appState.loadedUrlDocs = new Set();
         publications.forEach(function (publication) {
-            appState.loadedUrlDocs.add(publication.urlDoc);
+            appState.loadedUrlDocs.add(getPublicationKey(publication));
         });
     }
 
@@ -1727,10 +1740,11 @@ window.initMap = async function initMap() {
      * @returns {boolean} True when the publication was added.
      */
     function appendPublication(publication) {
-        if (appState.loadedUrlDocs.has(publication.urlDoc)) {
+        const key = getPublicationKey(publication);
+        if (appState.loadedUrlDocs.has(key)) {
             return false;
         }
-        appState.loadedUrlDocs.add(publication.urlDoc);
+        appState.loadedUrlDocs.add(key);
         appState.publicationsArray.push(publication);
         return true;
     }
@@ -2409,14 +2423,23 @@ window.initMap = async function initMap() {
             console.error("Unexpected malformed searchRetrieveResponse loaded: " + JSON.stringify(responseJson, null, 4));
             return false;
         }
-        if (responseJson.searchRetrieveResponse.numberOfRecords === 1) {
-            // Somehow this is not an array when there is only one.
-            addPublication(responseJson.searchRetrieveResponse.records.record);
-        } else {
-            // Sort the raw records before pushing them into publicationsArray.
-            responseJson.searchRetrieveResponse.records.record.sort(sortRecords);
-            responseJson.searchRetrieveResponse.records.record.forEach(addPublication);
+        // The array wrapper is omitted when a *page* contains exactly one
+        // record. That happens for a result set of one, but also for the last
+        // page of a larger set (501 records = a page of 500 plus a page of 1).
+        // numberOfRecords is the total of the whole query, not the size of this
+        // page, so the shape has to be inspected instead of counted.
+        const records = responseJson.searchRetrieveResponse.records.record;
+        if (records === undefined || records === null) {
+            console.error("Unexpected searchRetrieveResponse without records: " + JSON.stringify(responseJson, null, 4));
+            return false;
         }
+        if (!Array.isArray(records)) {
+            addPublication(records);
+            return true;
+        }
+        // Sort the raw records before pushing them into publicationsArray.
+        records.sort(sortRecords);
+        records.forEach(addPublication);
         return true;
     }
 
@@ -2651,8 +2674,10 @@ window.initMap = async function initMap() {
             // duplicates of the overlapping day have been skipped.
             const firstNewMarker = appState.publicationsArray.length + 1;
             if (addPublications(responseJson)) {
-                const recordCount =
-                    responseJson.searchRetrieveResponse.numberOfRecords === 1 ? 1 : responseJson.searchRetrieveResponse.records.record.length;
+                // Same one-record-is-not-an-array rule as in addPublications:
+                // count the page by its shape, not by numberOfRecords.
+                const pageRecords = responseJson.searchRetrieveResponse.records.record;
+                const recordCount = Array.isArray(pageRecords) ? pageRecords.length : 1;
                 const addedCount = appState.publicationsArray.length - firstNewMarker + 1;
                 console.log(
                     "Found " +
@@ -2754,6 +2779,7 @@ window.initMap = async function initMap() {
         });
         appState.markersArray = [];
         appState.delayedMarkersArray = [];
+        appState.occupiedPositions = new Set();
     }
 
     /**
