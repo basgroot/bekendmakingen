@@ -2613,14 +2613,18 @@ window.initMap = async function initMap() {
                 });
             });
             console.log("Loaded " + appState.publicationsArray.length + " publications from history");
-            if (appState.publicationsArray.length > 0) {
-                addMarkers(1, true);
-            }
             if (latestDate !== null && latestDate > appState.requestPeriod.startDate) {
                 appState.requestPeriod.startDateString = formatDate(latestDate);
             }
+            // Fire the live request before rendering, so the round trip overlaps
+            // with placing the markers. Rendering thousands of them takes seconds,
+            // and the response cannot be processed in the meantime anyway: the
+            // callback waits until this synchronous work is done.
             console.log("Requesting live data from " + appState.requestPeriod.startDateString);
             loadDataForMunicipality(municipality, 1);
+            if (appState.publicationsArray.length > 0) {
+                addMarkers(1, true);
+            }
         });
     }
 
