@@ -8,16 +8,18 @@ Bestanden zijn georganiseerd per jaar, en daarbinnen per gemeente en maand:
 
 ```
 history/
-  2017/
-    amsterdam-2017-01.json
-    amsterdam-2017-02.json
+  2013/
+    amsterdam-2013-01.json
+    amsterdam-2013-02.json
     ...
-  2018/
+  2014/
   ...
   2026/
 ```
 
-Beschikbare jaren: **2017 – 2026**.
+Beschikbare jaren: **2013 – 2026**.
+
+Elke maand die `periods.json` aanbiedt moet hier een bestand hebben. Andersom geldt dat niet: de lopende maand staat hier wel, maar wordt bewust niet in `periods.json` aangeboden, omdat de recente weergave die maand al via de live-API dekt.
 
 ## Bestandsformaat
 
@@ -51,7 +53,23 @@ Elk bestand heeft de naam `<gemeente-slug>-<jaar>-<maand>.json` en bevat één J
 
 ## Gemeenteslugs
 
-Gemeenteslugs zijn afgeleid van `municipalities.json` in de hoofdmap van deze repository. De slug is de gemeentenaam in kleine letters, waarbij spaties zijn vervangen door koppeltekens en bijzondere tekens zijn genormaliseerd (bijv. `'s-Gravenhage` → `'s-gravenhage`, `IJsselstein` → `ijsselstein`).
+Gemeenteslugs zijn afgeleid van `municipalities.json` in de hoofdmap van deze repository. De slug is de gemeentenaam in kleine letters, waarbij spaties zijn vervangen door koppeltekens (`get_storage_name` in `scripts/fetch_history.py`):
+
+```python
+return get_lookup_name(key, data).lower().replace(" ", "-")
+```
+
+Er wordt verder **niets** genormaliseerd of weggehaald. Diakriet blijft dus in de bestandsnaam staan:
+
+| Gemeente | Slug |
+|---|---|
+| `Amsterdam` | `amsterdam` |
+| `'s-Gravenhage` | `'s-gravenhage` |
+| `IJsselstein` | `ijsselstein` (enkel kleine letters, geen normalisatie) |
+| `Noardeast-Fryslân` | `noardeast-fryslân` |
+| `Súdwest-Fryslân` | `súdwest-fryslân` |
+
+Wie de diakriet weghaalt bij het samenstellen van een bestandsnaam, krijgt een 404.
 
 Sommige gemeenten hebben een `lookupName` in `municipalities.json` om te verwijzen naar de juiste slug die de publicatie-API gebruikt. Bijvoorbeeld:
 

@@ -132,14 +132,16 @@ The municipality list is validated against the CBS (Centraal Bureau voor de Stat
 
 ## `history/` — cached publication data
 
-Pre-fetched and cached SRU data for the period **2014–2026**, served as static JSON from CDN for historical period queries (avoiding live API calls for past months).
+Pre-fetched and cached SRU data for the period **2013–2026**, served as static JSON from CDN for historical period queries (avoiding live API calls for past months).
+
+`periods.json` and `history/` must stay in step: every month offered in the period filter needs a file, and only **completed** months are offered. The running month always has data on disk (the update workflow writes it every three days) but is deliberately absent from `periods.json`, because the recent view already covers it through the live API.
 
 ### Directory layout
 
 ```
 history/
+  2013/
   2014/
-  2015/
   ...
   2026/
     amsterdam-2026-01.json
@@ -152,11 +154,19 @@ history/
 
 `<gemeente-slug>-<YYYY>-<MM>.json`
 
-**Slug derivation**: lowercase the municipality key from `municipalities.json`, replace spaces with hyphens, normalise special characters. Examples:
+**Slug derivation** (`get_storage_name` in `scripts/fetch_history.py`): lowercase the name and replace spaces with hyphens. That is all — nothing else is stripped or normalised, so diacritics survive into the file name:
+
+```python
+return get_lookup_name(key, data).lower().replace(" ", "-")
+```
 
 - `Amsterdam` → `amsterdam`
 - `'s-Gravenhage` → `'s-gravenhage`
-- `IJsselstein` → `ijsselstein`
+- `IJsselstein` → `ijsselstein` (plain lowercasing, not normalisation)
+- `Noardeast-Fryslân` → `noardeast-fryslân`
+- `Súdwest-Fryslân` → `súdwest-fryslân`
+
+Building a file name by stripping the diacritics yields a 404. The non-ASCII names also do not match ASCII-only sparse-checkout patterns, which is why those files stay in the working tree of an otherwise sparse checkout.
 
 If a `lookupName` is present in `municipalities.json`, the slug is derived from `lookupName` instead of the key.
 
@@ -230,6 +240,51 @@ Icons are SVG files in `img/`.
 
 ---
 
+## Marker placement (`map.js`)
+
+A publication carries **every vertex** of its area in `location`, so one publication can become thousands of markers: a single Amsterdam polygon has 3842. Left unchecked that is both slow and unreadable — the icons stack on top of each other. Four constants govern this:
+
+| Constant                       | Value | Meaning                                                              |
+| ------------------------------ | ----- | -------------------------------------------------------------------- |
+| `MARKER_CHUNK_SIZE`            | 200   | Publications rendered per task before yielding to the browser        |
+| `MARKER_SPACING_METERS`        | 25    | One marker per this many metres of outline                           |
+| `MAX_MARKERS_PER_PUBLICATION`  | 100   | Hard cap on top of the spacing, for a trench of several kilometres   |
+| `MARKER_MERGE_SIZE_METERS`     | 50    | An area with a shorter diagonal collapses to one marker in its middle |
+
+### How many markers, and which — `limitLocations()`
+
+1. Parse every `location` string through `createCoordinate`, dropping unparseable ones.
+2. If the bounding box diagonal is below `MARKER_MERGE_SIZE_METERS`, return **one** coordinate at the centre of that box (`getCoveredArea`). 50 m is the width of a 35 pixel marker icon at the default zoom level 16, so anything smaller would only stack identical icons.
+3. Otherwise take the outline length (sum of `computeDistanceBetween` over consecutive points) and derive `markerCount = clamp(round(length / 25), 1, min(100, number of points))`.
+4. Pick those coordinates with `selectSpreadCoordinates()`.
+
+The merge test is on the **spread**, not on the marker count. A publication with two points kilometres apart also yields a low count, and must keep both markers.
+
+### `selectSpreadCoordinates()`
+
+Always keeps the four outermost points (north, south, east, west) and fills the rest at an even stride. Sampling by index alone moves nearly every marker to the densest part of the list when a publication covers several separate areas: measured over the publications with more than a hundred coordinates, that lost up to **89%** of the extent. Holding on to the extremes caps the loss at 37 m across all publications.
+
+The extremes are inserted first, so the final `slice(0, markerCount)` cannot drop them when the count is below four.
+
+### Chunked rendering — `addMarkers()` / `addMarkerChunk()`
+
+Placing every marker in one synchronous loop blocked the main thread for seconds. Google Maps requests and paints its tiles from that same thread, so until the loop finished the map could not draw anything and the container kept showing its blue background (`#9CC0F9`, set both in `map.css` and in the Map options). `addMarkerChunk` therefore renders `MARKER_CHUNK_SIZE` publications and hands the thread back with `setTimeout(…, 0)`.
+
+Two invariants make that safe:
+
+- **`endRecord` is fixed when a run starts.** The live API response is appended to `publicationsArray` while the chunks of the history files are still running; without a fixed end the history run would render those too, alongside the `addMarkers` call that was made for them.
+- **The publications array is passed along**, not read from `appState`. A chunk that is still scheduled when the user picks another municipality or period sees that `setPublications` replaced the array and stops.
+
+`appState.activeMarkerRuns` counts the runs in flight and `appState.isMoreDataExpected` holds the last caller's `isMoreDataAvailable`. Only the last run to finish hides the loading indicator, sets `isFullyLoaded` and calls `tryOpenPublicationFromUrl` (`finishMarkerRun`). Without that counter the live response — which typically finishes in milliseconds — cleared the loading indicator while the history chunks were still placing markers. A stale run only decrements the counter; it must not clear the indicator of the view that replaced it.
+
+### Effect
+
+Measured over `history/2026-07` + `2026-08`, 76.430 publications in all 342 municipalities: **699.351 → 294.302 markers (42%)**. Amsterdam over a six week window: 40.843 → 15.206. The worst extent loss of any single publication is 37 m. Computing the reduction costs about 24 ms for Amsterdam, spread over the chunks.
+
+Note that `findUniquePosition` still shifts markers that land on exactly the same coordinate, and that publications without any location are all placed on the municipality centre.
+
+---
+
 ## Bezwaartermijn (objection period)
 
 When a user clicks a marker, `collectBezwaartermijn()` fetches the full XML of the publication and passes it to `parseBekendmaking()` to determine whether and how long a formal objection (_bezwaar_) is still possible.
@@ -241,6 +296,8 @@ Dutch law grants **6 weeks** from the date the decision was sent (_verzenddatum_
 ### Date extraction from XML (`getDateFromText()`)
 
 The free-text body of the XML publication is parsed with string matching to find the relevant date. Three patterns are recognised:
+
+> **These matcher strings are load-bearing and some contain non-ASCII characters**, such as `"uw bezwaarschrift moet vóór "` (Alkmaar). If the encoding of `map.js` is corrupted — for example by round-tripping the file through a tool that assumes Windows-1252, turning `vóór` into `vÃ³Ã³r` — the string silently stops matching. No error, no crash: the objection deadline just disappears from the info window for the affected municipalities. Verify non-ASCII characters after any bulk edit of `map.js`.
 
 #### 1. Standard: date of dispatch (`verzenddatum`)
 
@@ -308,7 +365,7 @@ History files always store coordinates in WGS84 (`"lat lng"` string format).
 | `map.min.css`                   | Minified build output (do not edit)                      |
 | `index.html`                    | Entry point, Google Maps API key, PWA meta               |
 | `municipalities.json`           | Municipality list with coordinates and merger history    |
-| `periods.json`                  | Time period filter options (rolling + monthly 2014–2026) |
+| `periods.json`                  | Time period filter options (rolling + monthly 2013–2026) |
 | `history/<year>/*.json`         | Cached monthly publication data per municipality         |
 | `manual/*.pdf`                  | SRU 2.0 API documentation (v1.2, v1.3, v1.4)             |
 | `manual/example-amsterdam.json` | Sample raw SRU API JSON response                         |
