@@ -17,6 +17,11 @@ A run that has been missing for weeks therefore repairs itself, and the month
 that just ended is completed by the first run of the new month. Use --full to
 request the whole target month regardless.
 
+A file is rewritten only when its content actually changed. The sort order of a
+history file is not portable between platforms, because glibc and the Windows
+CRT disagree about spaces and punctuation under the same locale name, so a byte
+comparison would rewrite hundreds of unchanged files on every run.
+
 Usage:
     python scripts/fetch_history.py                             # up to and including the current month
     python scripts/fetch_history.py --year 2026 --month 7       # up to and including a specific month
@@ -542,8 +547,25 @@ def deduplicate(publications):
 
 
 def sort_key(pub):
-    """Sort by date, then by lowercase(title)+urlDoc using Dutch locale, matching JS sortPublications."""
+    """Sort by date, then by lowercase(title)+urlDoc using Dutch locale.
+
+    Note that the resulting order is not portable: glibc ignores spaces and
+    punctuation at the primary collation level while the Windows CRT does not,
+    so the same locale name yields a different order on Linux than on Windows.
+    That is why a file is rewritten only when its content changed (see
+    signature), not when merely its order would differ.
+    """
     return (pub["date"], locale.strxfrm(pub["title"].lower() + pub["urlDoc"]))
+
+
+def signature(publications):
+    """Order-independent fingerprint of a set of publications.
+
+    Used to decide whether a file has to be rewritten. Comparing rendered bytes
+    would also flag a pure reordering, which happens whenever this script runs on
+    a different platform than the one that produced the file.
+    """
+    return sorted(json.dumps(pub, ensure_ascii=False, sort_keys=True, separators=(",", ":")) for pub in publications)
 
 
 def render(publications):
@@ -746,19 +768,38 @@ def process(args, municipalities, limiter):
                 continue
 
             merged = deduplicate([normalize(pub) for pub in fresh + (existing_pubs or [])])
+            # Compare content before the date suffix and the sort are applied, so
+            # the comparison is independent of the collation of this machine.
+            merged_signature = signature(merged)
+            existing_signature = None if existing_pubs is None else signature(existing_pubs)
             for pub in merged:
                 pub["date"] = pub["date"] + DATE_SUFFIX
             merged.sort(key=sort_key)
             content = render(merged)
-            results.append((month_str, filepath, content, merged, existing_content, existing_pubs, len(fresh)))
+            results.append(
+                (month_str, filepath, content, merged, existing_content, existing_pubs, merged_signature, existing_signature, len(fresh))
+            )
 
-        for month_str, filepath, content, merged, existing_content, existing_pubs, fresh_count in results:
+        for (
+            month_str,
+            filepath,
+            content,
+            merged,
+            existing_content,
+            existing_pubs,
+            merged_signature,
+            existing_signature,
+            fresh_count,
+        ) in results:
             label = f"[{index}/{total}] {storage_name} {month_str}"
             detail = f"{len(merged)} records ({fresh_count} fetched, {period})"
 
-            if existing_content == content:
+            if merged_signature == existing_signature:
                 unchanged.append(f"{storage_name} {month_str}")
-                print(f"{label}: {detail}, unchanged")
+                # The bytes may still differ when the file was written on a platform
+                # with a different collation. Rewriting it would be pure churn.
+                suffix = " (sort order differs)" if existing_content != content else ""
+                print(f"{label}: {detail}, unchanged{suffix}")
                 continue
 
             if existing_pubs is not None and not args.allow_shrink and len(merged) < len(existing_pubs):
