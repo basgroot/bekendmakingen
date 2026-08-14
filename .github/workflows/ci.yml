@@ -19,6 +19,37 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          # history/ holds many JSON files. A shallow clone still downloads
+          # every blob of the tip commit, so without a partial clone this job
+          # transfers gigabytes to lint a handful of files. blob:none fetches
+          # blobs on demand and the sparse checkout keeps that demand to the
+          # paths below. Cone mode always adds the files in the repository
+          # root, which is where map.js and the tool configuration live.
+          # This set matches what the linters actually read: eslint.config.mjs
+          # ignores history/, and .prettierignore excludes history/, img/,
+          # manual/ and .opencode/.
+          filter: blob:none
+          sparse-checkout: |
+            .github
+            .githooks
+            scripts
+
+      # `eslint .` and `prettier --check .` both exit 0 when they find no
+      # files, so a sparse checkout that silently went wrong would turn this
+      # job green without checking anything.
+      - name: Verify the checkout is complete
+        run: |
+          for FILE in map.js index.html package.json package-lock.json eslint.config.mjs \
+                      .prettierrc .prettierignore .githooks/pre-commit.cjs \
+                      scripts/minify-css.mjs .github/workflows/ci.yml; do
+            [ -f "$FILE" ] || { echo "ERROR: $FILE is missing from the sparse checkout"; exit 1; }
+          done
+          if [ -d history ]; then
+            echo "ERROR: history/ was checked out, so the sparse pattern is not being applied"
+            exit 1
+          fi
+          echo "Checked out $(find . -path ./.git -prune -o -type f -print | wc -l) files."
 
       - name: Set up Node.js
         uses: actions/setup-node@v7

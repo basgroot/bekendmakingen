@@ -1,4 +1,6 @@
-# CodeQL static analysis for JavaScript.
+# CodeQL static analysis for JavaScript (map.js and the build tooling) and
+# Python (scripts/fetch_history.py, which runs unattended in the history
+# workflow and writes to the repository).
 # Results appear under the repo's Security -> Code scanning tab.
 # Docs: https://docs.github.com/en/code-security/code-scanning
 name: "CodeQL"
@@ -13,24 +15,43 @@ on:
 
 jobs:
   analyze:
-    name: Analyze
+    name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
       security-events: write
+    strategy:
+      # One language must not cancel the analysis of the other.
+      fail-fast: false
+      matrix:
+        # "javascript" is the legacy alias of "javascript-typescript". Keeping
+        # the old name keeps the SARIF category below unchanged, so existing
+        # alerts are not closed and reopened as new ones.
+        language: ["javascript", "python"]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          # The JavaScript extractor also picks up JSON, so without this it
+          # would download and analyse the ~64k files in history/. Those are
+          # data, not code. Cone mode always adds the files in the repository
+          # root, which is where map.js, index.html and the manifests live;
+          # scripts/ holds the only Python file.
+          filter: blob:none
+          sparse-checkout: |
+            .github
+            .githooks
+            scripts
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4.37.6
         with:
-          languages: javascript
+          languages: ${{ matrix.language }}
           queries: security-extended
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4.37.6
         with:
-          category: "/language:javascript"
+          category: "/language:${{ matrix.language }}"

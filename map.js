@@ -29,8 +29,8 @@ window.initMap = async function initMap() {
         "delayedMarkersArray": [],
         // The publications to display:
         "publicationsArray": [],
-        // Index of the urlDoc values in publicationsArray, to skip duplicates
-        // when the live request overlaps the history files:
+        // Index of the keys of publicationsArray (see getPublicationKey), to
+        // skip duplicates when the live request overlaps the history files:
         "loadedUrlDocs": new Set(),
         // Index of the coordinates already taken by a marker, either placed or
         // queued in delayedMarkersArray. Mirrors those two arrays exactly, so
@@ -635,7 +635,13 @@ window.initMap = async function initMap() {
      * @returns {void}
      */
     function collectBezwaartermijn(licenseId, publication) {
-        if (publication.urlApi === "UNAVAILABLE") {
+        // getUrlApi() stores "UNAVAILABLE" when the publication URL is not a
+        // recognised zoek.officielebekendmakingen.nl link. The history files are
+        // written by a different tool (scripts/fetch_history.py), which stores
+        // an empty string in that situation, so both have to be rejected here.
+        // Passing "" to fetch() would request the current page and then try to
+        // parse the HTML of this app as a publication.
+        if (!publication.urlApi || publication.urlApi === "UNAVAILABLE") {
             console.error("Unable to get data for license " + publication.urlDoc);
             return;
         }
@@ -1689,6 +1695,31 @@ window.initMap = async function initMap() {
     }
 
     /**
+     * Key identifying one publication in the duplicate index.
+     *
+     * The URL is the natural key, but not every publication has one: the SRU
+     * record may lack a preferredUrl and the history files store "" in that
+     * case. Keying those on "" would make them all look like the same
+     * publication, so only the first one would ever be shown. They fall back to
+     * a composite key instead.
+     *
+     * The date is compared as a local calendar date, not as a timestamp,
+     * because the two sources produce a different time for the same day: the
+     * history files hold UTC midnight while getDate() rounds down to local
+     * midnight. Both refer to the same instant before rounding, so the local
+     * calendar date matches in every time zone.
+     * @param {!object} publication Publication to describe.
+     * @returns {string} Key for appState.loadedUrlDocs.
+     */
+    function getPublicationKey(publication) {
+        if (publication.urlDoc) {
+            return publication.urlDoc;
+        }
+        // No URL can start with "!", so a composite key cannot collide with one.
+        return "!" + formatDate(publication.date) + "|" + publication.title + "|" + publication.description;
+    }
+
+    /**
      * Replace the loaded publications and rebuild the index used to skip duplicates.
      * @param {!Array<!object>} publications Publications to show.
      * @returns {void}
@@ -1697,7 +1728,7 @@ window.initMap = async function initMap() {
         appState.publicationsArray = publications;
         appState.loadedUrlDocs = new Set();
         publications.forEach(function (publication) {
-            appState.loadedUrlDocs.add(publication.urlDoc);
+            appState.loadedUrlDocs.add(getPublicationKey(publication));
         });
     }
 
@@ -1709,10 +1740,11 @@ window.initMap = async function initMap() {
      * @returns {boolean} True when the publication was added.
      */
     function appendPublication(publication) {
-        if (appState.loadedUrlDocs.has(publication.urlDoc)) {
+        const key = getPublicationKey(publication);
+        if (appState.loadedUrlDocs.has(key)) {
             return false;
         }
-        appState.loadedUrlDocs.add(publication.urlDoc);
+        appState.loadedUrlDocs.add(key);
         appState.publicationsArray.push(publication);
         return true;
     }
@@ -2391,14 +2423,23 @@ window.initMap = async function initMap() {
             console.error("Unexpected malformed searchRetrieveResponse loaded: " + JSON.stringify(responseJson, null, 4));
             return false;
         }
-        if (responseJson.searchRetrieveResponse.numberOfRecords === 1) {
-            // Somehow this is not an array when there is only one.
-            addPublication(responseJson.searchRetrieveResponse.records.record);
-        } else {
-            // Sort the raw records before pushing them into publicationsArray.
-            responseJson.searchRetrieveResponse.records.record.sort(sortRecords);
-            responseJson.searchRetrieveResponse.records.record.forEach(addPublication);
+        // The array wrapper is omitted when a *page* contains exactly one
+        // record. That happens for a result set of one, but also for the last
+        // page of a larger set (501 records = a page of 500 plus a page of 1).
+        // numberOfRecords is the total of the whole query, not the size of this
+        // page, so the shape has to be inspected instead of counted.
+        const records = responseJson.searchRetrieveResponse.records.record;
+        if (records === undefined || records === null) {
+            console.error("Unexpected searchRetrieveResponse without records: " + JSON.stringify(responseJson, null, 4));
+            return false;
         }
+        if (!Array.isArray(records)) {
+            addPublication(records);
+            return true;
+        }
+        // Sort the raw records before pushing them into publicationsArray.
+        records.sort(sortRecords);
+        records.forEach(addPublication);
         return true;
     }
 
@@ -2633,8 +2674,10 @@ window.initMap = async function initMap() {
             // duplicates of the overlapping day have been skipped.
             const firstNewMarker = appState.publicationsArray.length + 1;
             if (addPublications(responseJson)) {
-                const recordCount =
-                    responseJson.searchRetrieveResponse.numberOfRecords === 1 ? 1 : responseJson.searchRetrieveResponse.records.record.length;
+                // Same one-record-is-not-an-array rule as in addPublications:
+                // count the page by its shape, not by numberOfRecords.
+                const pageRecords = responseJson.searchRetrieveResponse.records.record;
+                const recordCount = Array.isArray(pageRecords) ? pageRecords.length : 1;
                 const addedCount = appState.publicationsArray.length - firstNewMarker + 1;
                 console.log(
                     "Found " +
