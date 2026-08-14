@@ -2512,18 +2512,22 @@ window.initMap = async function initMap() {
             } else {
                 // This is a request to add some history to the current view:
                 startRecord = appState.publicationsArray.length + 1;
-                // Delete the publications older than 6 weeks:
-                const publicationIndex = responseJson.publications.findIndex(function (publication) {
-                    return publication.date < appState.requestPeriod.startDate;
+                // Delete the publications older than 6 weeks. Filtering instead of
+                // slicing at the first match, because the two sources differ in sort
+                // order: the live API returns newest first (see sortRecords), while the
+                // history files are sorted oldest first. Slicing assumed the former and
+                // discarded the entire file for the latter.
+                const publicationCount = responseJson.publications.length;
+                responseJson.publications = responseJson.publications.filter(function (publication) {
+                    return publication.date >= appState.requestPeriod.startDate;
                 });
-                if (publicationIndex >= 0) {
+                if (responseJson.publications.length < publicationCount) {
                     console.log(
                         "Deleting " +
-                            (responseJson.publications.length - publicationIndex) +
+                            (publicationCount - responseJson.publications.length) +
                             " historical items from before " +
                             appState.requestPeriod.startDate.toDateString()
                     );
-                    responseJson.publications = responseJson.publications.slice(0, publicationIndex);
                 }
                 appState.publicationsArray = appState.publicationsArray.concat(responseJson.publications);
                 appState.isFullyLoaded = true;
