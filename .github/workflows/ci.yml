@@ -1,6 +1,8 @@
 # Lint and format check for every push and pull request to main.
 # Runs ESLint and Prettier via `npm run check`, then rebuilds the minified
-# assets and fails when they differ from what is committed.
+# assets and fails when they differ from what is committed. A second job
+# byte-compiles and lints the Python in scripts/, which otherwise has no
+# automated verification at all despite running unattended from history.yml.
 # Docs: https://docs.github.com/en/actions/automating-builds-and-tests
 name: "CI"
 
@@ -83,3 +85,54 @@ jobs:
             exit 1
           fi
           echo "map.min.js and map.min.css are up to date."
+
+  python:
+    name: Python static checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          # Same reasoning as the job above: history/ makes a full checkout
+          # expensive. Cone mode always adds the repository root, which is where
+          # ruff.toml lives, so scripts/ is all that has to be asked for.
+          filter: blob:none
+          sparse-checkout: |
+            scripts
+
+      # ruff exits 0 with only a warning when it finds no Python files at all, so
+      # a sparse checkout that silently went wrong would turn this job green
+      # without checking anything.
+      - name: Verify the checkout is complete
+        run: |
+          for FILE in scripts/fetch_history.py ruff.toml; do
+            [ -f "$FILE" ] || { echo "ERROR: $FILE is missing from the sparse checkout"; exit 1; }
+          done
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          # Pinned rather than "3.x", because history.yml runs the script with
+          # the python3 of the runner image and this is the version that has to
+          # match it. Give history.yml an actions/setup-python step with this
+          # same version, otherwise an image rotation makes CI check the script
+          # against a different interpreter than the one that runs it nightly.
+          python-version: "3.12"
+
+      # The real CPython compiler for the target version, not a third-party
+      # parser. A syntax error in a script that runs unattended at 04:17 UTC with
+      # contents: write would otherwise first surface in production.
+      - name: Byte-compile
+        run: python -m compileall -q scripts/
+
+      # The version is pinned on purpose: ruff has widened its default rule set
+      # between releases, so an unpinned run would silently change what CI
+      # enforces. ruff.toml pins the rules themselves.
+      - name: Lint
+        run: |
+          python -m pip install --quiet ruff==0.16.3
+          ruff --version
+          ruff check scripts/
