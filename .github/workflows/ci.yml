@@ -1,5 +1,6 @@
 # Lint and format check for every push and pull request to main.
-# Runs ESLint and Prettier via `npm run check`.
+# Runs ESLint and Prettier via `npm run check`, then rebuilds the minified
+# assets and fails when they differ from what is committed.
 # Docs: https://docs.github.com/en/actions/automating-builds-and-tests
 name: "CI"
 
@@ -11,7 +12,7 @@ on:
 
 jobs:
   lint:
-    name: Lint & format
+    name: Lint, format & build
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -40,7 +41,8 @@ jobs:
       # job green without checking anything.
       - name: Verify the checkout is complete
         run: |
-          for FILE in map.js index.html package.json package-lock.json eslint.config.mjs \
+          for FILE in map.js map.css map.min.js map.min.css \
+                      index.html package.json package-lock.json eslint.config.mjs \
                       .prettierrc .prettierignore .githooks/pre-commit.cjs \
                       scripts/minify-css.mjs .github/workflows/ci.yml; do
             [ -f "$FILE" ] || { echo "ERROR: $FILE is missing from the sparse checkout"; exit 1; }
@@ -62,3 +64,22 @@ jobs:
 
       - name: Run lint and format check
         run: npm run check
+
+      # map.min.js and map.min.css are committed build output, and they are what
+      # the site actually serves. Nothing else in this job looks at them:
+      # eslint.config.mjs ignores **/*.min.js and .prettierignore excludes
+      # *.min.js and *.min.css. Until now the only thing keeping them in step
+      # with map.js and map.css was the pre-commit hook, which is skipped by
+      # `git commit --no-verify`. Rebuilding here and comparing catches that,
+      # and it also catches a dependabot bump of terser or clean-css that
+      # changes the output without anyone touching the sources.
+      - name: Verify minified assets are up to date
+        run: |
+          npm run build
+          if ! git diff --quiet -- map.min.js map.min.css; then
+            echo "ERROR: the committed minified assets do not match their sources."
+            git diff --stat -- map.min.js map.min.css
+            echo "Run 'npm run build' and commit map.min.js and/or map.min.css."
+            exit 1
+          fi
+          echo "map.min.js and map.min.css are up to date."
