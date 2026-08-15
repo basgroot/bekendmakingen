@@ -1,0 +1,29 @@
+# Static checks for scripts/fetch_history.py, the only Python in this repository.
+# It runs unattended from .github/workflows/history.yml with contents: write, so
+# a mistake there lands in production at 04:17 UTC without anyone watching.
+#
+# The rule set is spelled out instead of relying on ruff's defaults, because
+# those have widened between releases: on the current code the defaults of ruff
+# 0.16 report seven findings. Pinning the rules here and the ruff version in
+# ci.yml keeps a new ruff release from turning the build red without a single
+# line of code changing.
+#
+# Enabled:
+#   E4/E7/E9  pycodestyle errors, including the ones that mean the file does not
+#             parse at all
+#   F         pyflakes: undefined names, unused imports, unused variables
+#   B         bugbear: mutable default arguments, loop variable binding and other
+#             patterns that are wrong rather than merely untidy
+#   W         pycodestyle warnings, notably W605 for an invalid escape sequence
+#
+# Deliberately still off: DTZ (naive datetimes), S (bandit), SIM, PIE, PTH. Those
+# report real observations rather than noise - naive datetime.now() while the
+# data is CET/CEST, the bare except that swallows an exception, ElementTree on
+# remote XML - but they are open work. Enabling them before that work is done
+# would only make the build red. Widen the selection as they get addressed.
+
+target-version = "py312"
+line-length = 150 # matches printWidth in .prettierrc
+
+[lint]
+select = ["E4", "E7", "E9", "F", "B", "W"]

@@ -9,6 +9,9 @@
 # The authoritative file for a completed month is still exported from the
 # archive database in the bekendmakingen-downloader project; that export
 # overwrites whatever this workflow produced.
+# Whatever the script managed to write is committed even when the run itself
+# fails or times out, so a bad day costs one run instead of everything it had
+# already fetched. Such a commit is marked "(partial, ...)".
 # Docs: https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
 name: "Update history"
 
@@ -110,6 +113,7 @@ jobs:
           echo "$SPARSE"
 
       - name: Checkout repository
+        id: checkout
         uses: actions/checkout@v7
         with:
           fetch-depth: 1
@@ -125,6 +129,7 @@ jobs:
           locale -a | grep -i "^nl_NL"
 
       - name: Fetch publications
+        id: fetch
         env:
           PYTHONUNBUFFERED: "1"
         run: |
@@ -137,8 +142,19 @@ jobs:
             --max-failures 3 \
             ${{ steps.period.outputs.args }}
 
+      # The script writes each municipality to disk as it finishes it, so hours
+      # of work are already on disk by the time it gives up over --max-failures
+      # or the job runs into timeout-minutes above. A plain `if: inputs.dry_run
+      # != true` has success() ANDed onto it implicitly, which skipped this step
+      # in exactly those cases and threw all of it away; the next run then
+      # fetched everything again. always() keeps it, including on the
+      # cancellation that a timeout produces. It is still gated on the checkout,
+      # because without one there is nothing sensible to commit, and the
+      # deletion guard below is what protects a partial state.
       - name: Commit and push
-        if: ${{ inputs.dry_run != true }}
+        if: ${{ always() && steps.checkout.outcome == 'success' && inputs.dry_run != true }}
+        env:
+          FETCH_OUTCOME: ${{ steps.fetch.outcome }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -159,6 +175,10 @@ jobs:
           fi
           MONTHS=$(git diff --cached --name-only | sed -n 's/.*-\([0-9]\{4\}-[0-9]\{2\}\)\.json$/\1/p' | sort -u | tr '\n' ' ')
           [ -n "$MONTHS" ] || MONTHS="${{ steps.period.outputs.year }}-${{ steps.period.outputs.month }}"
+          # Mark the commit when the fetch did not finish cleanly, so a partial
+          # month is recognisable in the log instead of looking like a full run.
+          SUFFIX=""
+          [ "$FETCH_OUTCOME" = "success" ] || SUFFIX=" (partial, fetch $FETCH_OUTCOME)"
           echo "Changed files: $(git diff --cached --name-only | wc -l)"
-          git commit -m "History ${MONTHS% }"
+          git commit -m "History ${MONTHS% }$SUFFIX"
           git push
