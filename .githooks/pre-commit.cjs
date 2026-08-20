@@ -27,7 +27,7 @@ function run(cmd, args, { ignoreError = false } = {}) {
 // quotes, so quoting is not enough. execFileSync hands argv straight to git and
 // no shell ever parses it.
 function git(...args) {
-    return execFileSync("git", args, { "encoding": "utf8" });
+    return execFileSync("git", args, { "encoding": "utf8", "maxBuffer": 1024 * 1024 * 1024 });
 }
 
 // Stage one path. "--" stops a leading dash from being read as an option, and
