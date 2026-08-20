@@ -532,6 +532,10 @@
         "center": {
             "lat": 51.69096,
             "lng": 5.30418
+        },
+        "origin": {
+            "year": 2015,
+            "municipalities": ["'s-Hertogenbosch", "Maasdonk"]
         }
     },
     "Den Haag": {
@@ -1725,6 +1729,10 @@
         "center": {
             "lat": 51.58062,
             "lng": 5.19457
+        },
+        "origin": {
+            "year": 2021,
+            "municipalities": ["Haaren", "Oisterwijk"]
         }
     },
     "Oldambt": {
