@@ -2837,6 +2837,26 @@ window.initMap = async function initMap() {
     }
 
     /**
+     * Build the dt.creator part of the query.
+     * A plain name is matched partially, which is what almost every municipality needs: it also catches the spelling variants KOOP has used over the
+     * years, such as "Utrecht (Utr)" until 2015 and "Utrecht" from 2016 on. A "creators" list switches to exact matching of every term, which is only
+     * correct where a partial match would swallow a neighbouring municipality, because exact matching no longer picks up unlisted variants.
+     * @param {string} municipality Municipality to load.
+     * @returns {string} URL-encoded CQL clause selecting that municipality.
+     */
+    function buildCreatorClause(municipality) {
+        const data = appState.municipalities[municipality];
+        if (Array.isArray(data.creators)) {
+            const terms = data.creators.map(function (name) {
+                return "dt.creator==%22" + encodeURIComponent(name) + "%22";
+            });
+            return "%28" + terms.join("%20OR%20") + "%29";
+        }
+        const lookupMunicipality = data.hasOwnProperty("lookupName") ? data.lookupName : municipality;
+        return "dt.creator=%22" + encodeURIComponent(lookupMunicipality) + "%22";
+    }
+
+    /**
      * Call the API to get live data.
      * @param {string} municipality Municipality to load.
      * @param {number} startRecord Start of batch.
@@ -2934,15 +2954,13 @@ window.initMap = async function initMap() {
                 });
         }
 
-        const lookupMunicipality =
-            appState.municipalities[municipality].hasOwnProperty("lookupName") ? appState.municipalities[municipality].lookupName : municipality;
         setLoadingIndicatorVisibility("show");
         const url =
             "https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.available%3E=" +
             appState.requestPeriod.startDateString +
-            "%20AND%20dt.creator=%22" +
-            encodeURIComponent(lookupMunicipality) +
-            "%22%20AND%20w.organisatietype%20any%20%22gemeente%20deelgemeente%22%20sortBy%20dt.available%20/sort.descending&maximumRecords=500&startRecord=" +
+            "%20AND%20" +
+            buildCreatorClause(municipality) +
+            "%20AND%20w.organisatietype%20any%20%22gemeente%20deelgemeente%22%20sortBy%20dt.available%20/sort.descending&maximumRecords=500&startRecord=" +
             startRecord +
             "&httpAccept=application/json";
         loadDataWithRetries(url, MAX_RETRIES);
