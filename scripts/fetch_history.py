@@ -127,7 +127,15 @@ def load_municipalities(source):
 
 
 def get_lookup_name(key, data):
-    """Get the name used to query the SRU API."""
+    """Get the name this municipality is known by outside its own entry.
+
+    It is the creator queried at the SRU API, unless a "creators" list overrides
+    that, and it is always the basis for the file name. Those two roles cannot be
+    split without renaming existing history files, which is why a municipality
+    whose creator differs from its file name carries both fields: "Bergen
+    (Limburg)" keeps lookupName "Bergen" so its files stay bergen-*.json, while
+    its creators list points at the real terms "Bergen (L)" and "Bergen (Li)".
+    """
     return data["lookupName"] if "lookupName" in data else key
 
 
@@ -403,26 +411,44 @@ def parse_publications(xml_text, fallback_date, warnings):
 # --------------------------------------------------------------------------
 
 
-def build_url(municipality, start_date, end_date, start_record, page_size):
+def build_creator_clause(creators):
+    """Build the dt.creator part of the query.
+
+    A plain string is matched partially, which is what almost every municipality
+    needs: it also catches the spelling variants KOOP has used over the years,
+    such as "Utrecht (Utr)" until 2015 and "Utrecht" from 2016 on.
+
+    A list switches to exact matching of every term. That is only correct where
+    a partial match would swallow another municipality, because exact matching
+    no longer picks up variants that are not listed.
+    """
+    if isinstance(creators, str):
+        return f"dt.creator=%22{quote(creators)}%22"
+    return "%28" + "%20OR%20".join(f"dt.creator==%22{quote(name)}%22" for name in creators) + "%29"
+
+
+def build_url(creators, start_date, end_date, start_record, page_size):
     """Build the SRU query URL for one page."""
     return (
         f"{SRU_ENDPOINT}?query="
         f"c.product-area==officielepublicaties"
         f"%20AND%20dt.available%3E={start_date}"
         f"%20AND%20dt.available%3C={end_date}"
-        f"%20AND%20dt.creator=%22{quote(municipality)}%22"
+        f"%20AND%20{build_creator_clause(creators)}"
+        f"%20AND%20w.organisatietype%20any%20%22gemeente%20deelgemeente%22"
         f"%20sortBy%20dt.available%20/sort.descending"
         f"&maximumRecords={page_size}&startRecord={start_record}"
         f"&httpAccept=application/xml"
     )
 
 
-def fetch_publications(municipality, start_date, end_date, limiter, warnings):
+def fetch_publications(municipality, creators, start_date, end_date, limiter, warnings):
     """Fetch publications for one municipality between two dates, inclusive.
 
-    The period may span several months; the caller splits the result. Returns
-    (publications, success). On failure success is False and the caller must
-    leave any existing file untouched.
+    ``municipality`` is only used for logging; ``creators`` selects the records,
+    see build_creator_clause. The period may span several months; the caller
+    splits the result. Returns (publications, success). On failure success is
+    False and the caller must leave any existing file untouched.
     """
     fallback_date = start_date
 
@@ -433,7 +459,7 @@ def fetch_publications(municipality, start_date, end_date, limiter, warnings):
     attempt = 0
 
     while True:
-        api_url = build_url(municipality, start_date, end_date, start_record, page_size)
+        api_url = build_url(creators, start_date, end_date, start_record, page_size)
         try:
             limiter.acquire()
             req = Request(api_url, method="GET")
@@ -691,15 +717,24 @@ def process(args, municipalities, limiter):
         keys = list(municipalities.keys())
 
     # Group by storage name: merged municipalities can map several source names
-    # onto one file when the requested year predates the merger.
+    # onto one file when the requested year predates the merger. Every source is
+    # a (label, creators) pair; the label is for logging, the creators select the
+    # records. A municipality with a "creators" list uses it in place of its own
+    # name, also inside an origin list, because the reason for that list -- a
+    # partial match that swallows a neighbour -- applies to those years just as
+    # much. The other origin names are unrelated municipalities and keep their
+    # own partial match.
     targets = {}
     for key in keys:
         data = municipalities[key]
         storage_name = get_storage_name(key, data)
+        lookup_name = get_lookup_name(key, data)
+        creators = data.get("creators")
         if "origin" in data and args.year < data["origin"]["year"]:
-            sources = list(data["origin"]["municipalities"])
+            names = list(data["origin"]["municipalities"])
         else:
-            sources = [get_lookup_name(key, data)]
+            names = [lookup_name]
+        sources = [(name, creators if creators and name == lookup_name else name) for name in names]
         targets.setdefault(storage_name, []).extend(sources)
 
     written = []
@@ -729,8 +764,8 @@ def process(args, municipalities, limiter):
 
         publications = []
         ok = True
-        for source in sources:
-            pubs, success = fetch_publications(source, start_date, end_date, limiter, warnings)
+        for label, creators in sources:
+            pubs, success = fetch_publications(label, creators, start_date, end_date, limiter, warnings)
             if not success:
                 ok = False
                 break
