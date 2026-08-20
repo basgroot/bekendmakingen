@@ -2905,7 +2905,7 @@ window.initMap = async function initMap() {
             }
             console.debug("Retrieving " + url + " (" + retriesLeft + " retries left)..");
             fetch(
-                // Example: https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.available%3E=2025-04-01%20AND%20dt.available%3C=2025-05-01%20AND%20dt.creator=%22Amsterdam%22%20sortBy%20dt.available%20/sort.descending&maximumRecords=500&startRecord=1&httpAccept=application/json
+                // Example: https://repository.overheid.nl/sru?query=c.product-area==officielepublicaties%20AND%20dt.available%3E=2025-04-01%20AND%20dt.available%3C=2025-05-01%20AND%20dt.creator=%22Amsterdam%22%20AND%20w.organisatietype==%22gemeente%22%20sortBy%20dt.available%20/sort.descending&maximumRecords=500&startRecord=1&httpAccept=application/json
                 url,
                 {
                     "method": "GET"
@@ -2942,7 +2942,7 @@ window.initMap = async function initMap() {
             appState.requestPeriod.startDateString +
             "%20AND%20dt.creator=%22" +
             encodeURIComponent(lookupMunicipality) +
-            "%22%20sortBy%20dt.available%20/sort.descending&maximumRecords=500&startRecord=" +
+            "%22%20AND%20w.organisatietype==%22gemeente%22%20sortBy%20dt.available%20/sort.descending&maximumRecords=500&startRecord=" +
             startRecord +
             "&httpAccept=application/json";
         loadDataWithRetries(url, MAX_RETRIES);

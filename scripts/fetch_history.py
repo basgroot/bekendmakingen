@@ -411,6 +411,7 @@ def build_url(municipality, start_date, end_date, start_record, page_size):
         f"%20AND%20dt.available%3E={start_date}"
         f"%20AND%20dt.available%3C={end_date}"
         f"%20AND%20dt.creator=%22{quote(municipality)}%22"
+        f"%20AND%20w.organisatietype==%22gemeente%22"
         f"%20sortBy%20dt.available%20/sort.descending"
         f"&maximumRecords={page_size}&startRecord={start_record}"
         f"&httpAccept=application/xml"
