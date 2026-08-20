@@ -233,6 +233,7 @@
     "Bergen (Limburg)": {
         "url": "https://www.bergen.nl",
         "lookupName": "Bergen",
+        "creators": ["Bergen (L)", "Bergen (Li)"],
         "center": {
             "lat": 51.60343,
             "lng": 6.04959
@@ -472,6 +473,7 @@
     },
     "Dantumadiel": {
         "url": "https://www.dantumadiel.nl",
+        "creators": ["Dantumadiel", "Dantumadeel"],
         "center": {
             "lat": 53.28581,
             "lng": 5.9907
@@ -496,7 +498,7 @@
         },
         "origin": {
             "year": 2016,
-            "municipalities": ["Boarnsterhim", "De Friese Meren", "Gaasterlân-Sleat", "Lemsterland", "Skasterlân"]
+            "municipalities": ["Boarnsterhim", "De Friese Meren", "Gaasterlân-Sleat", "Lemsterland", "Skarsterlân"]
         }
     },
     "De Ronde Venen": {
@@ -530,11 +532,16 @@
         "center": {
             "lat": 51.69096,
             "lng": 5.30418
+        },
+        "origin": {
+            "year": 2015,
+            "municipalities": ["'s-Hertogenbosch", "Maasdonk"]
         }
     },
     "Den Haag": {
         "url": "https://www.denhaag.nl",
         "lookupName": "'s-Gravenhage",
+        "creators": ["'s-Gravenhage", "Den Haag"],
         "center": {
             "lat": 52.08026,
             "lng": 4.3123
@@ -877,6 +884,7 @@
     },
     "Groningen": {
         "url": "https://gemeente.groningen.nl",
+        "creators": ["Groningen", "Groningen (Gr)"],
         "center": {
             "lat": 53.21732,
             "lng": 6.5672
@@ -1721,6 +1729,10 @@
         "center": {
             "lat": 51.58062,
             "lng": 5.19457
+        },
+        "origin": {
+            "year": 2021,
+            "municipalities": ["Haaren", "Oisterwijk"]
         }
     },
     "Oldambt": {
