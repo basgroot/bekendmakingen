@@ -1767,10 +1767,7 @@ window.initMap = async function initMap() {
     function isLocationInUrl() {
         if (globalThis.URLSearchParams) {
             const urlSearchParams = new globalThis.URLSearchParams(globalThis.location.search);
-            const municipalityParam = urlSearchParams.get("in");
-            if (municipalityParam && appState.municipalities[municipalityParam] !== undefined) {
-                return true;
-            }
+            return getMunicipalityFromUrl(urlSearchParams.get("in")) !== false;
         }
         return false;
     }
