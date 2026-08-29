@@ -2800,37 +2800,43 @@ window.initMap = async function initMap() {
                 return { "publications": [] };
             });
         });
-        Promise.all(requests).then(function (responses) {
-            if (municipality !== appState.activeMunicipality || appState.isHistoryActive) {
-                // The user selected something else while we were loading.
-                return;
-            }
-            let latestDate = null;
-            responses.forEach(function (responseJson) {
-                responseJson.publications.forEach(function (publication) {
-                    publication.date = new Date(publication.date);
-                    if (latestDate === null || publication.date > latestDate) {
-                        latestDate = publication.date;
-                    }
-                    if (publication.date >= appState.requestPeriod.startDate) {
-                        appendPublication(publication);
-                    }
+        Promise.all(requests)
+            .then(function (responses) {
+                if (municipality !== appState.activeMunicipality || appState.isHistoryActive) {
+                    // The user selected something else while we were loading.
+                    return;
+                }
+                let latestDate = null;
+                responses.forEach(function (responseJson) {
+                    responseJson.publications.forEach(function (publication) {
+                        publication.date = new Date(publication.date);
+                        if (latestDate === null || publication.date > latestDate) {
+                            latestDate = publication.date;
+                        }
+                        if (publication.date >= appState.requestPeriod.startDate) {
+                            appendPublication(publication);
+                        }
+                    });
                 });
+                console.log("Loaded " + appState.publicationsArray.length + " publications from history");
+                if (latestDate !== null && latestDate > appState.requestPeriod.startDate) {
+                    appState.requestPeriod.startDateString = formatDate(latestDate);
+                }
+                // Fire the live request before rendering, so the round trip overlaps
+                // with placing the markers. Rendering thousands of them takes seconds,
+                // and the response cannot be processed in the meantime anyway: the
+                // callback waits until this synchronous work is done.
+                console.log("Requesting live data from " + appState.requestPeriod.startDateString);
+                loadDataForMunicipality(municipality, 1);
+                if (appState.publicationsArray.length > 0) {
+                    addMarkers(1, true);
+                }
+            })
+            .catch(function (error) {
+                console.error("Failed to load recent publications", error);
+                setLoadingIndicatorVisibility("hide");
+                showError("Er is een probleem opgetreden bij het laden van de historische bekendmakingen.\nProbeer het later nogmaals.");
             });
-            console.log("Loaded " + appState.publicationsArray.length + " publications from history");
-            if (latestDate !== null && latestDate > appState.requestPeriod.startDate) {
-                appState.requestPeriod.startDateString = formatDate(latestDate);
-            }
-            // Fire the live request before rendering, so the round trip overlaps
-            // with placing the markers. Rendering thousands of them takes seconds,
-            // and the response cannot be processed in the meantime anyway: the
-            // callback waits until this synchronous work is done.
-            console.log("Requesting live data from " + appState.requestPeriod.startDateString);
-            loadDataForMunicipality(municipality, 1);
-            if (appState.publicationsArray.length > 0) {
-                addMarkers(1, true);
-            }
-        });
     }
 
     /**
