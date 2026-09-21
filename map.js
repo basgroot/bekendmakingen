@@ -902,13 +902,14 @@ window.initMap = async function initMap() {
         const bouwvergunningen = ["bouwen", "slopen"];
         title = title.toLowerCase();
         if (
-            (title.includes("aanvraag") && !title.includes("besluit op aanvraag")) ||
+            (title.includes("aanvraag") && !title.includes("besluit op aanvraag") && !title.includes("intrekking aanvraag")) ||
             title.includes("verlenging") ||
+            title.includes("aangevraagde omgevingsvergunning") ||
             title.includes("opschorten beslistermijn")
         ) {
             return "aanvraag"; // Halfwitty, CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0, via Wikimedia Commons
         }
-        if (title.includes("intrekken") || title.includes("buiten behandeling")) {
+        if (title.includes("intrekken") || title.includes("buiten behandeling") || title.includes("intrekking")) {
             return "ingetrokken";
         }
         if (exploitatievergunningen.includes(type) || title.includes("exploitatievergunning") || title.includes("alcoholwetvergunning")) {
