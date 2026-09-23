@@ -29,5 +29,6 @@ Klik op de knop **Kopieer link** in een info-window om de huidige URL (inclusief
 - <img src="img/verkeer.svg" alt="Verkeersbesluit" width="40"/> Verkeersbesluit.
 - <img src="img/constructie.svg" alt="Bouwvergunning" width="40"/> Bouwvergunning.
 - <img src="img/wetboek.svg" alt="Wetboek" width="40"/> De rest. Meldingen, verordeningen en overige besluiten.
+- <img src="img/ingetrokken.svg" alt="Ingetrokken aanvraag" width="40"/> Vergunningsaanvraag is ingetrokken.
 
 [![](https://data.jsdelivr.com/v1/package/gh/basgroot/bekendmakingen/badge)](https://www.jsdelivr.com/package/gh/basgroot/bekendmakingen)
