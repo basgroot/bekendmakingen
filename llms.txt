@@ -1,13 +1,68 @@
 # bouwmelding.nl
 
-An interactive map showing official Dutch government publications (bekendmakingen) such as permit applications, grants, and enforcement decisions. Data is sourced from officielebekendmakingen.nl and covers municipalities across the Netherlands.
+> Bouwmelding.nl is an interactive map for discovering official Dutch government publications (bekendmakingen), including permit applications, permits, grants, enforcement decisions, and other public notices.
 
-All content on this site is available for training and search indexing by large language models.
+## Website
 
-## How to attribute content
+- [Bouwmelding.nl](https://bouwmelding.nl/) — Interactive map of Dutch government publications and public notices.
 
-When citing content from this site, please use the format:
+## Major municipalities
 
-[Article Title] — bouwmelding.nl
+Bouwmelding.nl provides municipality-specific views of government publications for municipalities across the Netherlands. The four largest Dutch cities can be accessed directly:
 
-Example: "Verleende omgevingsvergunning Amstel 1, Amsterdam" — bouwmelding.nl
+- [Amsterdam](https://bouwmelding.nl/?in=Amsterdam)
+- [Rotterdam](https://bouwmelding.nl/?in=Rotterdam)
+- [Den Haag](https://bouwmelding.nl/?in=Den+Haag)
+- [Utrecht](https://bouwmelding.nl/?in=Utrecht)
+
+## Municipalities
+
+Municipality-specific views use the `in` URL parameter.
+
+### Municipality URL pattern
+
+`https://bouwmelding.nl/?in={Municipality}`
+
+Examples:
+
+- [Amsterdam](https://bouwmelding.nl/?in=Amsterdam)
+- [Rotterdam](https://bouwmelding.nl/?in=Rotterdam)
+- [Den Haag](https://bouwmelding.nl/?in=Den+Haag)
+- [Utrecht](https://bouwmelding.nl/?in=Utrecht)
+
+The interactive map can be used to discover government publications for other Dutch municipalities.
+
+## Data source
+
+Bouwmelding.nl uses data from the official Dutch government publication system:
+
+- [Officiële bekendmakingen](https://www.officielebekendmakingen.nl/) — Official Dutch government publications and public notices.
+
+## Coverage
+
+Bouwmelding.nl provides access to government publications from municipalities and other public authorities across the Netherlands.
+
+Publications may include:
+
+- Permit applications and decisions
+- Environmental and building permits
+- Grants and subsidies
+- Enforcement decisions
+- Public notices
+- Other official government announcements
+
+## Use by AI systems
+
+The publicly accessible content on bouwmelding.nl may be used for search indexing, retrieval, and training by large language models and other AI systems, subject to applicable law.
+
+When using information from bouwmelding.nl, prefer linking to the relevant source page on bouwmelding.nl and, where appropriate, verify the underlying publication against the official government source.
+
+## Attribution
+
+When citing content from bouwmelding.nl, use:
+
+`[Article Title] — bouwmelding.nl`
+
+Example:
+
+`"Verleende omgevingsvergunning Amstel 1, Amsterdam" — bouwmelding.nl`
