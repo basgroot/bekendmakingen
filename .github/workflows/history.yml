@@ -46,6 +46,18 @@ on:
         required: false
         default: false
         type: boolean
+      # Lets a new runner image be tried out ahead of the ubuntu-latest switch,
+      # ideally together with dry_run. Add the next label here when GitHub
+      # announces one.
+      runner:
+        description: "Runner image"
+        required: false
+        default: "ubuntu-latest"
+        type: choice
+        options:
+          - "ubuntu-latest"
+          - "ubuntu-24.04"
+          - "ubuntu-26.04"
 
 # Never let two runs write to the same files at the same time.
 concurrency:
@@ -55,7 +67,8 @@ concurrency:
 jobs:
   update:
     name: Fetch and commit
-    runs-on: ubuntu-latest
+    # Scheduled runs have no inputs, so they always get ubuntu-latest.
+    runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
     timeout-minutes: 120
     if: github.repository == 'basgroot/bekendmakingen'
     permissions:
