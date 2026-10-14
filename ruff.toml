@@ -5,8 +5,8 @@
 # The rule set is spelled out instead of relying on ruff's defaults, because
 # those have widened between releases: on the current code the defaults of ruff
 # 0.16 report seven findings. Pinning the rules here and the ruff version in
-# ci.yml keeps a new ruff release from turning the build red without a single
-# line of code changing.
+# requirements-dev.txt keeps a new ruff release from turning the build red
+# without a single line of code changing.
 #
 # Enabled:
 #   E4/E7/E9  pycodestyle errors, including the ones that mean the file does not

@@ -108,7 +108,7 @@ jobs:
       # without checking anything.
       - name: Verify the checkout is complete
         run: |
-          for FILE in scripts/fetch_history.py ruff.toml; do
+          for FILE in scripts/fetch_history.py ruff.toml requirements-dev.txt; do
             [ -f "$FILE" ] || { echo "ERROR: $FILE is missing from the sparse checkout"; exit 1; }
           done
 
@@ -128,11 +128,12 @@ jobs:
       - name: Byte-compile
         run: python -m compileall -q scripts/
 
-      # The version is pinned on purpose: ruff has widened its default rule set
-      # between releases, so an unpinned run would silently change what CI
-      # enforces. ruff.toml pins the rules themselves.
+      # The ruff version is pinned in requirements-dev.txt, where Dependabot
+      # (pip ecosystem) proposes updates as reviewable pull requests instead of
+      # an unpinned run silently changing what CI enforces. ruff.toml pins the
+      # rules themselves.
       - name: Lint
         run: |
-          python -m pip install --quiet ruff==0.16.3
+          python -m pip install --quiet -r requirements-dev.txt
           ruff --version
           ruff check scripts/
