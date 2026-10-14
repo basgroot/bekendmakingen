@@ -415,8 +415,8 @@ def build_creator_clause(creators):
     """Build the dt.creator part of the query.
 
     A plain string is matched partially, which is what almost every municipality
-    needs: it also catches the spelling variants KOOP has used over the years,
-    such as "Utrecht (Utr)" until 2015 and "Utrecht" from 2016 on.
+    needs: it also catches the spelling variants KOOP (now Logius) has used over
+    the years, such as "Utrecht (Utr)" until 2015 and "Utrecht" from 2016 on.
 
     A list switches to exact matching of every term. That is only correct where
     a partial match would swallow another municipality, because exact matching
