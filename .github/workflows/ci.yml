@@ -115,12 +115,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          # Pinned rather than "3.x", because history.yml runs the script with
-          # the python3 of the runner image and this is the version that has to
-          # match it. Give history.yml an actions/setup-python step with this
-          # same version, otherwise an image rotation makes CI check the script
-          # against a different interpreter than the one that runs it nightly.
-          python-version: "3.12"
+          # "3.x" is the latest stable CPython, so new releases are picked up
+          # without anyone bumping a number. history.yml uses the same "3.x",
+          # so CI checks the script against the interpreter that runs it
+          # nightly. Keep the two in step.
+          python-version: "3.x"
 
       # The real CPython compiler for the target version, not a third-party
       # parser. A syntax error in a script that runs unattended at 04:17 UTC with

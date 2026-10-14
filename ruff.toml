@@ -22,7 +22,7 @@
 # remote XML - but they are open work. Enabling them before that work is done
 # would only make the build red. Widen the selection as they get addressed.
 
-target-version = "py312"
+target-version = "py314" # ci.yml and history.yml run "3.x", the latest stable release
 line-length = 150 # matches printWidth in .prettierrc
 
 [lint]

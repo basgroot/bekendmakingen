@@ -120,6 +120,14 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: ${{ steps.period.outputs.sparse }}
 
+      # Same "3.x" as the Python job in ci.yml, so the nightly run uses the
+      # interpreter CI checked the script against instead of whatever python3
+      # the runner image happens to ship.
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.x"
+
       # The script sorts with Dutch collation, matching export_history.py. Ubuntu
       # runners only ship C and en_US; without nl_NL every file would be rewritten
       # in a different order.
