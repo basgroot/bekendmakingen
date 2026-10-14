@@ -2849,9 +2849,9 @@ window.initMap = async function initMap() {
 
     /**
      * Build the dt.creator part of the query.
-     * A plain name is matched partially, which is what almost every municipality needs: it also catches the spelling variants KOOP has used over the
-     * years, such as "Utrecht (Utr)" until 2015 and "Utrecht" from 2016 on. A "creators" list switches to exact matching of every term, which is only
-     * correct where a partial match would swallow a neighbouring municipality, because exact matching no longer picks up unlisted variants.
+     * A plain name is matched partially, which is what almost every municipality needs: it also catches the spelling variants KOOP (now Logius) has used
+     * over the years, such as "Utrecht (Utr)" until 2015 and "Utrecht" from 2016 on. A "creators" list switches to exact matching of every term, which is
+     * only correct where a partial match would swallow a neighbouring municipality, because exact matching no longer picks up unlisted variants.
      * @param {string} municipality Municipality to load.
      * @returns {string} URL-encoded CQL clause selecting that municipality.
      */
