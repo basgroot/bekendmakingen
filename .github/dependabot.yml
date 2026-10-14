@@ -4,6 +4,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "saturday"
+      time: "07:00"
+      timezone: "Europe/Amsterdam"
     cooldown:
       default-days: 2
     groups:
@@ -17,6 +20,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "saturday"
+      time: "07:00"
+      timezone: "Europe/Amsterdam"
     cooldown:
       default-days: 2
     groups:
@@ -30,6 +36,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "saturday"
+      time: "07:00"
+      timezone: "Europe/Amsterdam"
     cooldown:
       default-days: 2
     commit-message:
