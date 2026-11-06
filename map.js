@@ -196,8 +196,13 @@ window.initMap = async function initMap() {
             if (parsedUrl !== null && (parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:")) {
                 const linkPara = document.createElement("p");
                 const link = document.createElement("a");
-                link.href = parsedUrl.href;
                 link.title = parsedUrl.href;
+                if (parsedUrl.hostname === "officielebekendmakingen.nl" || parsedUrl.hostname.endsWith(".officielebekendmakingen.nl")) {
+                    parsedUrl.searchParams.set("utm_source", "bouwmelding.nl");
+                    parsedUrl.searchParams.set("utm_medium", "referral");
+                    parsedUrl.searchParams.set("utm_campaign", "bekendmakingen");
+                }
+                link.href = parsedUrl.href;
                 // Original code had target="blank" (a named window called "blank")
                 // instead of "_blank" (new tab). Use the correct value plus rel
                 // attributes that prevent the opened page from accessing this one.
