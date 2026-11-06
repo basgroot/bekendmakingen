@@ -137,6 +137,29 @@ window.initMap = async function initMap() {
     }
 
     /**
+     * Append UTM campaign parameters to a URL so links shared via the
+     * "Kopieer link" button are attributable to bouwmelding.nl, matching
+     * the parameters used on the "Officiële bekendmaking" link.
+     * @param {string} url The URL to append UTM parameters to.
+     * @returns {string} The URL with UTM parameters added.
+     */
+    function addUtmParameters(url) {
+        let parsedUrl = null;
+        try {
+            parsedUrl = new URL(url, globalThis.location.href);
+        } catch (_ignore) {
+            // parsedUrl remains null
+        }
+        if (parsedUrl === null) {
+            return url;
+        }
+        parsedUrl.searchParams.set("utm_source", "bouwmelding.nl");
+        parsedUrl.searchParams.set("utm_medium", "referral");
+        parsedUrl.searchParams.set("utm_campaign", "bekendmakingen");
+        return parsedUrl.href;
+    }
+
+    /**
      * Display the popup window.
      * https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindow.open
      * @param {!object} marker Marker showing the popup.
@@ -214,8 +237,9 @@ window.initMap = async function initMap() {
             }
         }
 
-        // "Kopieer link" button: copies the current URL (including ?pub=) to
-        // the clipboard so the deep link to this info-window can be shared.
+        // "Kopieer link" button: copies the current URL (including ?pub= and
+        // UTM parameters) to the clipboard so the deep link to this info-window
+        // can be shared.
         if (licenseId) {
             const copyPara = document.createElement("p");
             const copyButton = document.createElement("button");
@@ -227,7 +251,7 @@ window.initMap = async function initMap() {
                 // Make sure the URL reflects the currently shown publication
                 // before copying (in case the user clicked very quickly).
                 updateUrlForPublication(licenseId);
-                const url = globalThis.location.href;
+                const url = addUtmParameters(globalThis.location.href);
                 const showCopied = function () {
                     const original = copyButton.textContent;
                     copyButton.textContent = "Gekopieerd";
