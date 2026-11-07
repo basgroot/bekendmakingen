@@ -9,7 +9,10 @@ updates:
       timezone: "Europe/Amsterdam"
     cooldown:
       default-days: 2
+    versioning-strategy: "increase"
     groups:
+      npm-prod:
+        dependency-type: "production"
       npm-dev:
         dependency-type: "development"
     commit-message:
