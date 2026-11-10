@@ -99,6 +99,7 @@ jobs:
           # the script, the municipality list and the months the script may read
           # or write. Collect the years as well, for staging the result.
           SPARSE="/scripts/
+          /.gitignore
           /municipalities.json"
           YEARS=""
           for OFFSET in $(seq 0 "$LOOKBACK_MONTHS"); do
@@ -171,7 +172,7 @@ jobs:
       # fetched everything again. always() keeps it, including on the
       # cancellation that a timeout produces. It is still gated on the checkout,
       # because without one there is nothing sensible to commit, and the
-      # deletion guard below is what protects a partial state.
+      # deletion guard and staged JSON validation below protect a partial state.
       - name: Commit and push
         if: ${{ always() && steps.checkout.outcome == 'success' && inputs.dry_run != true }}
         env:
@@ -194,6 +195,7 @@ jobs:
             echo "No changes to commit."
             exit 0
           fi
+          python3 scripts/validate_history.py
           MONTHS=$(git diff --cached --name-only | sed -n 's/.*-\([0-9]\{4\}-[0-9]\{2\}\)\.json$/\1/p' | sort -u | tr '\n' ' ')
           [ -n "$MONTHS" ] || MONTHS="${{ steps.period.outputs.year }}-${{ steps.period.outputs.month }}"
           # Mark the commit when the fetch did not finish cleanly, so a partial

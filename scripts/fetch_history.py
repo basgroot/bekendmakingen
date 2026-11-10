@@ -43,6 +43,7 @@ import math
 import os
 import re
 import sys
+import tempfile
 import time
 import xml.etree.ElementTree as ET
 from datetime import date, datetime, timedelta
@@ -604,6 +605,29 @@ def render(publications):
     return content + "\n]}"
 
 
+def write_atomic(filepath, content):
+    """Replace a history file only after its complete contents are on disk."""
+    directory = os.path.dirname(filepath)
+    os.makedirs(directory, exist_ok=True)
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", newline="\n", dir=directory,
+            prefix=".fetch-history-", suffix=".tmp", delete=False,
+        ) as f:
+            temporary_path = f.name
+            f.write(content)
+            f.flush()
+            os.fsync(f.fileno())
+        # Keep existing permissions; new history files must be readable by the site.
+        mode = os.stat(filepath).st_mode & 0o777 if os.path.exists(filepath) else 0o644
+        os.chmod(temporary_path, mode)
+        os.replace(temporary_path, filepath)
+    finally:
+        if temporary_path is not None and os.path.exists(temporary_path):
+            os.unlink(temporary_path)
+
+
 def history_path(history_dir, storage_name, year, month):
     """Path of the history file of one municipality for one month."""
     return os.path.join(history_dir, str(year), f"{storage_name}-{year}-{month:02d}.json")
@@ -850,9 +874,7 @@ def process(args, municipalities, limiter):
                 print(f"{label}: {detail}, would write (dry run)")
                 continue
 
-            os.makedirs(os.path.dirname(filepath), exist_ok=True)
-            with open(filepath, "w", encoding="utf-8", newline="\n") as f:
-                f.write(content)
+            write_atomic(filepath, content)
             written.append(f"{storage_name} {month_str}")
             print(f"{label}: {detail}, written")
 

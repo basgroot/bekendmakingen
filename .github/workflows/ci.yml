@@ -1,8 +1,8 @@
 # Lint and format check for every push and pull request to main.
 # Runs ESLint and Prettier via `npm run check`, then rebuilds the minified
 # assets and fails when they differ from what is committed. A second job
-# byte-compiles and lints the Python in scripts/, which otherwise has no
-# automated verification at all despite running unattended from history.yml.
+# byte-compiles and lints the Python in scripts/ and tests the history writer
+# and staged validation used by the unattended history.yml workflow.
 # Docs: https://docs.github.com/en/actions/automating-builds-and-tests
 name: "CI"
 
@@ -87,7 +87,7 @@ jobs:
           echo "map.min.js and map.min.css are up to date."
 
   python:
-    name: Python static checks
+    name: Python checks & tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -108,7 +108,7 @@ jobs:
       # without checking anything.
       - name: Verify the checkout is complete
         run: |
-          for FILE in scripts/fetch_history.py ruff.toml requirements-dev.txt; do
+          for FILE in scripts/fetch_history.py scripts/validate_history.py scripts/test_history.py ruff.toml requirements-dev.txt; do
             [ -f "$FILE" ] || { echo "ERROR: $FILE is missing from the sparse checkout"; exit 1; }
           done
 
@@ -126,6 +126,9 @@ jobs:
       # contents: write would otherwise first surface in production.
       - name: Byte-compile
         run: python -m compileall -q scripts/
+
+      - name: History writer and staged validation tests
+        run: python -m unittest discover -s scripts -p 'test_*.py' -v
 
       # The ruff version is pinned in requirements-dev.txt, where Dependabot
       # (pip ecosystem) proposes updates as reviewable pull requests instead of
