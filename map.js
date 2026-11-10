@@ -137,6 +137,23 @@ window.initMap = async function initMap() {
     }
 
     /**
+     * Parse an absolute or relative HTTP(S) URL; reject invalid or unsafe schemes.
+     * @param {*} url The URL to validate.
+     * @returns {?URL} Parsed URL, or null when it is not an HTTP(S) URL.
+     */
+    function parseHttpUrl(url) {
+        if (typeof url !== "string" || !url.trim()) {
+            return null;
+        }
+        try {
+            const parsedUrl = new URL(url, globalThis.location.href);
+            return parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:" ? parsedUrl : null;
+        } catch (_ignore) {
+            return null;
+        }
+    }
+
+    /**
      * Append UTM campaign parameters to a URL so links shared via the
      * "Kopieer link" button are attributable to bouwmelding.nl, matching
      * the parameters used on the "Officiële bekendmaking" link.
@@ -144,12 +161,7 @@ window.initMap = async function initMap() {
      * @returns {string} The URL with UTM parameters added.
      */
     function addUtmParameters(url) {
-        let parsedUrl = null;
-        try {
-            parsedUrl = new URL(url, globalThis.location.href);
-        } catch (_ignore) {
-            // parsedUrl remains null
-        }
+        const parsedUrl = parseHttpUrl(url);
         if (parsedUrl === null) {
             return url;
         }
@@ -204,37 +216,26 @@ window.initMap = async function initMap() {
         descriptionPara.textContent = description;
         body.appendChild(descriptionPara);
 
-        // Only render the link when urlDoc is an http(s) URL. This blocks
-        // javascript:, data:, and other scheme-based XSS vectors that would
-        // otherwise be executed when the user clicks the link. Parsing via
-        // the URL constructor (with location.href as the base) accepts both
-        // absolute and protocol-relative/relative forms.
-        if (urlDoc) {
-            let parsedUrl = null;
-            try {
-                parsedUrl = new URL(urlDoc, globalThis.location.href);
-            } catch (_ignore) {
-                // parsedUrl remains null
+        // Only render links with a validated HTTP(S) URL.
+        const parsedUrl = parseHttpUrl(urlDoc);
+        if (parsedUrl !== null) {
+            const linkPara = document.createElement("p");
+            const link = document.createElement("a");
+            link.title = parsedUrl.href;
+            if (parsedUrl.hostname === "officielebekendmakingen.nl" || parsedUrl.hostname.endsWith(".officielebekendmakingen.nl")) {
+                parsedUrl.searchParams.set("utm_source", "bouwmelding.nl");
+                parsedUrl.searchParams.set("utm_medium", "referral");
+                parsedUrl.searchParams.set("utm_campaign", "bekendmakingen");
             }
-            if (parsedUrl !== null && (parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:")) {
-                const linkPara = document.createElement("p");
-                const link = document.createElement("a");
-                link.title = parsedUrl.href;
-                if (parsedUrl.hostname === "officielebekendmakingen.nl" || parsedUrl.hostname.endsWith(".officielebekendmakingen.nl")) {
-                    parsedUrl.searchParams.set("utm_source", "bouwmelding.nl");
-                    parsedUrl.searchParams.set("utm_medium", "referral");
-                    parsedUrl.searchParams.set("utm_campaign", "bekendmakingen");
-                }
-                link.href = parsedUrl.href;
-                // Original code had target="blank" (a named window called "blank")
-                // instead of "_blank" (new tab). Use the correct value plus rel
-                // attributes that prevent the opened page from accessing this one.
-                link.target = "_blank";
-                link.rel = "noopener noreferrer";
-                link.textContent = "Officiële bekendmaking";
-                linkPara.appendChild(link);
-                body.appendChild(linkPara);
-            }
+            link.href = parsedUrl.href;
+            // Original code had target="blank" (a named window called "blank")
+            // instead of "_blank" (new tab). Use the correct value plus rel
+            // attributes that prevent the opened page from accessing this one.
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = "Officiële bekendmaking";
+            linkPara.appendChild(link);
+            body.appendChild(linkPara);
         }
 
         // "Kopieer link" button: copies the current URL (including ?pub= and
@@ -1234,8 +1235,9 @@ window.initMap = async function initMap() {
         boldTitle.textContent = "Bekendmakingen op kaart";
         const municipalityLink = document.createElement("a");
         const municipalityUrl = appState.municipalities[appState.activeMunicipality]?.url;
-        if (municipalityUrl) {
-            municipalityLink.href = municipalityUrl;
+        const parsedUrl = parseHttpUrl(municipalityUrl);
+        if (parsedUrl !== null) {
+            municipalityLink.href = parsedUrl.href;
             municipalityLink.target = "_blank";
             municipalityLink.rel = "noopener noreferrer";
         }
