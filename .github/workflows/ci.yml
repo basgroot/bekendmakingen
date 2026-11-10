@@ -108,7 +108,7 @@ jobs:
       # without checking anything.
       - name: Verify the checkout is complete
         run: |
-          for FILE in scripts/fetch_history.py scripts/validate_history.py scripts/test_history.py ruff.toml requirements-dev.txt; do
+          for FILE in scripts/fetch_history.py scripts/validate_history.py scripts/test_history.py scripts/test_sru.py ruff.toml requirements-dev.txt; do
             [ -f "$FILE" ] || { echo "ERROR: $FILE is missing from the sparse checkout"; exit 1; }
           done
 

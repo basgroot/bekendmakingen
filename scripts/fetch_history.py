@@ -361,19 +361,59 @@ def process_coordinate(coord_list, gebiedsmarkering):
         pass  # Ignore: too coarse to place on the map
 
 
+class SruResponseError(ValueError):
+    """An SRU protocol error, with an explicit retry policy."""
+
+    def __init__(self, message, retryable=True):
+        super().__init__(message)
+        self.retryable = retryable
+
+
 def parse_publications(xml_text, fallback_date, warnings):
     """Parse an SRU XML response. Returns (publications, total, next_record_position)."""
     root = ET.fromstring(xml_text)
+    if local_tag(root) != "searchRetrieveResponse":
+        raise SruResponseError(f"Unexpected SRU response root: {local_tag(root)}")
 
-    records = find_elements(root, "record")
+    # Diagnostics may replace the whole response or an individual record.
+    # Neither may be interpreted as a successful empty result.
+    diagnostics = find_elements(root, "diagnostic")
+    if diagnostics:
+        messages = []
+        retryable = True
+        # SRU diagnostic codes: general system error, system unavailable,
+        # and record temporarily unavailable. Other diagnostics fail promptly.
+        transient_uris = {f"info:srw/diagnostic/1/{code}" for code in (1, 2, 64)}
+        for diagnostic in diagnostics:
+            uri = get_elm_text(diagnostic, "uri") or "unknown diagnostic"
+            message = get_elm_text(diagnostic, "message") or ""
+            details = get_elm_text(diagnostic, "details") or ""
+            messages.append(" - ".join(part for part in (uri, message, details) if part))
+            retryable = retryable and uri in transient_uris
+        raise SruResponseError("SRU diagnostic: " + "; ".join(messages), retryable=retryable)
+
+    def metadata_integer(name, required=True):
+        # Read response-level metadata, not similarly named fields in record data.
+        elements = [child for child in root if local_tag(child) == name]
+        if not elements and not required:
+            return None
+        if len(elements) != 1 or not re.fullmatch(r"[0-9]+", (elements[0].text or "").strip()):
+            raise SruResponseError(f"Missing or invalid SRU {name}")
+        return int(elements[0].text)
+
+    total = metadata_integer("numberOfRecords")
+    next_pos = metadata_integer("nextRecordPosition", required=False)
+    if next_pos is not None and next_pos < 1:
+        raise SruResponseError("SRU nextRecordPosition must be positive")
+
+    records_containers = [child for child in root if local_tag(child) == "records"]
+    records = [record for container in records_containers for record in container if local_tag(record) == "record"]
     if not records:
+        if total != 0 or next_pos is not None:
+            raise SruResponseError("SRU response has no records but reports results or a next page")
         return [], 0, None
-
-    number_of_records_elm = find_element(root, "numberOfRecords")
-    total = int(number_of_records_elm.text) if number_of_records_elm is not None else 0
-
-    next_pos_elm = find_element(root, "nextRecordPosition")
-    next_pos = int(next_pos_elm.text) if next_pos_elm is not None else None
+    if total == 0:
+        raise SruResponseError("SRU response contains records but reports zero results")
 
     publications = []
     for record_elm in records:
@@ -493,7 +533,11 @@ def fetch_publications(municipality, creators, start_date, end_date, limiter, wa
             else:
                 break
 
-        except Exception as e:  # noqa: BLE001 - every transport error is retried
+        except Exception as e:  # noqa: BLE001 - transport and retryable protocol errors are retried
+            if isinstance(e, SruResponseError) and not e.retryable:
+                print(f"  FAILED: {municipality}: {e}")
+                print(f"    URL: {api_url}")
+                return [], False
             if isinstance(e, HTTPError):
                 error_msg = f"HTTP {e.code} {e.reason}"
                 try:
