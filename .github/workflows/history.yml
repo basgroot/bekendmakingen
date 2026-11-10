@@ -131,6 +131,8 @@ jobs:
         uses: actions/checkout@v7
         with:
           fetch-depth: 1
+          # Fetch only the blobs needed by the sparse checkout, not the full archive.
+          filter: blob:none
           sparse-checkout-cone-mode: false
           sparse-checkout: ${{ steps.period.outputs.sparse }}
 
