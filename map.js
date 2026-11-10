@@ -1100,6 +1100,7 @@ window.initMap = async function initMap() {
         const markerZIndex = Math.floor(publication.date.getTime() / 1000);
         const marker = new AdvancedMarkerElement({
             "map": isMarkerVisible(age, periodToShow) ? appState.map : null,
+            "gmpClickable": true,
             "position": position,
             "content": createMarkerIcon(cdnHost + "/img/" + iconName + ".png", 35, 45),
             "zIndex": markerZIndex,
@@ -1179,10 +1180,11 @@ window.initMap = async function initMap() {
             "age": age,
             "position": position,
             "isSvg": true,
-            "marker": marker
+            "marker": marker,
+            "openPublication": onClick
         };
         appState.markersArray.push(markerObject);
-        marker.addListener("gmp-click", onClick);
+        marker.addEventListener("gmp-click", onClick);
         // Highlight the icon (and related icons) on hover
         marker.content.addEventListener("mouseover", handleMarkerMouseMove);
         marker.content.addEventListener("mouseout", handleMarkerMouseMove);
@@ -1557,7 +1559,7 @@ window.initMap = async function initMap() {
 
     /**
      * If the URL contains ?pub=<licenseId>, locate the matching marker and
-     * synthesize a click on it so the deep-linked info-window opens.
+     * open its info-window using the same handler as a marker click.
      * Idempotent: does nothing if no parameter is present or no match is found.
      * @returns {void}
      */
@@ -1580,7 +1582,7 @@ window.initMap = async function initMap() {
         if (match) {
             console.log("Opening info-window for ?pub=" + wantedLicenseId);
             appState.openedPublicationLicenseId = wantedLicenseId;
-            google.maps.event.trigger(match.marker, "gmp-click");
+            match.openPublication();
             return;
         }
         // 2. Not yet on the map: maybe it's in the delayed (off-screen) queue.
@@ -1607,6 +1609,7 @@ window.initMap = async function initMap() {
             const municipalityObject = appState.municipalities[municipalityName];
             const marker = new AdvancedMarkerElement({
                 "map": municipalityName === appState.activeMunicipality ? null : appState.map,
+                "gmpClickable": true,
                 "position": municipalityObject.center,
                 "content": createMarkerIcon(cdnHost + "/img/gemeente.png", 50, 61, municipalityName),
                 "title": municipalityName
@@ -1615,7 +1618,7 @@ window.initMap = async function initMap() {
                 "municipalityName": municipalityName,
                 "marker": marker
             });
-            marker.addListener("gmp-click", function () {
+            marker.addEventListener("gmp-click", function () {
                 const municipalityComboElm = document.getElementById("idCbxMunicipality");
                 if (municipalityComboElm !== null) {
                     municipalityComboElm.value = municipalityName;
@@ -1633,7 +1636,7 @@ window.initMap = async function initMap() {
      * @returns {void}
      */
     function setMarkerVisibility(marker, isVisible) {
-        marker.setMap(isVisible ? appState.map : null);
+        marker.map = isVisible ? appState.map : null;
     }
 
     /**
@@ -3012,9 +3015,10 @@ window.initMap = async function initMap() {
      * @returns {void}
      */
     function clearMarkers(municipalityToHide) {
-        // https://developers.google.com/maps/documentation/javascript/markers#remove
+        // Detach Advanced Markers by clearing their map property.
+        // https://developers.google.com/maps/documentation/javascript/reference/advanced-markers#AdvancedMarkerElement.map
         appState.markersArray.forEach(function (markerObject) {
-            markerObject.marker.setMap(null);
+            markerObject.marker.map = null;
             markerObject.marker = null;
         });
         appState.municipalityMarkers.forEach(function (markerObject) {
