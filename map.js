@@ -373,6 +373,106 @@ window.initMap = async function initMap() {
     }
 
     /**
+     * Construct a local calendar date without the special handling of years 0-99.
+     * @param {number} year Calendar year.
+     * @param {number} month Month, from 1 to 12.
+     * @param {number} day Day of the month.
+     * @returns {!Date} Calendar date at local midnight.
+     */
+    function createCalendarDate(year, month, day) {
+        const result = new Date(0);
+        result.setFullYear(year, month - 1, day);
+        result.setHours(0, 0, 0, 0);
+        return result;
+    }
+
+    /**
+     * Count calendar days between dates without daylight-saving-time rounding.
+     * @param {!Date} from First calendar date.
+     * @param {!Date} to Second calendar date.
+     * @returns {number} Signed number of calendar days from the first to the second date.
+     */
+    function getCalendarDaysDifference(from, to) {
+        const fromUtc = new Date(0);
+        const toUtc = new Date(0);
+        fromUtc.setUTCFullYear(from.getFullYear(), from.getMonth(), from.getDate());
+        toUtc.setUTCFullYear(to.getFullYear(), to.getMonth(), to.getDate());
+        return (toUtc.getTime() - fromUtc.getTime()) / (24 * 60 * 60 * 1000);
+    }
+
+    /**
+     * Get holidays and currently known equivalent days under the Algemene termijnenwet.
+     * @param {number} year Calendar year.
+     * @returns {!Array<!Date>} Excluded calendar dates in the given year.
+     */
+    function getLegalHolidays(year) {
+        // Gregorian Easter, Meeus/Jones/Butcher algorithm.
+        const a = year % 19;
+        const b = Math.floor(year / 100);
+        const c = year % 100;
+        const d = Math.floor(b / 4);
+        const e = b % 4;
+        const f = Math.floor((b + 8) / 25);
+        const g = Math.floor((b - f + 1) / 3);
+        const h = (19 * a + b - d - g + 15) % 30;
+        const i = Math.floor(c / 4);
+        const k = c % 4;
+        const l = (32 + 2 * e + 2 * i - h - k) % 7;
+        const m = Math.floor((a + 11 * h + 22 * l) / 451);
+        const easterMonth = Math.floor((h + l - 7 * m + 114) / 31);
+        const easterDay = ((h + l - 7 * m + 114) % 31) + 1;
+        // Article 3: https://wetten.overheid.nl/BWBR0002448/#Artikel3
+        const royalDay = createCalendarDate(year, 4, year >= 2014 ? 27 : 30);
+        if (royalDay.getDay() === 0) {
+            royalDay.setDate(royalDay.getDate() - 1);
+        }
+        const holidays = [
+            createCalendarDate(year, 1, 1),
+            royalDay,
+            createCalendarDate(year, 5, 5), // Liberation Day counts every year.
+            createCalendarDate(year, 12, 25),
+            createCalendarDate(year, 12, 26)
+        ];
+        for (const offset of [-2, 1, 39, 50]) {
+            // Good Friday, Easter Monday, Ascension Day and Whit Monday.
+            holidays.push(createCalendarDate(year, easterMonth, easterDay + offset));
+        }
+        // Known additional days (brugdagen); future designations require updating this list.
+        // https://wetten.overheid.nl/BWBR0051300/#Artikel1
+        const equivalentDays = {
+            "2027": [[5, 7]],
+            "2028": [
+                [4, 28],
+                [5, 26]
+            ]
+        };
+        for (const [month, day] of equivalentDays[year] || []) {
+            holidays.push(createCalendarDate(year, month, day));
+        }
+        return holidays;
+    }
+
+    /**
+     * Extend a statutory deadline to the next day allowed by the Algemene termijnenwet.
+     * @param {!Date} deadline Unadjusted final day, inclusive.
+     * @returns {!Date} Inclusive final day after weekend and holiday correction.
+     */
+    function extendLegalDeadline(deadline) {
+        const result = new Date(deadline.getTime());
+        // Article 1: https://wetten.overheid.nl/BWBR0002448/#Artikel1
+        while (
+            result.getDay() === 0 ||
+            result.getDay() === 6 ||
+            getLegalHolidays(result.getFullYear()).some(function (holiday) {
+                return holiday.getMonth() === result.getMonth() && holiday.getDate() === result.getDate();
+            })
+        ) {
+            result.setDate(result.getDate() + 1);
+        }
+        return result;
+    }
+
+    /**
      * Parse the response of the license document to find the date the license is granted.
      * @param {string} responseXml XML response.
      * @param {!object} publication Publication object.
@@ -402,25 +502,37 @@ window.initMap = async function initMap() {
         }
 
         /**
-         * Parses a date value.
+         * Parses a calendar date at the start of the value, rejecting impossible dates.
          * @param {string} value The date value to parse.
          * @returns {!object} Object with parsed date, if valid.
          */
         function parseDate(value) {
-            const result = {
+            // Accept DD-MM-YYYY, DD/MM/YYYY, DD.MM.YYYY or DD MM YYYY.
+            // A date may be followed by publication text or a time, but not more digits.
+            const match = /^(\d{2})([ ./-])(\d{2})\2(\d{4})(?=$|[\s.,;:)])/.exec(value);
+            if (match !== null) {
+                const day = Number(match[1]);
+                const month = Number(match[3]);
+                const year = Number(match[4]);
+                const parsedDate = createCalendarDate(year, month, day);
+                // Date normalizes overflow (e.g. 31 February); reject it by round-tripping.
+                if (
+                    year > 0 &&
+                    Number.isFinite(parsedDate.getTime()) &&
+                    parsedDate.getFullYear() === year &&
+                    parsedDate.getMonth() === month - 1 &&
+                    parsedDate.getDate() === day
+                ) {
+                    return {
+                        "date": parsedDate,
+                        "isValid": true
+                    };
+                }
+            }
+            console.error("Error parsing date (" + value + ") of license " + publication.urlApi);
+            return {
                 "isValid": false
             };
-            const year = value.substring(6, 10);
-            const month = value.substring(3, 5);
-            const day = value.substring(0, 2);
-            if (Number.isNaN(parseInt(year, 10)) || Number.isNaN(parseInt(month, 10)) || Number.isNaN(parseInt(day, 10))) {
-                console.error("Error parsing date (" + value + ") of license " + publication.urlApi);
-                return result;
-            }
-            const datumBekendgemaakt = new Date(year + "-" + month + "-" + day);
-            result.date = new Date(datumBekendgemaakt.toDateString()); // Rounded date
-            result.isValid = true;
-            return result;
         }
 
         /**
@@ -483,6 +595,7 @@ window.initMap = async function initMap() {
             let i;
             let pos;
             let isDateOfDeadline = false;
+            let isExclusiveDeadline = false;
             let isObjectionStartDate = false;
             let result;
             if (value === identifierNextValueIsDate) {
@@ -559,6 +672,7 @@ window.initMap = async function initMap() {
                     if (value.startsWith(identifiersWithDeadline[i])) {
                         value = value.replace(identifiersWithDeadline[i], identifier);
                         isDateOfDeadline = true;
+                        isExclusiveDeadline = identifiersWithDeadline[i].includes("vóór ");
                         break;
                     }
                 }
@@ -590,12 +704,9 @@ window.initMap = async function initMap() {
                 // Remove time from dates:
                 result = parseDate(value);
                 if (result.isValid) {
-                    if (isDateOfDeadline) {
-                        // This is the last date you can object to a decision. Extract 6 weeks.
-                        result.date.setDate(result.date.getDate() - 7 * 6);
-                    } else if (isObjectionStartDate) {
-                        result.date.setDate(result.date.getDate() - 1); // Objection period starts one day after date 'verzonden'
-                    }
+                    result.isDateOfDeadline = isDateOfDeadline;
+                    result.isExclusiveDeadline = isExclusiveDeadline;
+                    result.isObjectionStartDate = isObjectionStartDate;
                     result.isNextValueBekendmakingsDate = isNextValueBekendmakingsDate;
                     return result;
                 }
@@ -609,10 +720,8 @@ window.initMap = async function initMap() {
         const alineas = getAlineas(responseXml);
         // STOP/IMOP documents use the <OfficielePublicatie> root element.
         const isStop = responseXml.indexOf("<OfficielePublicatie") !== -1;
-        const maxLooptijd = 6 * 7 + 1; // 6 weken de tijd om bezwaar te maken
         const dateFormatOptions = { "weekday": "long", "year": "numeric", "month": "long", "day": "numeric" };
         let datumBekendgemaakt; // Datum verzonden aan belanghebbende(n)
-        let looptijd;
         let resterendAantalDagenBezwaartermijn;
         let i;
         let j;
@@ -630,17 +739,43 @@ window.initMap = async function initMap() {
                         isNextValueBekendmakingsDate = datumBekendgemaakt.isNextValueBekendmakingsDate;
                         if (datumBekendgemaakt.isValid) {
                             isBezwaartermijnFound = true;
-                            looptijd = getDaysPassed(datumBekendgemaakt.date);
-                            resterendAantalDagenBezwaartermijn = maxLooptijd - looptijd;
+                            let deadline = new Date(datumBekendgemaakt.date.getTime());
+                            let dateLabel;
+                            if (datumBekendgemaakt.isDateOfDeadline) {
+                                // Preserve the date stated by the publication, including "before".
+                                dateLabel =
+                                    datumBekendgemaakt.isExclusiveDeadline ?
+                                        "In publicatie genoemde grensdatum (vóór): "
+                                    :   "In publicatie genoemde einddatum: ";
+                                if (datumBekendgemaakt.isExclusiveDeadline) {
+                                    deadline.setDate(deadline.getDate() - 1);
+                                }
+                            } else {
+                                const isStartDate = datumBekendgemaakt.isObjectionStartDate || isStop;
+                                dateLabel =
+                                    isStop ? "Start terinzagelegging: "
+                                    : isStartDate ? "Start bezwaartermijn: "
+                                    : "Bekendgemaakt aan belanghebbende: ";
+                                // Six weeks from the day after notification, or from a stated start day.
+                                deadline.setDate(deadline.getDate() + (isStartDate ? 41 : 42));
+                                deadline = extendLegalDeadline(deadline);
+                            }
+                            resterendAantalDagenBezwaartermijn = getCalendarDaysDifference(new Date(), deadline) + 1;
                             textToShow =
                                 "Gepubliceerd: " +
                                 publication.date.toLocaleDateString("nl-NL", dateFormatOptions) +
-                                ".\nBekendgemaakt aan belanghebbende: " +
+                                ".\n" +
+                                dateLabel +
                                 datumBekendgemaakt.date.toLocaleDateString("nl-NL", dateFormatOptions) +
+                                ".\n" +
+                                (isStop ? "Indicatieve einddatum bij zes weken: " : "Einddatum voor bezwaar (tot en met): ") +
+                                deadline.toLocaleDateString("nl-NL", dateFormatOptions) +
                                 ".";
                             textToShowBold =
                                 resterendAantalDagenBezwaartermijn > 0 ?
-                                    "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
+                                    (isStop ? "Resterend aantal dagen bij zes weken: " : "Resterend aantal dagen voor bezwaar: ") +
+                                    resterendAantalDagenBezwaartermijn +
+                                    "."
                                 :   "Geen bezwaar meer mogelijk.";
                         }
                         break;
