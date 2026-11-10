@@ -416,19 +416,32 @@ def parse_publications(xml_text, fallback_date, warnings):
         raise SruResponseError("SRU response contains records but reports zero results")
 
     publications = []
-    for record_elm in records:
+    for record_index, record_elm in enumerate(records, start=1):
+        record_label = (
+            get_elm_text(record_elm, "recordIdentifier")
+            or get_elm_text(record_elm, "identifier")
+            or f"page record {record_index}"
+        )
         try:
             gzd_elm = find_element(record_elm, "gzd")
             if gzd_elm is None:
-                continue
+                raise ValueError("missing gzd publication data")
             enriched = find_element(gzd_elm, "enrichedData")
             type_val = get_type(gzd_elm, warnings)
             preferred_url = get_elm_text(enriched, "preferredUrl")
             url = get_elm_text(enriched, "url")
 
             location = []
-            for gm in find_elements(gzd_elm, "gebiedsmarkering"):
-                process_coordinate(location, gm)
+            for geometry_index, gm in enumerate(find_elements(gzd_elm, "gebiedsmarkering"), start=1):
+                try:
+                    process_coordinate(location, gm)
+                except (ValueError, OverflowError) as e:
+                    # A malformed coordinate must not discard the publication.
+                    # Retain any usable locations and continue with other geometries.
+                    warnings.add(
+                        f"SRU record {record_label}, geometry {geometry_index}: {e}; "
+                        "publication retained with partial or no location"
+                    )
 
             publications.append(
                 {
@@ -441,8 +454,8 @@ def parse_publications(xml_text, fallback_date, warnings):
                     "location": location,
                 }
             )
-        except Exception as e:  # noqa: BLE001 - one bad record must not kill the run
-            print(f"  ERROR parsing record: {e}")
+        except Exception as e:  # noqa: BLE001 - fail the municipality instead of silently losing a record
+            raise SruResponseError(f"Cannot parse SRU record {record_label}: {e}", retryable=False) from e
 
     return publications, total, next_pos
 

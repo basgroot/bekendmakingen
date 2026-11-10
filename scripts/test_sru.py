@@ -110,6 +110,68 @@ class SruParsingTests(unittest.TestCase):
             with self.subTest(xml=xml), self.assertRaises(fetch_history.SruResponseError):
                 self.parse(xml)
 
+    def test_missing_publication_data_fails_instead_of_skipping_the_record(self):
+        missing_record = """<srw:record><srw:recordIdentifier>gmb-missing</srw:recordIdentifier>
+          <srw:recordData/></srw:record>"""
+        xml = RECORD_RESPONSE.replace("</srw:records>", missing_record + "</srw:records>")
+        with self.assertRaises(fetch_history.SruResponseError) as raised:
+            self.parse(xml)
+        self.assertFalse(raised.exception.retryable)
+        self.assertIn("gmb-missing", str(raised.exception))
+        self.assertIn("missing gzd", str(raised.exception))
+
+    def test_unexpected_record_parser_error_fails_with_record_identifier(self):
+        xml = RECORD_RESPONSE.replace("<available>", "<identifier>gmb-broken</identifier><available>")
+        with patch.object(fetch_history, "get_title", side_effect=RuntimeError("unexpected record format")):
+            with self.assertRaises(fetch_history.SruResponseError) as raised:
+                self.parse(xml)
+        self.assertFalse(raised.exception.retryable)
+        self.assertIn("gmb-broken", str(raised.exception))
+        self.assertIsInstance(raised.exception.__cause__, RuntimeError)
+
+    def test_bad_coordinate_preserves_publication_and_other_geometries(self):
+        bad_geometry = """<gebiedsmarkering><Punt>
+          <geometrie>POINT(not-a-number  463000)</geometrie>
+        </Punt></gebiedsmarkering>"""
+        good_geometry = """<gebiedsmarkering><Punt>
+          <geometrie>POINT(155000  463000)</geometrie>
+        </Punt></gebiedsmarkering>"""
+        for geometries in (bad_geometry, bad_geometry + good_geometry, good_geometry + bad_geometry):
+            xml = RECORD_RESPONSE.replace("<available>", "<identifier>gmb-location</identifier>" + geometries + "<available>")
+            warnings = set()
+            with self.subTest(geometries=geometries):
+                pubs, total, next_pos = fetch_history.parse_publications(xml, "2026-11-01", warnings)
+                self.assertEqual(len(pubs), 1)
+                self.assertEqual(pubs[0]["title"], "Vergunning café")
+                self.assertEqual(total, 1)
+                self.assertIsNone(next_pos)
+                expected_location = ["52.15517 5.387206"] if good_geometry in geometries else []
+                self.assertEqual(pubs[0]["location"], expected_location)
+                self.assertEqual(len(warnings), 1)
+                warning = next(iter(warnings))
+                self.assertIn("gmb-location", warning)
+                self.assertIn("publication retained", warning)
+
+    def test_partial_geometry_keeps_coordinates_parsed_before_the_error(self):
+        geometry = """<gebiedsmarkering><Vlak><geometrie>
+          POLYGON((155000 463000, invalid 463000))
+        </geometrie></Vlak></gebiedsmarkering>"""
+        # Legacy geometries are handled as Punt, including legacy polygons.
+        geometry = geometry.replace("Vlak", "Punt")
+        xml = RECORD_RESPONSE.replace("<available>", geometry + "<available>")
+        warnings = set()
+        pubs, _, _ = fetch_history.parse_publications(xml, "2026-11-01", warnings)
+        self.assertEqual(pubs[0]["location"], ["52.15517 5.387206"])
+        self.assertEqual(len(warnings), 1)
+
+    def test_unexpected_geometry_error_is_not_treated_as_a_bad_coordinate(self):
+        geometry = "<gebiedsmarkering><Punt><geometrie>POINT(155000  463000)</geometrie></Punt></gebiedsmarkering>"
+        xml = RECORD_RESPONSE.replace("<available>", geometry + "<available>")
+        with patch.object(fetch_history, "process_coordinate", side_effect=RuntimeError("programming error")):
+            with self.assertRaises(fetch_history.SruResponseError) as raised:
+                self.parse(xml)
+        self.assertFalse(raised.exception.retryable)
+
 
 class SruFetchTests(unittest.TestCase):
     def fetch(self):
@@ -163,6 +225,38 @@ class SruFetchTests(unittest.TestCase):
                     self.assertEqual(path.read_bytes(), original)
                 else:
                     self.assertFalse(path.exists())
+
+    def test_unparseable_record_does_not_advance_resume_point_or_update_other_months(self):
+        first_page = RECORD_RESPONSE.replace(
+            "</srw:searchRetrieveResponse>",
+            "<srw:nextRecordPosition>2</srw:nextRecordPosition></srw:searchRetrieveResponse>",
+        ).replace(">1<", ">2<")
+        missing_record = "<srw:record><srw:recordIdentifier>gmb-broken</srw:recordIdentifier><srw:recordData/></srw:record>"
+        broken_page = RECORD_RESPONSE.replace(RECORD, missing_record)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "2026" / "hoorn-2026-10.json"
+            path.parent.mkdir()
+            original = fetch_history.render([{
+                "date": "2026-10-30T00:00:00.000Z", "urlDoc": "", "urlApi": "", "type": "vergunning",
+                "title": "Bestaande publicatie", "description": "", "location": [],
+            }]).encode("utf-8")
+            path.write_bytes(original)
+            resume_before = fetch_history.find_resume(directory, "hoorn", (2026, 11), 2, 1)
+            args = SimpleNamespace(
+                year=2026, month=11, municipality="Hoorn", history_dir=directory,
+                full=False, lookback_months=2, overlap_days=1,
+            )
+            output = io.StringIO()
+            with patch.object(fetch_history, "urlopen", side_effect=[Response(first_page), Response(broken_page)]) as request, \
+                    patch.object(fetch_history.time, "sleep") as sleep, redirect_stdout(output):
+                result = fetch_history.process(args, {"Hoorn": {}}, Mock())
+            self.assertEqual(result, ([], [], [], ["hoorn"]))
+            self.assertEqual(path.read_bytes(), original)
+            self.assertFalse((path.parent / "hoorn-2026-11.json").exists())
+            self.assertEqual(fetch_history.find_resume(directory, "hoorn", (2026, 11), 2, 1), resume_before)
+            self.assertEqual(request.call_count, 2)
+            sleep.assert_not_called()
+            self.assertIn("gmb-broken", output.getvalue())
 
 
 if __name__ == "__main__":
