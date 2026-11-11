@@ -13,6 +13,8 @@ window.initMap = async function initMap() {
         "map": null,
         // Periods
         "periods": null,
+        "periodsByKey": new Map(),
+        "recentDays": null,
         // Municipalities
         "municipalities": null,
         // The selected (or initial) municipality:
@@ -20,7 +22,7 @@ window.initMap = async function initMap() {
         // The zoom level when starting the app:
         "initialZoomLevel": 16,
         // The initial period to show:
-        "initialPeriod": "14d",
+        "initialPeriod": null,
         // The marker objects of the municipalities:
         "municipalityMarkers": [],
         // The list with markers on the map:
@@ -980,7 +982,7 @@ window.initMap = async function initMap() {
             return appState.initialPeriod;
         }
 
-        // Get the period from the URL parameter or default to 2weeks:
+        // Get the period from the URL parameter or the configured default:
         const selectedPeriod = getPeriodToSelect();
 
         const controlDiv = document.createElement("div"); // Create a DIV to attach the control UI to the Map.
@@ -1165,22 +1167,78 @@ window.initMap = async function initMap() {
     }
 
     /**
+     * Load period definitions and the default selection before initializing the map.
+     * @param {!object} configuration Parsed periods.json.
+     * @returns {void}
+     */
+    function configurePeriods(configuration) {
+        if (!Array.isArray(configuration.periods) || !Number.isInteger(configuration.recentDays) || configuration.recentDays < 1) {
+            throw new Error("Invalid period configuration");
+        }
+        const periodsByKey = new Map();
+        for (const period of configuration.periods) {
+            if (typeof period.key !== "string" || typeof period.val !== "string" || periodsByKey.has(period.key)) {
+                throw new Error("Invalid or duplicate period key");
+            }
+            if (
+                !isHistoricalPeriod(period.key) &&
+                ((period.days !== null && (!Number.isInteger(period.days) || period.days < 0 || period.days > configuration.recentDays)) ||
+                    typeof period.description !== "string")
+            ) {
+                throw new Error("Invalid recent period: " + period.key);
+            }
+            periodsByKey.set(period.key, period);
+        }
+        if (
+            !periodsByKey.has(configuration.defaultPeriod) ||
+            isHistoricalPeriod(configuration.defaultPeriod) ||
+            periodsByKey.get("all")?.days !== null
+        ) {
+            throw new Error("Invalid default or unlimited period");
+        }
+        appState.periods = configuration.periods;
+        appState.periodsByKey = periodsByKey;
+        appState.initialPeriod = configuration.defaultPeriod;
+        appState.recentDays = configuration.recentDays;
+    }
+
+    /**
+     * Choose a shorter configured period when zooming out.
+     * @param {number} zoom Current zoom level.
+     * @param {string} currentKey Currently selected period.
+     * @returns {?object} Target period definition, or null when no change is needed.
+     */
+    function getPeriodForZoom(zoom, currentKey) {
+        const current = appState.periodsByKey.get(currentKey);
+        if (!current || isHistoricalPeriod(currentKey)) {
+            return null;
+        }
+        const zoomLimits = [
+            [13, "3d"],
+            [14, "7d"],
+            [15, "14d"]
+        ];
+        for (const [maximumZoom, key] of zoomLimits) {
+            const target = appState.periodsByKey.get(key);
+            if (zoom <= maximumZoom && target && target.days !== null && (current.days === null || target.days < current.days)) {
+                return target;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Set visibility of the markers, based on time filter.
      * @param {number} age Days in the past.
      * @param {string} periodToShow Selected period.
      * @returns {boolean} Is marker visible?
      */
     function isMarkerVisible(age, periodToShow) {
-        switch (periodToShow) {
-            case "3d":
-                return age <= 3;
-            case "7d":
-                return age <= 7;
-            case "14d":
-                return age <= 14;
-            default:
-                return true;
+        const period = appState.periodsByKey.get(periodToShow);
+        if (!period || isHistoricalPeriod(periodToShow) || period.days === null) {
+            return true;
         }
+        return age <= period.days;
     }
 
     /**
@@ -1380,30 +1438,15 @@ window.initMap = async function initMap() {
         boldMunicipality.textContent = appState.activeMunicipality;
         municipalityLink.appendChild(boldMunicipality);
         const periodFilter = getPeriodFilter();
-        let periodText;
+        const periodEntry = appState.periodsByKey.get(periodFilter.period);
+        let periodText = "";
         if (isHistoricalPeriod(periodFilter.period)) {
-            const periodEntry = appState.periods.find(function (p) {
-                return p.key === periodFilter.period;
-            });
             const periodLabel = periodEntry ? periodEntry.val : periodFilter.period;
             periodText = "Met bekendmakingen uit " + periodLabel.toLowerCase() + ".";
+        } else if (periodEntry) {
+            periodText = periodEntry.description;
         } else {
-            switch (periodFilter.period) {
-                case "3d":
-                    periodText = "Dit zijn de bekendmakingen van de laatste 3 dagen.";
-                    break;
-                case "7d":
-                    periodText = "Met de bekendmakingen van de laatste week.";
-                    break;
-                case "14d":
-                    periodText = "Met de bekendmakingen van de laatste twee weken.";
-                    break;
-                case "all":
-                    periodText = "Met alle recente bekendmakingen (zo'n 6 weken).";
-                    break;
-                default:
-                    console.error("Unknown period");
-            }
+            console.error("Unknown period");
         }
         const detailsElm = siteInfoElm.querySelector("details");
         siteInfoElm.replaceChildren(
@@ -1426,10 +1469,8 @@ window.initMap = async function initMap() {
         // Fall back to appState.initialPeriod when the combobox is not yet
         // in the DOM. The period control is added via map.controls.push(),
         // which is asynchronous, so during the initial loadData(true) call
-        // the combobox can still be missing - without this fallback we'd
-        // default to "14d" and a historical view (e.g. ?period=2022-10)
-        // would render every marker invisible because the publications are
-        // far older than 14 days.
+        // the combobox can still be missing. Keep the selected initial period
+        // so historical views are not accidentally filtered as recent data.
         const activePeriod = periodElm === null ? appState.initialPeriod : periodElm.value;
         const result = {
             "elm": periodElm,
@@ -2117,14 +2158,13 @@ window.initMap = async function initMap() {
      * @returns {void}
      */
     function determineRequestPeriod() {
-        const WEEKS_BACK = 6;
         const startDate = new Date();
-        startDate.setDate(startDate.getDate() - WEEKS_BACK * 7);
+        startDate.setDate(startDate.getDate() - appState.recentDays);
         startDate.setHours(0, 0, 0, 0);
         appState.requestPeriod.startDate = startDate;
         appState.requestPeriod.startDateString = formatDate(startDate);
         // Every month the period touches, oldest first. Early in a month the
-        // window of six weeks reaches back into the month before the previous
+        // recent window reaches back into the month before the previous
         // one, so this can be three files.
         appState.requestPeriod.historyFiles = [];
         const firstOfCurrentMonth = new Date();
@@ -2223,23 +2263,12 @@ window.initMap = async function initMap() {
             // Only auto-shrink on user-initiated zoom, not on programmatic
             // zooms (initial load, panTo for permalink, etc.). This keeps
             // ?period=…&pub=… working from a shared link.
-            if (!periodFilter.isHistory && appState.isUserZooming) {
-                // Iterate over markers and call setVisible
-                if (zoom <= 13 && (periodFilter.period === "7d" || periodFilter.period === "14d" || periodFilter.period === "all")) {
-                    // Set to 3 days
-                    periodFilter.elm.value = "3d";
+            if (!periodFilter.isHistory && appState.isUserZooming && periodFilter.elm !== null) {
+                const period = getPeriodForZoom(zoom, periodFilter.period);
+                if (period) {
+                    periodFilter.elm.value = period.key;
                     updatePeriodFilter();
-                    showToast("Periode verkleind naar laatste 3 dagen");
-                } else if (zoom <= 14 && (periodFilter.period === "14d" || periodFilter.period === "all")) {
-                    // Set to 7 days
-                    periodFilter.elm.value = "7d";
-                    updatePeriodFilter();
-                    showToast("Periode verkleind naar laatste week");
-                } else if (zoom <= 15 && periodFilter.period === "all") {
-                    // Set to 14 days
-                    periodFilter.elm.value = "14d";
-                    updatePeriodFilter();
-                    showToast("Periode verkleind naar laatste twee weken");
+                    showToast(period.zoomMessage || "Periode verkleind naar: " + period.val);
                 }
             }
             closeInfoWindow();
@@ -2869,7 +2898,7 @@ window.initMap = async function initMap() {
     }
 
     /**
-     * Download json from the GitHub Live Pages.
+     * Download JSON from the CDN.
      * @param {string} path Path and file name to retrieve.
      * @param {function} callback Function when request is successful.
      * @returns {!Promise<*>} Promise that resolves with the parsed JSON, or
@@ -3252,7 +3281,7 @@ window.initMap = async function initMap() {
             .then(function (results) {
                 const periodsJson = results[0];
                 const municipalitiesJson = results[1];
-                appState.periods = periodsJson.periods;
+                configurePeriods(periodsJson);
                 // Source: https://organisaties.overheid.nl/Gemeenten/
                 appState.municipalities = municipalitiesJson;
                 getLocationAndLoadData();
