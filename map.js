@@ -482,6 +482,8 @@ window.initMap = async function initMap() {
      * @returns {void}
      */
     function parseBekendmaking(responseXml, publication, licenseId) {
+        const normalizedTitle = publication.title.toLowerCase();
+
         /**
          * Converts month names to their corresponding numeric values.
          * @param {string} value The month name to convert.
@@ -682,13 +684,13 @@ window.initMap = async function initMap() {
             // If not found, try the Texel way of publishing:
             if (!isStop && !value.startsWith(identifier)) {
                 // Velsen repeats part of title (Zeeweg 343, interne constructiewijziging (07/02/2022) 143528-2022):
-                identifiersMiddle.push(publication.title.substring(publication.title.length - 4).toLowerCase() + " ("); // Velsen https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-69953/1/xml/gmb-2023-69953.xml
+                identifiersMiddle.push(normalizedTitle.substring(normalizedTitle.length - 4) + " ("); // Velsen https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-69953/1/xml/gmb-2023-69953.xml
                 for (i = 0; i < identifiersMiddle.length; i += 1) {
                     // Bergen, Castricum etc. have this in the title: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-76348/1/xml/gmb-2023-76348.xml
-                    pos = publication.title.indexOf(identifiersMiddle[i]);
+                    pos = normalizedTitle.indexOf(identifiersMiddle[i]);
                     if (pos !== -1) {
                         // Haarlem: ...activiteit handelen in strijd met regels ruimtelijke ordening, verzonden 16 januari 2023
-                        value = identifier + convertMonthNames(publication.title.substring(pos + identifiersMiddle[i].length));
+                        value = identifier + convertMonthNames(normalizedTitle.substring(pos + identifiersMiddle[i].length));
                         break;
                     }
                     pos = value.indexOf(identifiersMiddle[i]);
