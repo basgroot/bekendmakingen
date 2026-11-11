@@ -676,9 +676,7 @@ def write_atomic(filepath, content):
             f.write(content)
             f.flush()
             os.fsync(f.fileno())
-        # Keep existing permissions; new history files must be readable by the site.
-        mode = os.stat(filepath).st_mode & 0o777 if os.path.exists(filepath) else 0o644
-        os.chmod(temporary_path, mode)
+        # Keep the temporary file's owner-only permissions; Git runs as the same user.
         os.replace(temporary_path, filepath)
     finally:
         if temporary_path is not None and os.path.exists(temporary_path):

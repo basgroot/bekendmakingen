@@ -22,12 +22,11 @@ def publication():
 
 
 class AtomicWriteTests(unittest.TestCase):
-    def test_replacement_is_complete_and_preserves_permissions(self):
+    def test_replacement_is_complete_and_keeps_owner_only_permissions(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "hoorn-2026-11.json"
             original = b'{"publications":[]}'
             path.write_bytes(original)
-            path.chmod(0o644)
             content = fetch_history.render([publication()])
             replace = os.replace
 
@@ -40,7 +39,7 @@ class AtomicWriteTests(unittest.TestCase):
             with patch.object(fetch_history.os, "replace", side_effect=inspect_then_replace):
                 fetch_history.write_atomic(str(path), content)
             self.assertEqual(path.read_bytes(), content.encode("utf-8"))
-            self.assertEqual(path.stat().st_mode & 0o777, 0o644)
+            self.assertEqual(path.stat().st_mode & 0o777, 0o600)
             self.assertEqual(list(path.parent.iterdir()), [path])
 
     def test_failures_leave_existing_file_untouched_and_remove_temporary_file(self):
