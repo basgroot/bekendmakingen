@@ -43,6 +43,7 @@ import math
 import os
 import re
 import sys
+import tempfile
 import time
 import xml.etree.ElementTree as ET
 from datetime import date, datetime, timedelta
@@ -360,34 +361,87 @@ def process_coordinate(coord_list, gebiedsmarkering):
         pass  # Ignore: too coarse to place on the map
 
 
+class SruResponseError(ValueError):
+    """An SRU protocol error, with an explicit retry policy."""
+
+    def __init__(self, message, retryable=True):
+        super().__init__(message)
+        self.retryable = retryable
+
+
 def parse_publications(xml_text, fallback_date, warnings):
     """Parse an SRU XML response. Returns (publications, total, next_record_position)."""
     root = ET.fromstring(xml_text)
+    if local_tag(root) != "searchRetrieveResponse":
+        raise SruResponseError(f"Unexpected SRU response root: {local_tag(root)}")
 
-    records = find_elements(root, "record")
+    # Diagnostics may replace the whole response or an individual record.
+    # Neither may be interpreted as a successful empty result.
+    diagnostics = find_elements(root, "diagnostic")
+    if diagnostics:
+        messages = []
+        retryable = True
+        # SRU diagnostic codes: general system error, system unavailable,
+        # and record temporarily unavailable. Other diagnostics fail promptly.
+        transient_uris = {f"info:srw/diagnostic/1/{code}" for code in (1, 2, 64)}
+        for diagnostic in diagnostics:
+            uri = get_elm_text(diagnostic, "uri") or "unknown diagnostic"
+            message = get_elm_text(diagnostic, "message") or ""
+            details = get_elm_text(diagnostic, "details") or ""
+            messages.append(" - ".join(part for part in (uri, message, details) if part))
+            retryable = retryable and uri in transient_uris
+        raise SruResponseError("SRU diagnostic: " + "; ".join(messages), retryable=retryable)
+
+    def metadata_integer(name, required=True):
+        # Read response-level metadata, not similarly named fields in record data.
+        elements = [child for child in root if local_tag(child) == name]
+        if not elements and not required:
+            return None
+        if len(elements) != 1 or not re.fullmatch(r"[0-9]+", (elements[0].text or "").strip()):
+            raise SruResponseError(f"Missing or invalid SRU {name}")
+        return int(elements[0].text)
+
+    total = metadata_integer("numberOfRecords")
+    next_pos = metadata_integer("nextRecordPosition", required=False)
+    if next_pos is not None and next_pos < 1:
+        raise SruResponseError("SRU nextRecordPosition must be positive")
+
+    records_containers = [child for child in root if local_tag(child) == "records"]
+    records = [record for container in records_containers for record in container if local_tag(record) == "record"]
     if not records:
+        if total != 0 or next_pos is not None:
+            raise SruResponseError("SRU response has no records but reports results or a next page")
         return [], 0, None
-
-    number_of_records_elm = find_element(root, "numberOfRecords")
-    total = int(number_of_records_elm.text) if number_of_records_elm is not None else 0
-
-    next_pos_elm = find_element(root, "nextRecordPosition")
-    next_pos = int(next_pos_elm.text) if next_pos_elm is not None else None
+    if total == 0:
+        raise SruResponseError("SRU response contains records but reports zero results")
 
     publications = []
-    for record_elm in records:
+    for record_index, record_elm in enumerate(records, start=1):
+        record_label = (
+            get_elm_text(record_elm, "recordIdentifier")
+            or get_elm_text(record_elm, "identifier")
+            or f"page record {record_index}"
+        )
         try:
             gzd_elm = find_element(record_elm, "gzd")
             if gzd_elm is None:
-                continue
+                raise ValueError("missing gzd publication data")
             enriched = find_element(gzd_elm, "enrichedData")
             type_val = get_type(gzd_elm, warnings)
             preferred_url = get_elm_text(enriched, "preferredUrl")
             url = get_elm_text(enriched, "url")
 
             location = []
-            for gm in find_elements(gzd_elm, "gebiedsmarkering"):
-                process_coordinate(location, gm)
+            for geometry_index, gm in enumerate(find_elements(gzd_elm, "gebiedsmarkering"), start=1):
+                try:
+                    process_coordinate(location, gm)
+                except (ValueError, OverflowError) as e:
+                    # A malformed coordinate must not discard the publication.
+                    # Retain any usable locations and continue with other geometries.
+                    warnings.add(
+                        f"SRU record {record_label}, geometry {geometry_index}: {e}; "
+                        "publication retained with partial or no location"
+                    )
 
             publications.append(
                 {
@@ -400,8 +454,8 @@ def parse_publications(xml_text, fallback_date, warnings):
                     "location": location,
                 }
             )
-        except Exception as e:  # noqa: BLE001 - one bad record must not kill the run
-            print(f"  ERROR parsing record: {e}")
+        except Exception as e:  # noqa: BLE001 - fail the municipality instead of silently losing a record
+            raise SruResponseError(f"Cannot parse SRU record {record_label}: {e}", retryable=False) from e
 
     return publications, total, next_pos
 
@@ -492,7 +546,11 @@ def fetch_publications(municipality, creators, start_date, end_date, limiter, wa
             else:
                 break
 
-        except Exception as e:  # noqa: BLE001 - every transport error is retried
+        except Exception as e:  # noqa: BLE001 - transport and retryable protocol errors are retried
+            if isinstance(e, SruResponseError) and not e.retryable:
+                print(f"  FAILED: {municipality}: {e}")
+                print(f"    URL: {api_url}")
+                return [], False
             if isinstance(e, HTTPError):
                 error_msg = f"HTTP {e.code} {e.reason}"
                 try:
@@ -542,27 +600,24 @@ def normalize(pub):
 
 
 def deduplicate(publications):
-    """Remove duplicates, mirroring the downloader's two-stage deduplication.
+    """Remove duplicates without collapsing distinct publications that lack URLs.
 
-    First on urlDoc+date+title (as fetch_publications does), then on date+urlDoc,
-    which is the unique key of the archive database. The first occurrence wins,
-    so the result matches what export_history.py produces from that database.
-    Freshly fetched records must therefore be passed before existing ones.
+    Document URL + date matches the archive database's unique key. Without a
+    document URL, prefer the API URL. If neither exists, use the frontend's
+    date/title/description fallback. The first occurrence wins, so freshly
+    fetched records must be passed before existing ones.
     """
-    seen_full = set()
-    stage_one = []
-    for pub in publications:
-        key = f"{pub['urlDoc']}|{pub['date']}|{pub['title']}"
-        if key not in seen_full:
-            seen_full.add(key)
-            stage_one.append(pub)
-
-    seen_key = set()
+    seen = set()
     result = []
-    for pub in stage_one:
-        key = f"{pub['date']}|{pub['urlDoc']}"
-        if key not in seen_key:
-            seen_key.add(key)
+    for pub in publications:
+        if pub["urlDoc"]:
+            key = ("document", pub["date"], pub["urlDoc"])
+        elif pub["urlApi"]:
+            key = ("api", pub["date"], pub["urlApi"])
+        else:
+            key = ("content", pub["date"], pub["title"], pub["description"])
+        if key not in seen:
+            seen.add(key)
             result.append(pub)
     return result
 
@@ -602,6 +657,27 @@ def render(publications):
     for i, pub in enumerate(publications):
         content += ("\n" if i == 0 else ",\n") + json.dumps(pub, ensure_ascii=False, separators=(",", ":"))
     return content + "\n]}"
+
+
+def write_atomic(filepath, content):
+    """Replace a history file only after its complete contents are on disk."""
+    directory = os.path.dirname(filepath)
+    os.makedirs(directory, exist_ok=True)
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", newline="\n", dir=directory,
+            prefix=".fetch-history-", suffix=".tmp", delete=False,
+        ) as f:
+            temporary_path = f.name
+            f.write(content)
+            f.flush()
+            os.fsync(f.fileno())
+        # Keep the temporary file's owner-only permissions; Git runs as the same user.
+        os.replace(temporary_path, filepath)
+    finally:
+        if temporary_path is not None and os.path.exists(temporary_path):
+            os.unlink(temporary_path)
 
 
 def history_path(history_dir, storage_name, year, month):
@@ -850,9 +926,7 @@ def process(args, municipalities, limiter):
                 print(f"{label}: {detail}, would write (dry run)")
                 continue
 
-            os.makedirs(os.path.dirname(filepath), exist_ok=True)
-            with open(filepath, "w", encoding="utf-8", newline="\n") as f:
-                f.write(content)
+            write_atomic(filepath, content)
             written.append(f"{storage_name} {month_str}")
             print(f"{label}: {detail}, written")
 

@@ -13,6 +13,8 @@ window.initMap = async function initMap() {
         "map": null,
         // Periods
         "periods": null,
+        "periodsByKey": new Map(),
+        "recentDays": null,
         // Municipalities
         "municipalities": null,
         // The selected (or initial) municipality:
@@ -20,7 +22,7 @@ window.initMap = async function initMap() {
         // The zoom level when starting the app:
         "initialZoomLevel": 16,
         // The initial period to show:
-        "initialPeriod": "14d",
+        "initialPeriod": null,
         // The marker objects of the municipalities:
         "municipalityMarkers": [],
         // The list with markers on the map:
@@ -137,6 +139,23 @@ window.initMap = async function initMap() {
     }
 
     /**
+     * Parse an absolute or relative HTTP(S) URL; reject invalid or unsafe schemes.
+     * @param {*} url The URL to validate.
+     * @returns {?URL} Parsed URL, or null when it is not an HTTP(S) URL.
+     */
+    function parseHttpUrl(url) {
+        if (typeof url !== "string" || !url.trim()) {
+            return null;
+        }
+        try {
+            const parsedUrl = new URL(url, globalThis.location.href);
+            return parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:" ? parsedUrl : null;
+        } catch (_ignore) {
+            return null;
+        }
+    }
+
+    /**
      * Append UTM campaign parameters to a URL so links shared via the
      * "Kopieer link" button are attributable to bouwmelding.nl, matching
      * the parameters used on the "Officiële bekendmaking" link.
@@ -144,12 +163,7 @@ window.initMap = async function initMap() {
      * @returns {string} The URL with UTM parameters added.
      */
     function addUtmParameters(url) {
-        let parsedUrl = null;
-        try {
-            parsedUrl = new URL(url, globalThis.location.href);
-        } catch (_ignore) {
-            // parsedUrl remains null
-        }
+        const parsedUrl = parseHttpUrl(url);
         if (parsedUrl === null) {
             return url;
         }
@@ -204,37 +218,26 @@ window.initMap = async function initMap() {
         descriptionPara.textContent = description;
         body.appendChild(descriptionPara);
 
-        // Only render the link when urlDoc is an http(s) URL. This blocks
-        // javascript:, data:, and other scheme-based XSS vectors that would
-        // otherwise be executed when the user clicks the link. Parsing via
-        // the URL constructor (with location.href as the base) accepts both
-        // absolute and protocol-relative/relative forms.
-        if (urlDoc) {
-            let parsedUrl = null;
-            try {
-                parsedUrl = new URL(urlDoc, globalThis.location.href);
-            } catch (_ignore) {
-                // parsedUrl remains null
+        // Only render links with a validated HTTP(S) URL.
+        const parsedUrl = parseHttpUrl(urlDoc);
+        if (parsedUrl !== null) {
+            const linkPara = document.createElement("p");
+            const link = document.createElement("a");
+            link.title = parsedUrl.href;
+            if (parsedUrl.hostname === "officielebekendmakingen.nl" || parsedUrl.hostname.endsWith(".officielebekendmakingen.nl")) {
+                parsedUrl.searchParams.set("utm_source", "bouwmelding.nl");
+                parsedUrl.searchParams.set("utm_medium", "referral");
+                parsedUrl.searchParams.set("utm_campaign", "bekendmakingen");
             }
-            if (parsedUrl !== null && (parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:")) {
-                const linkPara = document.createElement("p");
-                const link = document.createElement("a");
-                link.title = parsedUrl.href;
-                if (parsedUrl.hostname === "officielebekendmakingen.nl" || parsedUrl.hostname.endsWith(".officielebekendmakingen.nl")) {
-                    parsedUrl.searchParams.set("utm_source", "bouwmelding.nl");
-                    parsedUrl.searchParams.set("utm_medium", "referral");
-                    parsedUrl.searchParams.set("utm_campaign", "bekendmakingen");
-                }
-                link.href = parsedUrl.href;
-                // Original code had target="blank" (a named window called "blank")
-                // instead of "_blank" (new tab). Use the correct value plus rel
-                // attributes that prevent the opened page from accessing this one.
-                link.target = "_blank";
-                link.rel = "noopener noreferrer";
-                link.textContent = "Officiële bekendmaking";
-                linkPara.appendChild(link);
-                body.appendChild(linkPara);
-            }
+            link.href = parsedUrl.href;
+            // Original code had target="blank" (a named window called "blank")
+            // instead of "_blank" (new tab). Use the correct value plus rel
+            // attributes that prevent the opened page from accessing this one.
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = "Officiële bekendmaking";
+            linkPara.appendChild(link);
+            body.appendChild(linkPara);
         }
 
         // "Kopieer link" button: copies the current URL (including ?pub= and
@@ -372,6 +375,106 @@ window.initMap = async function initMap() {
     }
 
     /**
+     * Construct a local calendar date without the special handling of years 0-99.
+     * @param {number} year Calendar year.
+     * @param {number} month Month, from 1 to 12.
+     * @param {number} day Day of the month.
+     * @returns {!Date} Calendar date at local midnight.
+     */
+    function createCalendarDate(year, month, day) {
+        const result = new Date(0);
+        result.setFullYear(year, month - 1, day);
+        result.setHours(0, 0, 0, 0);
+        return result;
+    }
+
+    /**
+     * Count calendar days between dates without daylight-saving-time rounding.
+     * @param {!Date} from First calendar date.
+     * @param {!Date} to Second calendar date.
+     * @returns {number} Signed number of calendar days from the first to the second date.
+     */
+    function getCalendarDaysDifference(from, to) {
+        const fromUtc = new Date(0);
+        const toUtc = new Date(0);
+        fromUtc.setUTCFullYear(from.getFullYear(), from.getMonth(), from.getDate());
+        toUtc.setUTCFullYear(to.getFullYear(), to.getMonth(), to.getDate());
+        return (toUtc.getTime() - fromUtc.getTime()) / (24 * 60 * 60 * 1000);
+    }
+
+    /**
+     * Get holidays and currently known equivalent days under the Algemene termijnenwet.
+     * @param {number} year Calendar year.
+     * @returns {!Array<!Date>} Excluded calendar dates in the given year.
+     */
+    function getLegalHolidays(year) {
+        // Gregorian Easter, Meeus/Jones/Butcher algorithm.
+        const a = year % 19;
+        const b = Math.floor(year / 100);
+        const c = year % 100;
+        const d = Math.floor(b / 4);
+        const e = b % 4;
+        const f = Math.floor((b + 8) / 25);
+        const g = Math.floor((b - f + 1) / 3);
+        const h = (19 * a + b - d - g + 15) % 30;
+        const i = Math.floor(c / 4);
+        const k = c % 4;
+        const l = (32 + 2 * e + 2 * i - h - k) % 7;
+        const m = Math.floor((a + 11 * h + 22 * l) / 451);
+        const easterMonth = Math.floor((h + l - 7 * m + 114) / 31);
+        const easterDay = ((h + l - 7 * m + 114) % 31) + 1;
+        // Article 3: https://wetten.overheid.nl/BWBR0002448/#Artikel3
+        const royalDay = createCalendarDate(year, 4, year >= 2014 ? 27 : 30);
+        if (royalDay.getDay() === 0) {
+            royalDay.setDate(royalDay.getDate() - 1);
+        }
+        const holidays = [
+            createCalendarDate(year, 1, 1),
+            royalDay,
+            createCalendarDate(year, 5, 5), // Liberation Day counts every year.
+            createCalendarDate(year, 12, 25),
+            createCalendarDate(year, 12, 26)
+        ];
+        for (const offset of [-2, 1, 39, 50]) {
+            // Good Friday, Easter Monday, Ascension Day and Whit Monday.
+            holidays.push(createCalendarDate(year, easterMonth, easterDay + offset));
+        }
+        // Known additional days (brugdagen); future designations require updating this list.
+        // https://wetten.overheid.nl/BWBR0051300/#Artikel1
+        const equivalentDays = {
+            "2027": [[5, 7]],
+            "2028": [
+                [4, 28],
+                [5, 26]
+            ]
+        };
+        for (const [month, day] of equivalentDays[year] || []) {
+            holidays.push(createCalendarDate(year, month, day));
+        }
+        return holidays;
+    }
+
+    /**
+     * Extend a statutory deadline to the next day allowed by the Algemene termijnenwet.
+     * @param {!Date} deadline Unadjusted final day, inclusive.
+     * @returns {!Date} Inclusive final day after weekend and holiday correction.
+     */
+    function extendLegalDeadline(deadline) {
+        const result = new Date(deadline.getTime());
+        // Article 1: https://wetten.overheid.nl/BWBR0002448/#Artikel1
+        while (
+            result.getDay() === 0 ||
+            result.getDay() === 6 ||
+            getLegalHolidays(result.getFullYear()).some(function (holiday) {
+                return holiday.getMonth() === result.getMonth() && holiday.getDate() === result.getDate();
+            })
+        ) {
+            result.setDate(result.getDate() + 1);
+        }
+        return result;
+    }
+
+    /**
      * Parse the response of the license document to find the date the license is granted.
      * @param {string} responseXml XML response.
      * @param {!object} publication Publication object.
@@ -379,6 +482,8 @@ window.initMap = async function initMap() {
      * @returns {void}
      */
     function parseBekendmaking(responseXml, publication, licenseId) {
+        const normalizedTitle = publication.title.toLowerCase();
+
         /**
          * Converts month names to their corresponding numeric values.
          * @param {string} value The month name to convert.
@@ -401,25 +506,37 @@ window.initMap = async function initMap() {
         }
 
         /**
-         * Parses a date value.
+         * Parses a calendar date at the start of the value, rejecting impossible dates.
          * @param {string} value The date value to parse.
          * @returns {!object} Object with parsed date, if valid.
          */
         function parseDate(value) {
-            const result = {
+            // Accept DD-MM-YYYY, DD/MM/YYYY, DD.MM.YYYY or DD MM YYYY.
+            // A date may be followed by publication text or a time, but not more digits.
+            const match = /^(\d{2})([ ./-])(\d{2})\2(\d{4})(?=$|[\s.,;:)])/.exec(value);
+            if (match !== null) {
+                const day = Number(match[1]);
+                const month = Number(match[3]);
+                const year = Number(match[4]);
+                const parsedDate = createCalendarDate(year, month, day);
+                // Date normalizes overflow (e.g. 31 February); reject it by round-tripping.
+                if (
+                    year > 0 &&
+                    Number.isFinite(parsedDate.getTime()) &&
+                    parsedDate.getFullYear() === year &&
+                    parsedDate.getMonth() === month - 1 &&
+                    parsedDate.getDate() === day
+                ) {
+                    return {
+                        "date": parsedDate,
+                        "isValid": true
+                    };
+                }
+            }
+            console.error("Error parsing date (" + value + ") of license " + publication.urlApi);
+            return {
                 "isValid": false
             };
-            const year = value.substring(6, 10);
-            const month = value.substring(3, 5);
-            const day = value.substring(0, 2);
-            if (Number.isNaN(parseInt(year, 10)) || Number.isNaN(parseInt(month, 10)) || Number.isNaN(parseInt(day, 10))) {
-                console.error("Error parsing date (" + value + ") of license " + publication.urlApi);
-                return result;
-            }
-            const datumBekendgemaakt = new Date(year + "-" + month + "-" + day);
-            result.date = new Date(datumBekendgemaakt.toDateString()); // Rounded date
-            result.isValid = true;
-            return result;
         }
 
         /**
@@ -482,6 +599,7 @@ window.initMap = async function initMap() {
             let i;
             let pos;
             let isDateOfDeadline = false;
+            let isExclusiveDeadline = false;
             let isObjectionStartDate = false;
             let result;
             if (value === identifierNextValueIsDate) {
@@ -558,6 +676,7 @@ window.initMap = async function initMap() {
                     if (value.startsWith(identifiersWithDeadline[i])) {
                         value = value.replace(identifiersWithDeadline[i], identifier);
                         isDateOfDeadline = true;
+                        isExclusiveDeadline = identifiersWithDeadline[i].includes("vóór ");
                         break;
                     }
                 }
@@ -565,13 +684,13 @@ window.initMap = async function initMap() {
             // If not found, try the Texel way of publishing:
             if (!isStop && !value.startsWith(identifier)) {
                 // Velsen repeats part of title (Zeeweg 343, interne constructiewijziging (07/02/2022) 143528-2022):
-                identifiersMiddle.push(publication.title.substring(publication.title.length - 4).toLowerCase() + " ("); // Velsen https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-69953/1/xml/gmb-2023-69953.xml
+                identifiersMiddle.push(normalizedTitle.substring(normalizedTitle.length - 4) + " ("); // Velsen https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-69953/1/xml/gmb-2023-69953.xml
                 for (i = 0; i < identifiersMiddle.length; i += 1) {
                     // Bergen, Castricum etc. have this in the title: https://repository.overheid.nl/frbr/officielepublicaties/gmb/2023/gmb-2023-76348/1/xml/gmb-2023-76348.xml
-                    pos = publication.title.indexOf(identifiersMiddle[i]);
+                    pos = normalizedTitle.indexOf(identifiersMiddle[i]);
                     if (pos !== -1) {
                         // Haarlem: ...activiteit handelen in strijd met regels ruimtelijke ordening, verzonden 16 januari 2023
-                        value = identifier + convertMonthNames(publication.title.substring(pos + identifiersMiddle[i].length));
+                        value = identifier + convertMonthNames(normalizedTitle.substring(pos + identifiersMiddle[i].length));
                         break;
                     }
                     pos = value.indexOf(identifiersMiddle[i]);
@@ -589,12 +708,9 @@ window.initMap = async function initMap() {
                 // Remove time from dates:
                 result = parseDate(value);
                 if (result.isValid) {
-                    if (isDateOfDeadline) {
-                        // This is the last date you can object to a decision. Extract 6 weeks.
-                        result.date.setDate(result.date.getDate() - 7 * 6);
-                    } else if (isObjectionStartDate) {
-                        result.date.setDate(result.date.getDate() - 1); // Objection period starts one day after date 'verzonden'
-                    }
+                    result.isDateOfDeadline = isDateOfDeadline;
+                    result.isExclusiveDeadline = isExclusiveDeadline;
+                    result.isObjectionStartDate = isObjectionStartDate;
                     result.isNextValueBekendmakingsDate = isNextValueBekendmakingsDate;
                     return result;
                 }
@@ -608,10 +724,8 @@ window.initMap = async function initMap() {
         const alineas = getAlineas(responseXml);
         // STOP/IMOP documents use the <OfficielePublicatie> root element.
         const isStop = responseXml.indexOf("<OfficielePublicatie") !== -1;
-        const maxLooptijd = 6 * 7 + 1; // 6 weken de tijd om bezwaar te maken
         const dateFormatOptions = { "weekday": "long", "year": "numeric", "month": "long", "day": "numeric" };
         let datumBekendgemaakt; // Datum verzonden aan belanghebbende(n)
-        let looptijd;
         let resterendAantalDagenBezwaartermijn;
         let i;
         let j;
@@ -629,17 +743,43 @@ window.initMap = async function initMap() {
                         isNextValueBekendmakingsDate = datumBekendgemaakt.isNextValueBekendmakingsDate;
                         if (datumBekendgemaakt.isValid) {
                             isBezwaartermijnFound = true;
-                            looptijd = getDaysPassed(datumBekendgemaakt.date);
-                            resterendAantalDagenBezwaartermijn = maxLooptijd - looptijd;
+                            let deadline = new Date(datumBekendgemaakt.date.getTime());
+                            let dateLabel;
+                            if (datumBekendgemaakt.isDateOfDeadline) {
+                                // Preserve the date stated by the publication, including "before".
+                                dateLabel =
+                                    datumBekendgemaakt.isExclusiveDeadline ?
+                                        "In publicatie genoemde grensdatum (vóór): "
+                                    :   "In publicatie genoemde einddatum: ";
+                                if (datumBekendgemaakt.isExclusiveDeadline) {
+                                    deadline.setDate(deadline.getDate() - 1);
+                                }
+                            } else {
+                                const isStartDate = datumBekendgemaakt.isObjectionStartDate || isStop;
+                                dateLabel =
+                                    isStop ? "Start terinzagelegging: "
+                                    : isStartDate ? "Start bezwaartermijn: "
+                                    : "Bekendgemaakt aan belanghebbende: ";
+                                // Six weeks from the day after notification, or from a stated start day.
+                                deadline.setDate(deadline.getDate() + (isStartDate ? 41 : 42));
+                                deadline = extendLegalDeadline(deadline);
+                            }
+                            resterendAantalDagenBezwaartermijn = getCalendarDaysDifference(new Date(), deadline) + 1;
                             textToShow =
                                 "Gepubliceerd: " +
                                 publication.date.toLocaleDateString("nl-NL", dateFormatOptions) +
-                                ".\nBekendgemaakt aan belanghebbende: " +
+                                ".\n" +
+                                dateLabel +
                                 datumBekendgemaakt.date.toLocaleDateString("nl-NL", dateFormatOptions) +
+                                ".\n" +
+                                (isStop ? "Indicatieve einddatum bij zes weken: " : "Einddatum voor bezwaar (tot en met): ") +
+                                deadline.toLocaleDateString("nl-NL", dateFormatOptions) +
                                 ".";
                             textToShowBold =
                                 resterendAantalDagenBezwaartermijn > 0 ?
-                                    "Resterend aantal dagen voor bezwaar: " + resterendAantalDagenBezwaartermijn + "."
+                                    (isStop ? "Resterend aantal dagen bij zes weken: " : "Resterend aantal dagen voor bezwaar: ") +
+                                    resterendAantalDagenBezwaartermijn +
+                                    "."
                                 :   "Geen bezwaar meer mogelijk.";
                         }
                         break;
@@ -844,7 +984,7 @@ window.initMap = async function initMap() {
             return appState.initialPeriod;
         }
 
-        // Get the period from the URL parameter or default to 2weeks:
+        // Get the period from the URL parameter or the configured default:
         const selectedPeriod = getPeriodToSelect();
 
         const controlDiv = document.createElement("div"); // Create a DIV to attach the control UI to the Map.
@@ -1029,22 +1169,78 @@ window.initMap = async function initMap() {
     }
 
     /**
+     * Load period definitions and the default selection before initializing the map.
+     * @param {!object} configuration Parsed periods.json.
+     * @returns {void}
+     */
+    function configurePeriods(configuration) {
+        if (!Array.isArray(configuration.periods) || !Number.isInteger(configuration.recentDays) || configuration.recentDays < 1) {
+            throw new Error("Invalid period configuration");
+        }
+        const periodsByKey = new Map();
+        for (const period of configuration.periods) {
+            if (typeof period.key !== "string" || typeof period.val !== "string" || periodsByKey.has(period.key)) {
+                throw new Error("Invalid or duplicate period key");
+            }
+            if (
+                !isHistoricalPeriod(period.key) &&
+                ((period.days !== null && (!Number.isInteger(period.days) || period.days < 0 || period.days > configuration.recentDays)) ||
+                    typeof period.description !== "string")
+            ) {
+                throw new Error("Invalid recent period: " + period.key);
+            }
+            periodsByKey.set(period.key, period);
+        }
+        if (
+            !periodsByKey.has(configuration.defaultPeriod) ||
+            isHistoricalPeriod(configuration.defaultPeriod) ||
+            periodsByKey.get("all")?.days !== null
+        ) {
+            throw new Error("Invalid default or unlimited period");
+        }
+        appState.periods = configuration.periods;
+        appState.periodsByKey = periodsByKey;
+        appState.initialPeriod = configuration.defaultPeriod;
+        appState.recentDays = configuration.recentDays;
+    }
+
+    /**
+     * Choose a shorter configured period when zooming out.
+     * @param {number} zoom Current zoom level.
+     * @param {string} currentKey Currently selected period.
+     * @returns {?object} Target period definition, or null when no change is needed.
+     */
+    function getPeriodForZoom(zoom, currentKey) {
+        const current = appState.periodsByKey.get(currentKey);
+        if (!current || isHistoricalPeriod(currentKey)) {
+            return null;
+        }
+        const zoomLimits = [
+            [13, "3d"],
+            [14, "7d"],
+            [15, "14d"]
+        ];
+        for (const [maximumZoom, key] of zoomLimits) {
+            const target = appState.periodsByKey.get(key);
+            if (zoom <= maximumZoom && target && target.days !== null && (current.days === null || target.days < current.days)) {
+                return target;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Set visibility of the markers, based on time filter.
      * @param {number} age Days in the past.
      * @param {string} periodToShow Selected period.
      * @returns {boolean} Is marker visible?
      */
     function isMarkerVisible(age, periodToShow) {
-        switch (periodToShow) {
-            case "3d":
-                return age <= 3;
-            case "7d":
-                return age <= 7;
-            case "14d":
-                return age <= 14;
-            default:
-                return true;
+        const period = appState.periodsByKey.get(periodToShow);
+        if (!period || isHistoricalPeriod(periodToShow) || period.days === null) {
+            return true;
         }
+        return age <= period.days;
     }
 
     /**
@@ -1100,6 +1296,7 @@ window.initMap = async function initMap() {
         const markerZIndex = Math.floor(publication.date.getTime() / 1000);
         const marker = new AdvancedMarkerElement({
             "map": isMarkerVisible(age, periodToShow) ? appState.map : null,
+            "gmpClickable": true,
             "position": position,
             "content": createMarkerIcon(cdnHost + "/img/" + iconName + ".png", 35, 45),
             "zIndex": markerZIndex,
@@ -1179,10 +1376,11 @@ window.initMap = async function initMap() {
             "age": age,
             "position": position,
             "isSvg": true,
-            "marker": marker
+            "marker": marker,
+            "openPublication": onClick
         };
         appState.markersArray.push(markerObject);
-        marker.addListener("gmp-click", onClick);
+        marker.addEventListener("gmp-click", onClick);
         // Highlight the icon (and related icons) on hover
         marker.content.addEventListener("mouseover", handleMarkerMouseMove);
         marker.content.addEventListener("mouseout", handleMarkerMouseMove);
@@ -1232,8 +1430,9 @@ window.initMap = async function initMap() {
         boldTitle.textContent = "Bekendmakingen op kaart";
         const municipalityLink = document.createElement("a");
         const municipalityUrl = appState.municipalities[appState.activeMunicipality]?.url;
-        if (municipalityUrl) {
-            municipalityLink.href = municipalityUrl;
+        const parsedUrl = parseHttpUrl(municipalityUrl);
+        if (parsedUrl !== null) {
+            municipalityLink.href = parsedUrl.href;
             municipalityLink.target = "_blank";
             municipalityLink.rel = "noopener noreferrer";
         }
@@ -1241,30 +1440,15 @@ window.initMap = async function initMap() {
         boldMunicipality.textContent = appState.activeMunicipality;
         municipalityLink.appendChild(boldMunicipality);
         const periodFilter = getPeriodFilter();
-        let periodText;
+        const periodEntry = appState.periodsByKey.get(periodFilter.period);
+        let periodText = "";
         if (isHistoricalPeriod(periodFilter.period)) {
-            const periodEntry = appState.periods.find(function (p) {
-                return p.key === periodFilter.period;
-            });
             const periodLabel = periodEntry ? periodEntry.val : periodFilter.period;
             periodText = "Met bekendmakingen uit " + periodLabel.toLowerCase() + ".";
+        } else if (periodEntry) {
+            periodText = periodEntry.description;
         } else {
-            switch (periodFilter.period) {
-                case "3d":
-                    periodText = "Dit zijn de bekendmakingen van de laatste 3 dagen.";
-                    break;
-                case "7d":
-                    periodText = "Met de bekendmakingen van de laatste week.";
-                    break;
-                case "14d":
-                    periodText = "Met de bekendmakingen van de laatste twee weken.";
-                    break;
-                case "all":
-                    periodText = "Met alle recente bekendmakingen (zo'n 6 weken).";
-                    break;
-                default:
-                    console.error("Unknown period");
-            }
+            console.error("Unknown period");
         }
         const detailsElm = siteInfoElm.querySelector("details");
         siteInfoElm.replaceChildren(
@@ -1287,10 +1471,8 @@ window.initMap = async function initMap() {
         // Fall back to appState.initialPeriod when the combobox is not yet
         // in the DOM. The period control is added via map.controls.push(),
         // which is asynchronous, so during the initial loadData(true) call
-        // the combobox can still be missing - without this fallback we'd
-        // default to "14d" and a historical view (e.g. ?period=2022-10)
-        // would render every marker invisible because the publications are
-        // far older than 14 days.
+        // the combobox can still be missing. Keep the selected initial period
+        // so historical views are not accidentally filtered as recent data.
         const activePeriod = periodElm === null ? appState.initialPeriod : periodElm.value;
         const result = {
             "elm": periodElm,
@@ -1557,7 +1739,7 @@ window.initMap = async function initMap() {
 
     /**
      * If the URL contains ?pub=<licenseId>, locate the matching marker and
-     * synthesize a click on it so the deep-linked info-window opens.
+     * open its info-window using the same handler as a marker click.
      * Idempotent: does nothing if no parameter is present or no match is found.
      * @returns {void}
      */
@@ -1580,7 +1762,7 @@ window.initMap = async function initMap() {
         if (match) {
             console.log("Opening info-window for ?pub=" + wantedLicenseId);
             appState.openedPublicationLicenseId = wantedLicenseId;
-            google.maps.event.trigger(match.marker, "gmp-click");
+            match.openPublication();
             return;
         }
         // 2. Not yet on the map: maybe it's in the delayed (off-screen) queue.
@@ -1607,6 +1789,7 @@ window.initMap = async function initMap() {
             const municipalityObject = appState.municipalities[municipalityName];
             const marker = new AdvancedMarkerElement({
                 "map": municipalityName === appState.activeMunicipality ? null : appState.map,
+                "gmpClickable": true,
                 "position": municipalityObject.center,
                 "content": createMarkerIcon(cdnHost + "/img/gemeente.png", 50, 61, municipalityName),
                 "title": municipalityName
@@ -1615,7 +1798,7 @@ window.initMap = async function initMap() {
                 "municipalityName": municipalityName,
                 "marker": marker
             });
-            marker.addListener("gmp-click", function () {
+            marker.addEventListener("gmp-click", function () {
                 const municipalityComboElm = document.getElementById("idCbxMunicipality");
                 if (municipalityComboElm !== null) {
                     municipalityComboElm.value = municipalityName;
@@ -1633,7 +1816,7 @@ window.initMap = async function initMap() {
      * @returns {void}
      */
     function setMarkerVisibility(marker, isVisible) {
-        marker.setMap(isVisible ? appState.map : null);
+        marker.map = isVisible ? appState.map : null;
     }
 
     /**
@@ -1977,14 +2160,13 @@ window.initMap = async function initMap() {
      * @returns {void}
      */
     function determineRequestPeriod() {
-        const WEEKS_BACK = 6;
         const startDate = new Date();
-        startDate.setDate(startDate.getDate() - WEEKS_BACK * 7);
+        startDate.setDate(startDate.getDate() - appState.recentDays);
         startDate.setHours(0, 0, 0, 0);
         appState.requestPeriod.startDate = startDate;
         appState.requestPeriod.startDateString = formatDate(startDate);
         // Every month the period touches, oldest first. Early in a month the
-        // window of six weeks reaches back into the month before the previous
+        // recent window reaches back into the month before the previous
         // one, so this can be three files.
         appState.requestPeriod.historyFiles = [];
         const firstOfCurrentMonth = new Date();
@@ -2083,23 +2265,12 @@ window.initMap = async function initMap() {
             // Only auto-shrink on user-initiated zoom, not on programmatic
             // zooms (initial load, panTo for permalink, etc.). This keeps
             // ?period=…&pub=… working from a shared link.
-            if (!periodFilter.isHistory && appState.isUserZooming) {
-                // Iterate over markers and call setVisible
-                if (zoom <= 13 && (periodFilter.period === "7d" || periodFilter.period === "14d" || periodFilter.period === "all")) {
-                    // Set to 3 days
-                    periodFilter.elm.value = "3d";
+            if (!periodFilter.isHistory && appState.isUserZooming && periodFilter.elm !== null) {
+                const period = getPeriodForZoom(zoom, periodFilter.period);
+                if (period) {
+                    periodFilter.elm.value = period.key;
                     updatePeriodFilter();
-                    showToast("Periode verkleind naar laatste 3 dagen");
-                } else if (zoom <= 14 && (periodFilter.period === "14d" || periodFilter.period === "all")) {
-                    // Set to 7 days
-                    periodFilter.elm.value = "7d";
-                    updatePeriodFilter();
-                    showToast("Periode verkleind naar laatste week");
-                } else if (zoom <= 15 && periodFilter.period === "all") {
-                    // Set to 14 days
-                    periodFilter.elm.value = "14d";
-                    updatePeriodFilter();
-                    showToast("Periode verkleind naar laatste twee weken");
+                    showToast(period.zoomMessage || "Periode verkleind naar: " + period.val);
                 }
             }
             closeInfoWindow();
@@ -2729,7 +2900,7 @@ window.initMap = async function initMap() {
     }
 
     /**
-     * Download json from the GitHub Live Pages.
+     * Download JSON from the CDN.
      * @param {string} path Path and file name to retrieve.
      * @param {function} callback Function when request is successful.
      * @returns {!Promise<*>} Promise that resolves with the parsed JSON, or
@@ -3012,9 +3183,10 @@ window.initMap = async function initMap() {
      * @returns {void}
      */
     function clearMarkers(municipalityToHide) {
-        // https://developers.google.com/maps/documentation/javascript/markers#remove
+        // Detach Advanced Markers by clearing their map property.
+        // https://developers.google.com/maps/documentation/javascript/reference/advanced-markers#AdvancedMarkerElement.map
         appState.markersArray.forEach(function (markerObject) {
-            markerObject.marker.setMap(null);
+            markerObject.marker.map = null;
             markerObject.marker = null;
         });
         appState.municipalityMarkers.forEach(function (markerObject) {
@@ -3111,7 +3283,7 @@ window.initMap = async function initMap() {
             .then(function (results) {
                 const periodsJson = results[0];
                 const municipalitiesJson = results[1];
-                appState.periods = periodsJson.periods;
+                configurePeriods(periodsJson);
                 // Source: https://organisaties.overheid.nl/Gemeenten/
                 appState.municipalities = municipalitiesJson;
                 getLocationAndLoadData();

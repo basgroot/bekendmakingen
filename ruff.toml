@@ -18,7 +18,7 @@
 #
 # Deliberately still off: DTZ (naive datetimes), S (bandit), SIM, PIE, PTH. Those
 # report real observations rather than noise - naive datetime.now() while the
-# data is CET/CEST, the bare except that swallows an exception, ElementTree on
+# data is CET/CEST, broad except Exception handlers that swallow errors, ElementTree on
 # remote XML - but they are open work. Enabling them before that work is done
 # would only make the build red. Widen the selection as they get addressed.
 

@@ -3,3 +3,5 @@
 /img/*.pdn
 /node_modules
 __pycache__/
+# Temporary history files left behind when an atomic write is interrupted.
+.fetch-history-*.tmp
