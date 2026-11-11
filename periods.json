@@ -1,20 +1,33 @@
 {
+    "defaultPeriod": "14d",
+    "recentDays": 42,
     "periods": [
         {
             "key": "3d",
-            "val": "Publicaties laatste drie dagen"
+            "val": "Publicaties laatste drie dagen",
+            "days": 3,
+            "description": "Dit zijn de bekendmakingen van de laatste 3 dagen.",
+            "zoomMessage": "Periode verkleind naar laatste 3 dagen"
         },
         {
             "key": "7d",
-            "val": "Publicaties laatste week"
+            "val": "Publicaties laatste week",
+            "days": 7,
+            "description": "Met de bekendmakingen van de laatste week.",
+            "zoomMessage": "Periode verkleind naar laatste week"
         },
         {
             "key": "14d",
-            "val": "Publicaties laatste twee weken"
+            "val": "Publicaties laatste twee weken",
+            "days": 14,
+            "description": "Met de bekendmakingen van de laatste twee weken.",
+            "zoomMessage": "Periode verkleind naar laatste twee weken"
         },
         {
             "key": "all",
-            "val": "Alle recente publicaties"
+            "val": "Alle recente publicaties",
+            "days": null,
+            "description": "Met alle recente bekendmakingen (zo'n 6 weken)."
         },
         {
             "key": "2026-07",
