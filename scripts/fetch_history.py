@@ -600,27 +600,24 @@ def normalize(pub):
 
 
 def deduplicate(publications):
-    """Remove duplicates, mirroring the downloader's two-stage deduplication.
+    """Remove duplicates without collapsing distinct publications that lack URLs.
 
-    First on urlDoc+date+title (as fetch_publications does), then on date+urlDoc,
-    which is the unique key of the archive database. The first occurrence wins,
-    so the result matches what export_history.py produces from that database.
-    Freshly fetched records must therefore be passed before existing ones.
+    Document URL + date matches the archive database's unique key. Without a
+    document URL, prefer the API URL. If neither exists, use the frontend's
+    date/title/description fallback. The first occurrence wins, so freshly
+    fetched records must be passed before existing ones.
     """
-    seen_full = set()
-    stage_one = []
-    for pub in publications:
-        key = f"{pub['urlDoc']}|{pub['date']}|{pub['title']}"
-        if key not in seen_full:
-            seen_full.add(key)
-            stage_one.append(pub)
-
-    seen_key = set()
+    seen = set()
     result = []
-    for pub in stage_one:
-        key = f"{pub['date']}|{pub['urlDoc']}"
-        if key not in seen_key:
-            seen_key.add(key)
+    for pub in publications:
+        if pub["urlDoc"]:
+            key = ("document", pub["date"], pub["urlDoc"])
+        elif pub["urlApi"]:
+            key = ("api", pub["date"], pub["urlApi"])
+        else:
+            key = ("content", pub["date"], pub["title"], pub["description"])
+        if key not in seen:
+            seen.add(key)
             result.append(pub)
     return result
 
