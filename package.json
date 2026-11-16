@@ -10,7 +10,7 @@
     },
     "license": "GPL-3.0-only",
     "engines": {
-        "node": ">=18"
+        "node": ">=24.0.0"
     },
     "type": "module",
     "scripts": {
