@@ -134,7 +134,7 @@ The municipality list is validated against the CBS (Centraal Bureau voor de Stat
 
 Pre-fetched and cached SRU data for the period **2013–2026**, served as static JSON from CDN for historical period queries (avoiding live API calls for past months).
 
-`periods.json` and `history/` must stay in step: every month offered in the period filter needs a file, and only **completed** months are offered. The running month always has data on disk (the update workflow writes it every three days) but is deliberately absent from `periods.json`, because the recent view already covers it through the live API.
+`periods.json` and `history/` must stay in step: every month offered in the period filter needs a file, and only **completed** months are offered. The running month always has data on disk (the update workflow writes it every three days) but is deliberately absent from `periods.json`, because the recent view already covers it through the live API. `scripts/fetch_history.py` adds a month to `periods.json` automatically once the month is over.
 
 ### Directory layout
 

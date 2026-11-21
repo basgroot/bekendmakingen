@@ -12,6 +12,8 @@
 # Whatever the script managed to write is committed even when the run itself
 # fails or times out, so a bad day costs one run instead of everything it had
 # already fetched. Such a commit is marked "(partial, ...)".
+# When a month is over, the script also adds it to periods.json so the period
+# filter offers it.
 # Docs: https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
 name: "Update history"
 
@@ -95,12 +97,14 @@ jobs:
           # 10# forces base 10, because 08 and 09 are invalid octal.
           MONTH=$(printf "%02d" "$((10#$MONTH))")
 
-          # The full working tree is ~2.6 GB, so only check out what is needed:
-          # the script, the municipality list and the months the script may read
-          # or write. Collect the years as well, for staging the result.
+          # The full working tree is large, so only check out what is needed:
+          # the script, the municipality list, periods.json and the months the
+          # script may read or write. Collect the years as well, for staging the
+          # result.
           SPARSE="/scripts/
           /.gitignore
-          /municipalities.json"
+          /municipalities.json
+          /periods.json"
           YEARS=""
           for OFFSET in $(seq 0 "$LOOKBACK_MONTHS"); do
             PERIOD=$(date -u -d "$YEAR-$MONTH-01 -$OFFSET month" +%Y-%m)
@@ -175,6 +179,8 @@ jobs:
       # cancellation that a timeout produces. It is still gated on the checkout,
       # because without one there is nothing sensible to commit, and the
       # deletion guard and staged JSON validation below protect a partial state.
+      # The script also updates periods.json when a completed month is not
+      # offered there yet, so that file is part of the commit as well.
       - name: Commit and push
         if: ${{ always() && steps.checkout.outcome == 'success' && inputs.dry_run != true }}
         env:
@@ -185,6 +191,7 @@ jobs:
           for YEAR in ${{ steps.period.outputs.years }}; do
             git add "history/$YEAR"
           done
+          git add periods.json
           # A sparse checkout must never stage a deletion: everything outside the
           # sparse set is marked skip-worktree and has to stay untouched.
           DELETED=$(git diff --cached --name-only --diff-filter=D)

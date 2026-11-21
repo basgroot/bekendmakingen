@@ -30,6 +30,18 @@
             "description": "Met alle recente bekendmakingen (zo'n 6 weken)."
         },
         {
+            "key": "2026-10",
+            "val": "Oktober 2026"
+        },
+        {
+            "key": "2026-09",
+            "val": "September 2026"
+        },
+        {
+            "key": "2026-08",
+            "val": "Augustus 2026"
+        },
+        {
             "key": "2026-07",
             "val": "Juli 2026"
         },

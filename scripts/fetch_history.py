@@ -17,6 +17,11 @@ A run that has been missing for weeks therefore repairs itself, and the month
 that just ended is completed by the first run of the new month. Use --full to
 request the whole target month regardless.
 
+After the fetch, the month that just ended is added to periods.json when it is
+not offered there yet, and any older months still missing from the list are
+added in the same pass. The running month stays absent: the recent view already
+covers it through the live API.
+
 A file is rewritten only when its content actually changed. The sort order of a
 history file is not portable between platforms, because glibc and the Windows
 CRT disagree about spaces and punctuation under the same locale name, so a byte
@@ -27,6 +32,7 @@ Usage:
     python scripts/fetch_history.py --year 2026 --month 7       # up to and including a specific month
     python scripts/fetch_history.py --municipality Zaanstad     # single municipality (key name)
     python scripts/fetch_history.py --history-dir /tmp/out      # write elsewhere
+    python scripts/fetch_history.py --periods /tmp/periods.json # periods file elsewhere
     python scripts/fetch_history.py --full                      # ignore existing files, refetch the target month
     python scripts/fetch_history.py --dry-run                   # report only, write nothing
 
@@ -59,6 +65,13 @@ MAX_RETRIES = 15
 RETRY_DELAY_BASE = 5  # seconds, multiplied by attempt number
 REQUEST_TIMEOUT = 60
 DATE_SUFFIX = "T00:00:00.000Z"
+HISTORICAL_PERIOD = re.compile(r"^(\d{4})-(\d{2})$")
+
+# Month names as used in the period filter, matching the existing periods.json.
+DUTCH_MONTHS = (
+    "januari", "februari", "maart", "april", "mei", "juni",
+    "juli", "augustus", "september", "oktober", "november", "december",
+)
 
 # Field order of a publication on disk. Rebuilding every record in this order
 # keeps the output byte-stable, also for records read back from an existing file.
@@ -699,6 +712,81 @@ def months_between(start, end):
         current = add_months(current[0], current[1], 1)
 
 
+def completed_through(target, today=None):
+    """Return the newest month that may be offered in the period filter.
+
+    Only months that are fully over are offered: the running month is covered
+    by the recent view instead. A target in the past is complete itself; a
+    target in the future must not turn the running month into a historical one.
+    """
+    current = today if today is not None else date.today()
+    if target < (current.year, current.month):
+        return target
+    return add_months(current.year, current.month, -1)
+
+
+def update_periods(periods_path, through, dry_run=False):
+    """Add completed months that periods.json does not offer yet.
+
+    Months are added oldest first, so the monthly block stays contiguous even
+    when a run has been missing for a while. New entries go before the existing
+    monthly block, newest first, which is the order the frontend already uses.
+
+    Returns the added month keys, or the keys that would be added with dry_run.
+    """
+    try:
+        with open(periods_path, "r", encoding="utf-8") as f:
+            configuration = json.load(f)
+    except FileNotFoundError:
+        print(f"Periods: {periods_path} not found, nothing to update")
+        return []
+    except (OSError, ValueError) as error:
+        print(f"WARNING: cannot read {periods_path}: {error}; left untouched")
+        return []
+
+    periods = configuration.get("periods") if isinstance(configuration, dict) else None
+    if not isinstance(periods, list):
+        print(f"WARNING: {periods_path} has no periods array; left untouched")
+        return []
+
+    historical = []
+    for index, period in enumerate(periods):
+        key = period.get("key") if isinstance(period, dict) else None
+        match = HISTORICAL_PERIOD.fullmatch(key) if isinstance(key, str) else None
+        if match:
+            historical.append((index, int(match.group(1)), int(match.group(2))))
+    if not historical:
+        print(f"WARNING: {periods_path} has no monthly periods; left untouched")
+        return []
+
+    # Inserting every new month at the same index keeps the block descending.
+    insert_at = historical[0][0]
+    latest = max((year, month) for _, year, month in historical)
+    if latest >= through:
+        return []
+
+    added = []
+    for year, month in months_between(add_months(latest[0], latest[1], 1), through):
+        periods.insert(
+            insert_at,
+            {"key": f"{year}-{month:02d}", "val": f"{DUTCH_MONTHS[month - 1].capitalize()} {year}"},
+        )
+        added.append(f"{year}-{month:02d}")
+
+    if dry_run:
+        print(f"Periods: would add {', '.join(added)} (dry run)")
+        return added
+
+    content = json.dumps(configuration, ensure_ascii=False, indent=4) + "\n"
+    try:
+        write_atomic(periods_path, content)
+    except OSError as error:
+        print(f"WARNING: cannot write {periods_path}: {error}; left untouched")
+        return []
+    print(f"Periods: added {', '.join(added)}")
+    return added
+
+
 def load_existing(filepath):
     """Read an existing history file.
 
@@ -954,6 +1042,12 @@ def main():
         default=None,
         help=f"Path or URL of municipalities.json (default: the local file, else {MUNICIPALITIES_URL})",
     )
+    parser.add_argument(
+        "--periods",
+        type=str,
+        default=None,
+        help="periods.json to keep in step with completed months (default: next to the history directory)",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Report what would change, write nothing")
     parser.add_argument("--full", action="store_true", help="Request the whole target month, ignoring existing files")
     parser.add_argument(
@@ -990,6 +1084,8 @@ def main():
 
     if args.history_dir is None:
         args.history_dir = os.path.join(REPO_ROOT, "history")
+    if args.periods is None:
+        args.periods = os.path.join(os.path.dirname(os.path.abspath(args.history_dir)), "periods.json")
     if args.municipalities is None:
         local = os.path.join(REPO_ROOT, "municipalities.json")
         args.municipalities = local if os.path.exists(local) else MUNICIPALITIES_URL
@@ -1007,6 +1103,15 @@ def main():
     )
     written, unchanged, skipped, failed = process(args, municipalities, limiter)
     elapsed = math.floor(time.monotonic() - started)
+
+    # A targeted repair is not a scheduled archive update, so leave the period
+    # filter alone.
+    if args.municipality is None:
+        update_periods(
+            args.periods,
+            completed_through((args.year, args.month)),
+            dry_run=args.dry_run,
+        )
 
     print(f"\nDone in {elapsed // 60}m {elapsed % 60}s.")
     print(f"  Written:   {len(written)} file(s){' (dry run)' if args.dry_run else ''}")
