@@ -19,7 +19,7 @@ history/
 
 Beschikbare jaren: **2013 – 2026**.
 
-Elke maand die `periods.json` aanbiedt moet hier een bestand hebben. Andersom geldt dat niet: de lopende maand staat hier wel, maar wordt bewust niet in `periods.json` aangeboden, omdat de recente weergave die maand al via de live-API dekt.
+Elke maand die `periods.json` aanbiedt moet hier een bestand hebben. Andersom geldt dat niet: de lopende maand staat hier wel, maar wordt bewust niet in `periods.json` aangeboden, omdat de recente weergave die maand al via de live-API dekt. `scripts/fetch_history.py` voegt een maand automatisch aan `periods.json` toe zodra die voorbij is.
 
 ## Bestandsformaat
 
