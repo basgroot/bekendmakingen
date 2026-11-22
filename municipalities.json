@@ -1097,6 +1097,10 @@
         "center": {
             "lat": 52.22497,
             "lng": 5.17315
+        },
+        "origin": {
+            "year": 2027,
+            "municipalities": ["'s-Graveland", "Hilversum", "Loosdrecht", "Nederhorst den Berg", "Wijdemeren"]
         }
     },
     "Hoeksche Waard": {
@@ -2660,17 +2664,6 @@
         "center": {
             "lat": 51.80722,
             "lng": 5.72613
-        }
-    },
-    "Wijdemeren": {
-        "url": "https://www.wijdemeren.nl",
-        "center": {
-            "lat": 52.24175,
-            "lng": 5.1093
-        },
-        "origin": {
-            "year": 2002,
-            "municipalities": ["'s-Graveland", "Loosdrecht", "Nederhorst den Berg"]
         }
     },
     "Wijk bij Duurstede": {

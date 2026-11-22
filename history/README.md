@@ -209,3 +209,4 @@ Gemeenten met een `origin`-vermelding in deze dataset.
 | Maashorst | 2022 | Landerd, Uden, Schaijk, Zeeland |
 | Purmerend | 2022 | Purmerend, Beemster |
 | Voorne aan Zee | 2023 | Brielle, Hellevoetsluis, Westvoorne |
+| Hilversum | 2027 | Hilversum, Wijdemeren |
