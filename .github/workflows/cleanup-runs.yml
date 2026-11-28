@@ -1,0 +1,27 @@
+name: Cleanup old workflow runs
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete old workflow runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh run list \
+            --repo "$REPO" \
+            --limit 1000 \
+            --json databaseId,createdAt \
+            --jq '.[] | select(.createdAt < (now - 14*86400 | todate)) | .databaseId' |
+          while read id; do
+            gh run delete "$id" --repo "$REPO"
+          done
