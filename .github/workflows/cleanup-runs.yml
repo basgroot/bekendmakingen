@@ -11,17 +11,22 @@ permissions:
 jobs:
   cleanup:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Delete old workflow runs
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
+          cutoff=$(date -u -d '14 days ago' +%s)
+
           gh run list \
             --repo "$REPO" \
             --limit 1000 \
             --json databaseId,createdAt \
-            --jq '.[] | select(.createdAt < (now - 14*86400 | todate)) | .databaseId' |
-          while read id; do
+            --jq ".[] | select((.createdAt | fromdateiso8601) < $cutoff) | .databaseId" |
+          while read -r id; do
+            [ -z "$id" ] && continue
+            echo "Deleting run: $id"
             gh run delete "$id" --repo "$REPO"
           done
