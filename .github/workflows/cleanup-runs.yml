@@ -2,7 +2,7 @@ name: Cleanup old workflow runs
 
 on:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: "17 5 */3 * *"
   workflow_dispatch:
 
 permissions:
